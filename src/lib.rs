@@ -18,6 +18,60 @@ pub fn background(canvas: &mut Canvas, width: u32, height: u32, color: Color) {
     canvas.fill_rect(rect, &paint);
 }
 
+#[derive(Debug, Clone)]
+pub struct Shape<'a> {
+    points: Vec<Point>,
+    fill_paint: Option<Paint<'a>>,
+    stroke: Stroke,
+    stroke_paint: Option<Paint<'a>>,
+}
+
+impl<'a> Shape<'a> {
+    pub(crate) fn new() -> Self {
+        let mut fill_paint = Paint::default();
+        fill_paint.anti_alias = true;
+        fill_paint.set_color(Color::WHITE);
+        let mut stroke_paint = Paint::default();
+        stroke_paint.anti_alias = true;
+        stroke_paint.set_color(Color::BLACK);
+        Self {
+            points: vec![],
+            fill_paint: Some(fill_paint),
+            stroke: Stroke::default(),
+            stroke_paint: Some(stroke_paint),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ShapeBuilder<'a> {
+    fill_shader: Option<Shader<'a>>,
+    stroke_shader: Option<Shader<'a>>,
+    stroke_width: f32,
+    line_cap: LineCap,
+    line_join: LineJoin,
+    stroke_dash: Option<StrokeDash>,
+}
+
+impl<'a> ShapeBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            fill_shader: Shader::SolidColor(Color::WHITE),
+            stroke_shader: Shader::SolidColor(Color::BLACK),
+            stroke_width: 1.0,
+            line_cap: LineCap::default(),
+            line_join: LineJoin::default(),
+            stroke_dash: None,
+        }
+    }
+
+    pub fn build(&self) -> Shape<'a> {
+        let mut shape = Shape::new();
+
+        shape
+    }
+}
+
 pub fn rectangle(
     canvas: &mut Canvas,
     x: f32,
@@ -53,7 +107,15 @@ pub fn stroke(weight: f32) -> Stroke {
     stroke.width = weight;
     stroke
 }
-pub fn line(canvas: &mut Canvas, x0: f32, y0: f32, x1: f32, y1: f32, stroke: &Stroke, stroke_paint: &Paint) {
+pub fn line(
+    canvas: &mut Canvas,
+    x0: f32,
+    y0: f32,
+    x1: f32,
+    y1: f32,
+    stroke: &Stroke,
+    stroke_paint: &Paint,
+) {
     let mut pb = PathBuilder::new();
     pb.move_to(x0, y0);
     pb.line_to(x1, y1);
@@ -81,18 +143,31 @@ pub fn polygon(
     canvas.stroke_path(&path, &stroke_paint, &stroke);
 }
 
-pub fn polyline(
-    canvas: &mut Canvas,
-    points: &[Point],
-    stroke: &Stroke,
-    stroke_paint: &Paint,
-) {
+pub fn polyline(canvas: &mut Canvas, points: &[Point], stroke: &Stroke, stroke_paint: &Paint) {
     let mut pb = PathBuilder::new();
     let head = points[0];
     let tail = &points[1..];
     pb.move_to(head.x, head.y);
     for p in tail {
         pb.line_to(p.x, p.y);
+    }
+    let path = pb.finish().unwrap();
+    canvas.stroke_path(&path, &stroke_paint, &stroke);
+}
+
+pub fn polycurve(
+    canvas: &mut Canvas,
+    points: &[Point],
+    stroke: &Stroke,
+    stroke_paint: &Paint,
+    control: Point,
+) {
+    let mut pb = PathBuilder::new();
+    let head = points[0];
+    let tail = &points[1..];
+    pb.move_to(head.x, head.y);
+    for p in tail {
+        pb.quad_to(control.x, control.y, p.x, p.y);
     }
     let path = pb.finish().unwrap();
     canvas.stroke_path(&path, &stroke_paint, &stroke);
