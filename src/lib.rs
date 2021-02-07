@@ -1,3 +1,4 @@
+
 use tiny_skia::*;
 
 pub const TAU: f32 = std::f32::consts::TAU;
@@ -19,11 +20,22 @@ pub fn background(canvas: &mut Canvas, width: u32, height: u32, color: Color) {
 }
 
 #[derive(Debug, Clone)]
+enum ShapeType {
+    Poly,
+    PolyQuad,
+    PolyCubic,
+    Rect,
+    Ellipse,
+    Line,
+}
+
+#[derive(Debug, Clone)]
 pub struct Shape<'a> {
     points: Box<Vec<Point>>,
     fill_paint: Option<Paint<'a>>,
     stroke: Stroke,
     stroke_paint: Option<Paint<'a>>,
+    shape: ShapeType,
 }
 
 impl<'a> Shape<'a> {
@@ -32,16 +44,29 @@ impl<'a> Shape<'a> {
         fill_paint: Option<Paint<'a>>,
         stroke: Stroke,
         stroke_paint: Option<Paint<'a>>,
+        shape: ShapeType,
     ) -> Self {
         Self {
             points,
             fill_paint,
             stroke,
             stroke_paint,
+            shape,
         }
     }
 
     pub fn draw(&self, canvas: &mut Canvas) {
+        match self.shape {
+            ShapeType::Poly => self.draw_poly(canvas),
+            ShapeType::PolyQuad => self.draw_quad(canvas),
+            ShapeType::PolyCubic => self.draw_cubic(canvas),
+            ShapeType::Rect => self.draw_rect(canvas),
+            ShapeType::Ellipse => self.draw_ellipse(canvas),
+            ShapeType::Line => {}
+        }
+    }
+
+    pub fn draw_poly(&self, canvas: &mut Canvas) {
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         let tail = &self.points[1..];
@@ -123,7 +148,7 @@ impl<'a> Shape<'a> {
             canvas.stroke_path(&pb, &sp, &self.stroke)
         }
     }
-    
+
     pub fn draw_ellipse(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
             panic!("Ellipse points vector contains less than 2 points");
@@ -141,6 +166,23 @@ impl<'a> Shape<'a> {
             canvas.stroke_path(&pb, &sp, &self.stroke)
         }
     }
+
+    pub fn draw_line(&self, canvas: &mut Canvas) {
+        if self.points.len() < 2 {
+            panic!("Line points vector contains less than 2 points");
+        }
+        let x0 = self.points[0].x;
+        let y0 = self.points[0].y;
+        let x1 = self.points[1].x;
+        let y1 = self.points[1].y;
+        let mut pb = PathBuilder::new();
+        pb.move_to(x0, y0);
+        pb.line_to(x1, y1);
+        let path = pb.finish().unwrap();
+        if let Some(sp) = &self.stroke_paint {
+            canvas.stroke_path(&path, &sp, &self.stroke)
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -152,6 +194,7 @@ pub struct ShapeBuilder<'a> {
     line_join: LineJoin,
     stroke_dash: Option<StrokeDash>,
     points: Box<Vec<Point>>,
+    shape: ShapeType,
 }
 
 impl<'a> ShapeBuilder<'a> {
@@ -164,6 +207,7 @@ impl<'a> ShapeBuilder<'a> {
             line_join: LineJoin::default(),
             stroke_dash: None,
             points: Box::new(vec![]),
+            shape: ShapeType::Poly,
         }
     }
 
@@ -213,25 +257,43 @@ impl<'a> ShapeBuilder<'a> {
     }
 
     pub fn rect_ltrb(mut self, lt: Point, rb: Point) -> Self {
+        self.shape = ShapeType::Rect;
         self.points = Box::new(vec![lt, rb]);
         self
     }
 
     pub fn rect_xywh(mut self, xy: Point, wh: Point) -> Self {
+        self.shape = ShapeType::Rect;
         self.points = Box::new(vec![xy, pt2(xy.x + wh.x, xy.y + wh.y)]);
         self
     }
 
     pub fn ellipse(mut self, center: Point, wh: Point) -> Self {
+        self.shape = ShapeType::Ellipse;
         self.points = Box::new(vec![center, wh]);
         self
     }
 
     pub fn circle(mut self, center: Point, radius: f32) -> Self {
+        self.shape = ShapeType::Ellipse;
         self.points = Box::new(vec![center, pt2(radius, radius)]);
         self
     }
 
+    pub fn quad(mut self) -> Self {
+        self.shape = ShapeType::PolyQuad;
+        self
+    }
+
+    pub fn cubic(mut self) -> Self {
+        self.shape = ShapeType::PolyCubic;
+        self
+    }
+
+    pub fn line(mut self) -> Self {
+        self.shape = ShapeType::Line;
+        self
+    }
 
     pub fn build(self) -> Shape<'a> {
         let mut fill_paint = None;
@@ -253,23 +315,8 @@ impl<'a> ShapeBuilder<'a> {
         stroke.line_cap = self.line_cap;
         stroke.line_join = self.line_join;
         stroke.width = self.stroke_width;
-        Shape::new(self.points, fill_paint, stroke, stroke_paint)
+        Shape::new(self.points, fill_paint, stroke, stroke_paint, self.shape)
     }
-}
-
-pub fn circle(
-    canvas: &mut Canvas,
-    cx: f32,
-    cy: f32,
-    radius: f32,
-    fill_paint: &Paint,
-    stroke: &Stroke,
-    stroke_paint: &Paint,
-) {
-    let path =
-        PathBuilder::from_circle(cx, cy, radius).expect("Circle radius must be greater than 0");
-    canvas.fill_path(&path, &fill_paint, FillRule::Winding);
-    canvas.stroke_path(&path, &stroke_paint, &stroke);
 }
 
 pub fn stroke(weight: f32) -> Stroke {
@@ -277,6 +324,7 @@ pub fn stroke(weight: f32) -> Stroke {
     stroke.width = weight;
     stroke
 }
+
 pub fn line(
     canvas: &mut Canvas,
     x0: f32,
@@ -291,213 +339,4 @@ pub fn line(
     pb.line_to(x1, y1);
     let path = pb.finish().unwrap();
     canvas.stroke_path(&path, &stroke_paint, &stroke);
-}
-
-pub fn polygon(
-    canvas: &mut Canvas,
-    points: &[Point],
-    fill_paint: &Paint,
-    stroke: &Stroke,
-    stroke_paint: &Paint,
-) {
-    let mut pb = PathBuilder::new();
-    let head = points[0];
-    let tail = &points[1..];
-    pb.move_to(head.x, head.y);
-    for p in tail {
-        pb.line_to(p.x, p.y);
-    }
-    pb.close();
-    let path = pb.finish().unwrap();
-    canvas.fill_path(&path, &fill_paint, FillRule::Winding);
-    canvas.stroke_path(&path, &stroke_paint, &stroke);
-}
-
-pub fn polyline(canvas: &mut Canvas, points: &[Point], stroke: &Stroke, stroke_paint: &Paint) {
-    let mut pb = PathBuilder::new();
-    let head = points[0];
-    let tail = &points[1..];
-    pb.move_to(head.x, head.y);
-    for p in tail {
-        pb.line_to(p.x, p.y);
-    }
-    let path = pb.finish().unwrap();
-    canvas.stroke_path(&path, &stroke_paint, &stroke);
-}
-
-pub fn polycurve(
-    canvas: &mut Canvas,
-    points: &[Point],
-    stroke: &Stroke,
-    stroke_paint: &Paint,
-    control: Point,
-) {
-    let mut pb = PathBuilder::new();
-    let head = points[0];
-    let tail = &points[1..];
-    pb.move_to(head.x, head.y);
-    for p in tail {
-        pb.quad_to(control.x, control.y, p.x, p.y);
-    }
-    let path = pb.finish().unwrap();
-    canvas.stroke_path(&path, &stroke_paint, &stroke);
-}
-
-pub fn polycurve3(
-    canvas: &mut Canvas,
-    points: &[Point],
-    stroke: &Stroke,
-    stroke_paint: &Paint,
-    control1: Point,
-    control2: Point,
-) {
-    let mut pb = PathBuilder::new();
-    let head = points[0];
-    let tail = &points[1..];
-    pb.move_to(head.x, head.y);
-    for p in tail {
-        pb.cubic_to(control1.x, control1.y, control2.x, control2.y, p.x, p.y);
-    }
-    let path = pb.finish().unwrap();
-    canvas.stroke_path(&path, &stroke_paint, &stroke);
-}
-// -----------------------------------------------------------------------------
-// Create a grid of values based on a function of it's coordinates. Used for
-// example for flow fields.
-pub struct Grid<T> {
-    pub width: f32,
-    pub height: f32,
-    pub spacing: f32,
-    pub grid: Vec<T>,
-    pub pts: Vec<Point>,
-}
-
-impl<T> Grid<T>
-where
-    T: Copy,
-{
-    pub fn new(width: f32, height: f32, spacing: f32, gen: impl Fn(f32, f32) -> T) -> Self {
-        let rows = (height / spacing) as usize;
-        let cols = (width / spacing) as usize;
-        let mut grid = vec![];
-        let mut pts = vec![];
-        for i in 0..rows {
-            let y = i as f32 * spacing;
-            for j in 0..cols {
-                let x = j as f32 * spacing;
-                grid.push(gen(x, y));
-                pts.push(pt2(x, y));
-            }
-        }
-        Self {
-            width,
-            height,
-            spacing,
-            grid,
-            pts,
-        }
-    }
-
-    pub fn rows(&self) -> usize {
-        (self.height / self.spacing) as usize
-    }
-
-    pub fn cols(&self) -> usize {
-        (self.width / self.spacing) as usize
-    }
-
-    pub fn get(&self, x: f32, y: f32) -> T {
-        let n = self.rows();
-        let m = self.cols();
-        let xn = x;
-        let yn = y;
-
-        let mut col = if xn < 0.0 {
-            0
-        } else {
-            (x / self.spacing) as usize
-        };
-        let mut row = if yn < 0.0 {
-            0
-        } else {
-            (y / self.spacing) as usize
-        };
-
-        while col >= m {
-            col -= 1;
-        }
-        while row >= n {
-            row -= 1;
-        }
-
-        self.grid[row * m + col]
-    }
-
-    pub fn iter<'a>(&'a self) -> GridIter<'a, T> {
-        GridIter {
-            grid: self,
-            i: 0,
-            j: 0,
-        }
-    }
-
-    pub fn x_bounds(&self) -> (f32, f32) {
-        (0.0, self.width)
-    }
-
-    pub fn y_bounds(&self) -> (f32, f32) {
-        (0.0, self.height)
-    }
-}
-
-pub struct GridIter<'a, T>
-where
-    T: Copy,
-{
-    grid: &'a Grid<T>,
-    i: usize,
-    j: usize,
-}
-
-impl<'a, T> Iterator for GridIter<'a, T>
-where
-    T: Copy,
-{
-    type Item = (Point, T);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let n = (self.grid.width / self.grid.spacing) as usize;
-        if self.i * n + self.j >= self.grid.grid.len() {
-            return None;
-        };
-        let x = self.j as f32 * self.grid.spacing;
-        let y = self.i as f32 * self.grid.spacing;
-        let result = (pt2(x, y), self.grid.grid[self.i * n + self.j]);
-
-        if self.j >= n - 1 {
-            self.j = 0;
-            self.i += 1;
-        } else {
-            self.j += 1;
-        };
-
-        Some(result)
-    }
-}
-
-pub fn gen_points(
-    f: impl Fn(f32) -> f32,
-    g: impl Fn(f32) -> f32,
-    delta: f32,
-    max: f32,
-) -> Vec<Point> {
-    let mut points = vec![];
-    let mut t = 0.0;
-    while t <= max {
-        let x = f(t);
-        let y = g(t);
-        points.push(pt2(x, y));
-        t += delta;
-    }
-    points
 }
