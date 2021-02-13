@@ -1,3 +1,5 @@
+use tiny_skia::*;
+use crate::util::*;
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 // Create a grid of values based on a function of it's coordinates. Used for

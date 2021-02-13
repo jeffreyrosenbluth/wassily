@@ -3,7 +3,9 @@ use noise::NoiseFn;
 use rand_distr::{Distribution, Geometric};
 use rand::{thread_rng, Rng};
 use tiny_skia::*;
-use wassily::*;
+use wassily::util::*;
+use wassily::grid::*;
+use wassily::shape::*;
 
 const WIDTH: u32 = 8_000;
 const HEIGHT: u32 = 6_000;
@@ -48,14 +50,10 @@ fn main() {
         }
         let c = colors.eval_rational(l % 100, 100);
         let kolor = Color::from_rgba8(c.r, c.g, c.b, 255);
-        let mut fill_paint = Paint::default();
-        fill_paint.set_color(kolor);
-        let mut stroke_paint = Paint::default();
-        let mut stroke =  Stroke::default();
-        stroke_paint.set_color(Color::BLACK);
-        stroke_paint.anti_alias = true;
-        stroke.width =  8.0 * geo.sample(&mut rand::thread_rng()) as f32;
-        polygon(&mut canvas, &points, &fill_paint, &stroke, &stroke_paint);
+        let sw =  8.0 * geo.sample(&mut rand::thread_rng()) as f32;
+
+        let poly = ShapeBuilder::new().points(&points).fill_color(kolor).stroke_color(Color::BLACK).stroke_weight(sw).build();
+        poly.draw(&mut canvas);
     }
     pixmap.save_png("mtn.png").unwrap();
 }

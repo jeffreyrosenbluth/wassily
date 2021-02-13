@@ -1,6 +1,7 @@
 use colorous;
 use tiny_skia::*;
-use wassily::*;
+use wassily::shape::*;
+use wassily::util::*;
 
 const WIDTH: u32 = 4032;
 const HEIGHT: u32 = 3024;
@@ -11,11 +12,6 @@ fn main() {
 
     let colors = colorous::REDS;
 
-    let mut stroke_paint = Paint::default();
-    stroke_paint.anti_alias = true;
-    let mut s = Stroke::default();
-    s.width = 1.5;
-
     for l in 0..HEIGHT {
         let t = l as f64 / HEIGHT as f64;
         let c = colors.eval_continuous(t);
@@ -24,32 +20,34 @@ fn main() {
             alpha = 0
         }
         let kolor = Color::from_rgba8(c.r, c.g, c.b, alpha);
-        stroke_paint.set_color(kolor);
         let h = l as f32;
-        line(&mut canvas, 0.0, h, WIDTH as f32, h, &s, &stroke_paint);
+        let ln =ShapeBuilder::new()
+            .stroke_color(kolor)
+            .stroke_weight(1.5)
+            .line(pt2(0.0, h), pt2(WIDTH as f32, h))
+            .build();
+        ln.draw(&mut canvas);
     }
 
     let rh = 0.2 * HEIGHT as f32;
     let y = -rh + 7.0 / 15.0 * HEIGHT as f32;
-    let mut fill_paint = Paint::default();
-    fill_paint.set_color_rgba8(0, 0, 0, 150);
-    rectangle(
-        &mut canvas,
-        0.0,
-        y ,
-        WIDTH as f32,
-        rh,
-        &fill_paint,
-        &s,
-        &fill_paint,
-    );
+    
+    let color = Color::from_rgba8(0, 0, 0, 150);
+    let shape = ShapeBuilder::new()
+        .rect_xywh(pt2(0.0, y), pt2(WIDTH as f32, rh))
+        .fill_color(color)
+        .stroke_color(color)
+        .stroke_weight(1.5)
+        .build();
+    shape.draw(&mut canvas);
 
-    let mut cpaint = Paint::default();
-    cpaint.set_color_rgba8(255, 255, 255, 190);
-    let mut spaint = Paint::default();
-    spaint.set_color(Color::WHITE);
-    s.width = 20.0;
-    circle(&mut canvas, 0.88 * WIDTH as f32, 0.15 * HEIGHT as f32, 250.0, &cpaint, &s, &cpaint);
-
+    let color = Color::from_rgba8(255, 255, 255, 190);
+    let shape = ShapeBuilder::new()
+        .circle(pt2(0.88 * WIDTH as f32, 0.15 * HEIGHT as f32), 250.0)
+        .stroke_weight(20.0)
+        .fill_color(color)
+        .stroke_color(color)
+        .build();
+    shape.draw(&mut canvas);
     pixmap.save_png("image.png").unwrap();
 }

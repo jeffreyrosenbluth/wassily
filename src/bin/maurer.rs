@@ -1,5 +1,6 @@
 use tiny_skia::*;
-use wassily::*;
+use wassily::shape::*;
+use wassily::util::*;
 
 const WIDTH: u32 = 900;
 const HEIGHT: u32 = 900;

@@ -1,9 +1,10 @@
 use tiny_skia::*;
-use wassily::*;
+use wassily::shape::*;
+use wassily::util::*;
 
 const WIDTH: u32 = 900;
 const HEIGHT: u32 = 900;
-const ORDER: u32 = 4;
+const ORDER: u32 = 6;
 
 fn main() {
     let mut pixmap = Pixmap::new(WIDTH, HEIGHT).unwrap();
@@ -16,7 +17,7 @@ fn main() {
         Color::from_rgba(0.0, 0.0, 0.0, 1.0).unwrap(),
     );
 
-    let width =WIDTH as f32;
+    let width = WIDTH as f32;
     let n = 2u32.pow(ORDER);
 
     let total = n * n;
@@ -29,18 +30,19 @@ fn main() {
         path[j] = pt2(m * path[j].x, m * path[j].y);
         path[j] += pt2(m / 2.0, m / 2.0);
     }
-    path = path
-        .into_iter()
-        .collect();
+    path = path.into_iter().collect();
 
-    let mut spaint = Paint::default();
-    spaint.set_color_rgba8(255, 155, 0, 255);
-    spaint.anti_alias = true;
-    let mut stroke = Stroke::default();
-    stroke.width = 1.5;
+    let color = Color::WHITE;
 
-    polycurve3(&mut canvas, &path, &stroke, &spaint, pt2(300., 300.), pt2(600., 600.));
-    // polyline(&mut canvas, &path, &stroke, &spaint);
+    let shape = ShapeBuilder::new()
+        // .stroke_color(color)
+        // .stroke_weight(1.5)
+        .no_stroke()
+        .fill_color(color)
+        .quad()
+        .points(&path)
+        .build();
+    shape.draw(&mut canvas);
     pixmap.save_png("hilbert.png").unwrap();
 }
 
