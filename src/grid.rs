@@ -17,8 +17,8 @@ where
     T: Copy,
 {
     pub fn new(width: f32, height: f32, spacing: f32, gen: impl Fn(f32, f32) -> T) -> Self {
-        let rows = (height / spacing) as usize;
-        let cols = (width / spacing) as usize;
+        let rows = (height / spacing).round() as usize;
+        let cols = (width / spacing).round() as usize;
         let mut grid = vec![];
         let mut pts = vec![];
         for i in 0..rows {
@@ -39,35 +39,34 @@ where
     }
 
     pub fn rows(&self) -> usize {
-        (self.height / self.spacing) as usize
+        (self.height / self.spacing).round() as usize
     }
 
     pub fn cols(&self) -> usize {
-        (self.width / self.spacing) as usize
+        (self.width / self.spacing).round() as usize
     }
 
     pub fn get(&self, x: f32, y: f32) -> T {
         let n = self.rows();
         let m = self.cols();
-        let xn = x;
-        let yn = y;
 
-        let mut col = if xn < 0.0 {
+        let mut col = if x < 0.0 {
             0
         } else {
-            (x / self.spacing) as usize
+            (x / self.spacing).round() as usize
         };
-        let mut row = if yn < 0.0 {
+        let mut row = if y < 0.0 {
             0
         } else {
-            (y / self.spacing) as usize
+            (y / self.spacing).round() as usize
         };
 
-        while col >= m {
-            col -= 1;
+        if col >= m {
+            col = m - 1;
         }
-        while row >= n {
-            row -= 1;
+
+        if row >= n {
+            row = n - 1;
         }
 
         self.grid[row * m + col]
@@ -140,4 +139,26 @@ pub fn gen_points(
         t += delta;
     }
     points
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_test() {
+        let grid = Grid::new(200.0, 100.0, 10.0, |x, y| (x, y));
+        assert_eq!(grid.get(0.0, 0.0), (0.0, 0.0));
+        assert_eq!(grid.get(15.0, 25.0), (20.0, 30.0));
+        assert_eq!(grid.get(-25.0, 25.0), (0.0, 30.0));
+        assert_eq!(grid.get(29.0, -29.0), (30.0, 0.0));
+        assert_eq!(grid.get(-80.0, -29.0), (0.0, 0.0));
+    }
+
+    #[test]
+    fn get_test_bounds() {
+        let grid = Grid::new(200.0, 100.0, 10.0, |x, y| (x, y));
+        assert_eq!(grid.get(99.0, 49.0), (100.0, 50.0));
+        assert_eq!(grid.get(200.0, 100.0), (190.0, 90.0));
+    }
 }

@@ -21,10 +21,10 @@ pub(crate) enum ShapeType {
 
 #[derive(Debug, Clone)]
 pub struct Shape<'a> {
-    points: Box<Vec<Point>>,
-    fill_paint: Option<Paint<'a>>,
-    stroke: Stroke,
-    stroke_paint: Option<Paint<'a>>,
+    pub points: Box<Vec<Point>>,
+    pub fill_paint: Option<Paint<'a>>,
+    pub stroke: Stroke,
+    pub stroke_paint: Option<Paint<'a>>,
     shape: ShapeType,
 }
 

@@ -15,7 +15,7 @@ const LENGTH: usize = 250;
 const K: f64 = 0.002;
 const LINES: usize = 10_000;
 const STEP: f32 = 2.0;
-const ALPHA: f32 = 0.9;
+const ALPHA: f32 = 0.5;
 const EPSILON: f32 = 0.001;
 
 fn curl(f: impl Fn(f32, f32) -> f32, x: f32, y: f32, eps: f32) -> f32 {
@@ -57,10 +57,11 @@ fn main() {
     let h = HEIGHT as f32;
     let mut rng = thread_rng();
 
-    let mut pixmap = Pixmap::new(WIDTH, HEIGHT).unwrap();
+    let mut pixmap = Pixmap::load_png("trees.png").unwrap();
     let mut canvas = Canvas::from(pixmap.as_mut());
 
-    background(&mut canvas, WIDTH, HEIGHT, Color::BLACK);
+    // let bg = Color::from_rgba8(81, 7, 8, 255);
+    // background(&mut canvas, WIDTH, HEIGHT, bg);
 
     let nn = noise::BasicMulti::new();
     let f = |x, y| {
@@ -76,8 +77,8 @@ fn main() {
     // });
     let g = |x: f32, y: f32| {
         let a: f32 = 3.0 / 7.0 * x / 1000.0 * TAU;
-        let b: f32 = 5.0 / 13.0 * y / 1000.0 * TAU;
-        a.sin() * b.sin().powf(3.0)
+        let b: f32 = 7.0 / 13.0 * y / 1000.0 * TAU;
+        a.cos() * b
     };
 
     let grid = Grid::new(1.1 * w, 1.1 * h, GRID_SPACING, g);
@@ -98,10 +99,11 @@ fn main() {
         }
 
         // ps = offset(ps, 25.0, 0.0);
+        let clr = Color::from_rgba8(79, 70, 56, 255);
         let poly = ShapeBuilder::new()
             .points(&ps)
-            .stroke_color(Color::WHITE)
-            .stroke_weight(1.0)
+            .stroke_color(clr)
+            .stroke_weight(2.0)
             // .fill_color(Color::from_rgba(0.6, 0.6, 0.7, 0.1).unwrap())
             // .no_stroke()
             .no_fill()
