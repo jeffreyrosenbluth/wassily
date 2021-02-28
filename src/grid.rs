@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn get_test_bounds() {
         let grid = Grid::new(200.0, 100.0, 10.0, |x, y| (x, y));
-        assert_eq!(grid.get(99.0, 49.0), (100.0, 50.0));
+        assert_eq!(grid.get(199.0, 99.0), (190.0, 90.0));
         assert_eq!(grid.get(200.0, 100.0), (190.0, 90.0));
     }
 }
