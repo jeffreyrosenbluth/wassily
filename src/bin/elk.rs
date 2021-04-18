@@ -7,8 +7,7 @@ const WIDTH: u32 = 4032;
 const HEIGHT: u32 = 3024;
 
 fn main() {
-    let mut pixmap = Pixmap::load_png("elk.png").expect("Can't load png");
-    let mut canvas = Canvas::from(pixmap.as_mut());
+    let mut canvas = Pixmap::load_png("elk.png").expect("Can't load png");
 
     let colors = colorous::REDS;
 
@@ -49,5 +48,5 @@ fn main() {
         .stroke_color(color)
         .build();
     shape.draw(&mut canvas);
-    pixmap.save_png("image.png").unwrap();
+    canvas.save_png("image.png").unwrap();
 }

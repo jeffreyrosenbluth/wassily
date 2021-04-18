@@ -7,9 +7,8 @@ const HEIGHT: u32 = 900;
 const ORDER: u32 = 6;
 
 fn main() {
-    let mut pixmap = Pixmap::new(WIDTH, HEIGHT).unwrap();
+    let mut canvas = Pixmap::new(WIDTH, HEIGHT).unwrap();
     // let mut pixmap = Pixmap::load_png("soup2.png").expect("Can't load png");
-    let mut canvas = Canvas::from(pixmap.as_mut());
     background(
         &mut canvas,
         WIDTH,
@@ -43,7 +42,7 @@ fn main() {
         .points(&path)
         .build();
     shape.draw(&mut canvas);
-    pixmap.save_png("hilbert.png").unwrap();
+    canvas.save_png("hilbert.png").unwrap();
 }
 
 fn hilbert(k: u32, order: u32) -> Point {

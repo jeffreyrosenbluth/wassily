@@ -1,12 +1,12 @@
-use tiny_skia::*;
 use crate::util::*;
+use tiny_skia::*;
 
 // TODO use PixelMap.fill instead.
-pub fn background(canvas: &mut Canvas, width: u32, height: u32, color: Color) {
+pub fn background(canvas: &mut Pixmap, width: u32, height: u32, color: Color) {
     let mut paint = Paint::default();
     paint.set_color(color);
     let rect = IntRect::from_xywh(0, 0, width, height).unwrap().to_rect();
-    canvas.fill_rect(rect, &paint);
+    canvas.fill_rect(rect, &paint, Transform::identity(), None);
 }
 
 #[derive(Debug, Clone)]
@@ -45,7 +45,7 @@ impl<'a> Shape<'a> {
         }
     }
 
-    pub fn draw(&self, canvas: &mut Canvas) {
+    pub fn draw(&self, canvas: &mut Pixmap) {
         match self.shape {
             ShapeType::Poly => self.draw_poly(canvas),
             ShapeType::PolyQuad => self.draw_quad(canvas),
@@ -56,7 +56,7 @@ impl<'a> Shape<'a> {
         }
     }
 
-    fn draw_poly(&self, canvas: &mut Canvas) {
+    fn draw_poly(&self, canvas: &mut Pixmap) {
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         let tail = &self.points[1..];
@@ -69,14 +69,14 @@ impl<'a> Shape<'a> {
         }
         let path = pb.finish().unwrap();
         if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&path, &fp, FillRule::Winding);
+            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity(), None);
         }
         if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&path, &sp, &self.stroke)
+            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity(), None);
         }
     }
 
-    fn draw_quad(&self, canvas: &mut Canvas) {
+    fn draw_quad(&self, canvas: &mut Pixmap) {
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         let tail = &mut self.points[1..].to_vec();
@@ -91,14 +91,14 @@ impl<'a> Shape<'a> {
         }
         let path = pb.finish().unwrap();
         if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&path, &fp, FillRule::Winding);
+            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity(), None);
         }
         if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&path, &sp, &self.stroke)
+            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity(), None);
         }
     }
 
-    pub fn draw_cubic(&self, canvas: &mut Canvas) {
+    pub fn draw_cubic(&self, canvas: &mut Pixmap) {
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         let tail = &mut self.points[1..].to_vec();
@@ -114,14 +114,14 @@ impl<'a> Shape<'a> {
         }
         let path = pb.finish().unwrap();
         if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&path, &fp, FillRule::Winding);
+            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity(), None);
         }
         if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&path, &sp, &self.stroke)
+            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity(), None);
         }
     }
 
-    fn draw_rect(&self, canvas: &mut Canvas) {
+    fn draw_rect(&self, canvas: &mut Pixmap) {
         if self.points.len() < 2 {
             panic!("Rectangls points vector contains less than 2 points");
         }
@@ -132,14 +132,14 @@ impl<'a> Shape<'a> {
         let r = Rect::from_ltrb(left, top, right, bottom).unwrap();
         let pb = PathBuilder::from_rect(r);
         if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&pb, &fp, FillRule::Winding);
+            canvas.fill_path(&pb, &fp, FillRule::Winding, Transform::identity(), None);
         }
         if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&pb, &sp, &self.stroke)
+            canvas.stroke_path(&pb, &sp, &self.stroke, Transform::identity(), None);
         }
     }
 
-    fn draw_ellipse(&self, canvas: &mut Canvas) {
+    fn draw_ellipse(&self, canvas: &mut Pixmap) {
         if self.points.len() < 2 {
             panic!("Ellipse points vector contains less than 2 points");
         }
@@ -150,15 +150,14 @@ impl<'a> Shape<'a> {
         // XXX Fixme to scale to ellipse when tiny_skia updates;
         let pb = PathBuilder::from_circle(cx, cy, w).unwrap();
         if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&pb, &fp, FillRule::Winding);
+            canvas.fill_path(&pb, &fp, FillRule::Winding, Transform::identity(), None);
         }
         if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&pb, &sp, &self.stroke)
+            canvas.stroke_path(&pb, &sp, &self.stroke, Transform::identity(), None);
         }
-        canvas.reset_transform();
     }
 
-    fn draw_line(&self, canvas: &mut Canvas) {
+    fn draw_line(&self, canvas: &mut Pixmap) {
         if self.points.len() < 2 {
             panic!("Line points vector contains less than 2 points");
         }
@@ -171,7 +170,7 @@ impl<'a> Shape<'a> {
         pb.line_to(x1, y1);
         let path = pb.finish().unwrap();
         if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&path, &sp, &self.stroke)
+            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity(), None);
         }
     }
 }
@@ -318,7 +317,7 @@ pub fn stroke(weight: f32) -> Stroke {
 }
 
 pub fn line(
-    canvas: &mut Canvas,
+    canvas: &mut Pixmap,
     x0: f32,
     y0: f32,
     x1: f32,
@@ -330,5 +329,5 @@ pub fn line(
     pb.move_to(x0, y0);
     pb.line_to(x1, y1);
     let path = pb.finish().unwrap();
-    canvas.stroke_path(&path, &stroke_paint, &stroke);
+    canvas.stroke_path(&path, &stroke_paint, stroke, Transform::identity(), None);
 }

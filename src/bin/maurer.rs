@@ -26,8 +26,7 @@ fn rose(n: f32, d: f32) -> Vec<Point> {
 
 fn main() {
     // let mut pixmap = Pixmap::new(WIDTH, HEIGHT).unwrap();
-    let mut pixmap = Pixmap::load_png("soupwc.png").expect("Can't load png");
-    let mut canvas = Canvas::from(pixmap.as_mut());
+    let mut canvas = Pixmap::load_png("soupwc.png").expect("Can't load png");
     background(
         &mut canvas,
         WIDTH,
@@ -44,5 +43,5 @@ fn main() {
         .points(&ps0)
         .build();
     shape.draw_cubic(&mut canvas);
-    pixmap.save_png("maurer.png").unwrap();
+    canvas.save_png("maurer.png").unwrap();
 }

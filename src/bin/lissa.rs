@@ -6,8 +6,7 @@ const WIDTH: u32 = 4032;
 const HEIGHT: u32 = 3024;
 
 fn main() {
-    let mut pixmap = Pixmap::load_png("napkin.png").expect("Can't load png");
-    let mut canvas = Canvas::from(pixmap.as_mut());
+    let mut canvas = Pixmap::load_png("napkin.png").expect("Can't load png");
 
     let mut fill_paint = Paint::default();
     fill_paint.anti_alias = true;
@@ -44,5 +43,5 @@ fn main() {
         shape.draw(&mut canvas);
     }
 
-    pixmap.save_png("image.png").unwrap();
+    canvas.save_png("image.png").unwrap();
 }

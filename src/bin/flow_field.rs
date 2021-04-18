@@ -36,7 +36,7 @@ fn offset(mut points: Vec<Point>, delta_x: f32, delta_y: f32) -> Vec<Point> {
     points
 }
 
-fn show_grid(canvas: &mut Canvas, grid: &Grid<f32>) {
+fn show_grid(canvas: &mut Pixmap, grid: &Grid<f32>) {
     let mut paint = Paint::default();
     paint.set_color_rgba8(40, 30, 150, 175);
     let mut stroke = Stroke::default();
@@ -48,7 +48,7 @@ fn show_grid(canvas: &mut Canvas, grid: &Grid<f32>) {
         let dy = GRID_SPACING * a.sin();
         pb.line_to(p.x + dx, p.y + dy);
         let path = pb.finish().unwrap();
-        canvas.stroke_path(&path, &paint, &stroke);
+        canvas.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
     }
 }
 
@@ -57,8 +57,7 @@ fn main() {
     let h = HEIGHT as f32;
     let mut rng = thread_rng();
 
-    let mut pixmap = Pixmap::load_png("trees.png").unwrap();
-    let mut canvas = Canvas::from(pixmap.as_mut());
+    let mut canvas = Pixmap::load_png("mtn.png").unwrap();
 
     // let bg = Color::from_rgba8(81, 7, 8, 255);
     // background(&mut canvas, WIDTH, HEIGHT, bg);
@@ -113,5 +112,5 @@ fn main() {
     }
 
     // show_grid(&mut canvas, &grid);
-    pixmap.save_png("fat.png").unwrap();
+    canvas.save_png("fat.png").unwrap();
 }

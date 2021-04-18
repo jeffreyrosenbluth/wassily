@@ -1,4 +1,5 @@
 use noise::NoiseFn;
+use palette::{Lab, Laba, Srgb, Srgba, ConvertInto};
 use rand::prelude::*;
 use rand_pcg::Pcg64;
 use tiny_skia::*;
@@ -33,6 +34,7 @@ pub fn green(alpha: f32) -> Color {
 pub fn blue(alpha: f32) -> Color {
     Color::from_rgba(0.0, 0.0, 1.0, alpha).unwrap()
 }
+
 pub struct Wassily {
     pub width: f32,
     pub height: f32,
@@ -84,9 +86,27 @@ impl Wassily {
     }
 
     pub fn noise(&self, x: f32, y: f32) -> f32 {
-        let noise_scale = 0.003;
         self.noise_fn
-            .get([(noise_scale * x) as f64, (noise_scale * y) as f64]) as f32
+            .get([(self.noise_scale * x) as f64, (self.noise_scale * y) as f64]) as f32
+    }
+
+    pub fn rand_rgb(&mut self) -> Color {
+        let l: f32 = self.rand_range(0.0, 100.0);
+        let a: f32 = self.rand_range(-128.0, 127.0);
+        let b: f32 = self.rand_range(-128.0, 127.0);
+        let rgb: Srgb = Lab::new(l, a, b).convert_into();
+        let c = rgb.into_components();
+        Color::from_rgba(c.0, c.1, c.2, 1.0).unwrap()
+    }
+
+    pub fn rand_rgba(&mut self) -> Color {
+        let l: f32 = self.rand_range(0.0, 100.0);
+        let a: f32 = self.rand_range(-128.0, 127.0);
+        let b: f32 = self.rand_range(-128.0, 127.0);
+        let o: f32 = self.rand_range(0.5, 1.0);
+        let rgba: Srgba = Laba::new(l, a, b, o).convert_into();
+        let c = rgba.into_components();
+        Color::from_rgba(c.0, c.1, c.2, c.3).unwrap()
     }
 }
 

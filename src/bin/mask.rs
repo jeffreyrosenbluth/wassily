@@ -9,8 +9,6 @@ const HEIGHT: u32 = 3024;
 fn main() {
     let mut layer0 = Pixmap::load_png("elk.png").expect("Can't load png");
     let mut layer1 = Pixmap::new(WIDTH, HEIGHT).unwrap();
-    let mut canvas0 = Canvas::from(layer0.as_mut());
-    let mut canvas1 = Canvas::from(layer1.as_mut());
 
     let mut paint = PixmapPaint::default();
     paint.quality = FilterQuality::Bicubic;
@@ -47,7 +45,7 @@ fn main() {
     p.blend_mode = BlendMode::Xor;
     circle.fill_paint = Some(p);
 
-    circle.draw(&mut canvas0);
+    circle.draw(&mut layer0);
 
     // canvas0.draw_pixmap(0, 0, layer1.as_ref(), &paint);
     layer0.save_png("xor.png").unwrap();

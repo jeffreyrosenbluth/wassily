@@ -20,8 +20,7 @@ fn main() {
     let h = HEIGHT as f32;
     let mut rng = thread_rng();
 
-    let mut pixmap = Pixmap::new(WIDTH, HEIGHT).unwrap();
-    let mut canvas = Canvas::from(pixmap.as_mut());
+    let mut canvas = Pixmap::new(WIDTH, HEIGHT).unwrap();
 
     let geo = Geometric::new(0.5).unwrap();
     let colors = colorous::REDS;
@@ -55,5 +54,5 @@ fn main() {
         let poly = ShapeBuilder::new().points(&points).fill_color(kolor).stroke_color(Color::BLACK).stroke_weight(sw).build();
         poly.draw(&mut canvas);
     }
-    pixmap.save_png("mtn.png").unwrap();
+    canvas.save_png("mtn.png").unwrap();
 }
