@@ -48,7 +48,7 @@ fn show_grid(canvas: &mut Pixmap, grid: &Grid<f32>) {
         let dy = GRID_SPACING * a.sin();
         pb.line_to(p.x + dx, p.y + dy);
         let path = pb.finish().unwrap();
-        canvas.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
+        canvas.stroke_p(&path, &paint, &stroke);
     }
 }
 

@@ -12,12 +12,7 @@ fn main() {
     fill_paint.anti_alias = true;
     fill_paint.set_color(Color::TRANSPARENT);
 
-    background(
-        &mut canvas,
-        WIDTH,
-        HEIGHT,
-        Color::from_rgba8(50, 50, 50, 175),
-    );
+    canvas.fill(Color::from_rgba8(50, 50, 50, 175));
 
     let mut stroke_paint = Paint::default();
     stroke_paint.anti_alias = true;

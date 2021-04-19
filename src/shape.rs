@@ -1,14 +1,6 @@
 use crate::util::*;
 use tiny_skia::*;
 
-// TODO use PixelMap.fill instead.
-pub fn background(canvas: &mut Pixmap, width: u32, height: u32, color: Color) {
-    let mut paint = Paint::default();
-    paint.set_color(color);
-    let rect = IntRect::from_xywh(0, 0, width, height).unwrap().to_rect();
-    canvas.fill_rect(rect, &paint, Transform::identity(), None);
-}
-
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {
     Poly,

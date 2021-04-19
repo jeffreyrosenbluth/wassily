@@ -26,7 +26,7 @@ fn main() {
     let colors = colorous::REDS;
     let c = colors.eval_rational(2, 10);
     let kolor = Color::from_rgba8(c.r, c.g, c.b, 255);
-    background(&mut canvas, WIDTH, HEIGHT, kolor);
+    canvas.fill(kolor);
 
     let nn = noise::BasicMulti::new();
 

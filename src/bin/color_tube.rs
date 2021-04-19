@@ -11,16 +11,16 @@ const GRID_SPACING: f32 = 4.0;
 const XSTEP: f32 = 10.0;
 const YSTEP: f32 = 15.0;
 const LENGTH: usize = 800;
-const X: f32  = 7.0;
+const X: f32 = 7.0;
 
 fn main() {
     let mut wk = Wassily::new(8191.0, 6144.0);
-    wk.set_seed(9);
+    wk.set_seed(1);
     wk.set_noise_scale(0.0011);
     let mut canvas = Pixmap::new(wk.width_n(), wk.height_n()).unwrap();
-    // let bg = Color::from_rgba8(255, 248, 220, 255);
+    // Cornsilk (255, 248, 220, 255);
     let bg = Color::from_rgba8(242, 240, 233, 255);
-    background(&mut canvas, wk.width_n(), wk.height_n(), bg);
+    canvas.fill(bg);
 
     let grid = Grid::new(1.1 * wk.width, 1.1 * wk.height, GRID_SPACING, |x, y| {
         TAU * wk.noise(x, y)
@@ -59,5 +59,5 @@ fn main() {
             .build();
         shape.draw(&mut canvas);
     }
-    canvas.save_png("color_tube_9.png").unwrap();
+    canvas.save_png("color_tube.png").unwrap();
 }

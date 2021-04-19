@@ -1,5 +1,5 @@
 use noise::NoiseFn;
-use palette::{Lab, Laba, Srgb, Srgba, ConvertInto};
+use palette::{ConvertInto, Lab, Laba, Srgb, Srgba};
 use rand::prelude::*;
 use rand_pcg::Pcg64;
 use tiny_skia::*;
@@ -107,6 +107,30 @@ impl Wassily {
         let rgba: Srgba = Laba::new(l, a, b, o).convert_into();
         let c = rgba.into_components();
         Color::from_rgba(c.0, c.1, c.2, c.3).unwrap()
+    }
+}
+
+pub trait Fill {
+    fn fill_r(&mut self, rect: Rect, paint: &Paint) -> Option<()>;
+    fn fill_p(&mut self, path: &Path, paint: &Paint) -> Option<()>;
+}
+
+pub trait Strk {
+    fn stroke_p(&mut self, path: &Path, paint: &Paint, stroke: &Stroke) -> Option<()>;
+}
+
+impl Fill for Pixmap {
+    fn fill_r(&mut self, rect: Rect, paint: &Paint) -> Option<()> {
+        self.fill_rect(rect, paint, Transform::identity(), None)
+    }
+    fn fill_p(&mut self, path: &Path, paint: &Paint) -> Option<()> {
+        self.fill_path(path, paint, FillRule::Winding, Transform::identity(), None)
+    }
+}
+
+impl Strk for Pixmap {
+    fn stroke_p(&mut self, path: &Path, paint: &Paint, stroke: &Stroke) -> Option<()> {
+        self.stroke_path(path, paint, stroke, Transform::identity(), None)
     }
 }
 

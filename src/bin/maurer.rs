@@ -27,12 +27,7 @@ fn rose(n: f32, d: f32) -> Vec<Point> {
 fn main() {
     // let mut pixmap = Pixmap::new(WIDTH, HEIGHT).unwrap();
     let mut canvas = Pixmap::load_png("soupwc.png").expect("Can't load png");
-    background(
-        &mut canvas,
-        WIDTH,
-        HEIGHT,
-        Color::from_rgba(0.0, 0.0, 0.0, 0.75).unwrap(),
-    );
+    canvas.fill(Color::from_rgba(0.0, 0.0, 0.0, 0.75).unwrap());
 
     let d = D + 0.01;
     let ps0 = rose(N, d);

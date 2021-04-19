@@ -9,12 +9,7 @@ const ORDER: u32 = 6;
 fn main() {
     let mut canvas = Pixmap::new(WIDTH, HEIGHT).unwrap();
     // let mut pixmap = Pixmap::load_png("soup2.png").expect("Can't load png");
-    background(
-        &mut canvas,
-        WIDTH,
-        HEIGHT,
-        Color::from_rgba(0.0, 0.0, 0.0, 1.0).unwrap(),
-    );
+    canvas.fill(Color::from_rgba(0.0, 0.0, 0.0, 1.0).unwrap());
 
     let width = WIDTH as f32;
     let n = 2u32.pow(ORDER);
