@@ -39,7 +39,7 @@ pub struct Wassily {
     pub width: f32,
     pub height: f32,
     rng: Pcg64,
-    noise_fn: Box<dyn NoiseFn<[f64; 2]>>,
+    noise_fn: Box<dyn NoiseFn<[f64; 3]>>,
     noise_scale: f32,
 }
 
@@ -65,7 +65,7 @@ impl Wassily {
         self.noise_scale = scale;
     }
 
-    pub fn set_noise_fn<N: NoiseFn<[f64; 2]> + 'static>(&mut self, nf: N) {
+    pub fn set_noise_fn<N: NoiseFn<[f64; 3]> + 'static>(&mut self, nf: N) {
         self.noise_fn = Box::new(nf)
     }
 
@@ -85,9 +85,12 @@ impl Wassily {
         self.rng.gen_range(low..high)
     }
 
-    pub fn noise(&self, x: f32, y: f32) -> f32 {
-        self.noise_fn
-            .get([(self.noise_scale * x) as f64, (self.noise_scale * y) as f64]) as f32
+    pub fn noise(&self, x: f32, y: f32, z: f32) -> f32 {
+        self.noise_fn.get([
+            (self.noise_scale * x) as f64,
+            (self.noise_scale * y) as f64,
+            (self.noise_scale * z) as f64,
+        ]) as f32
     }
 
     pub fn rand_rgb(&mut self) -> Color {
