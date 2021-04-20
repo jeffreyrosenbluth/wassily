@@ -160,6 +160,6 @@ mod tests {
     #[test]
     fn simplex() {
         let w = Wassily::new(1000.0, 800.0);
-        assert_eq!(w.noise(100.0, 100.0), 0.29744336);
+        assert_eq!(w.noise(100.0, 100.0, 0.0), 0.29744336);
     }
 }

@@ -23,7 +23,7 @@ fn main() {
     canvas.fill(bg);
 
     let grid = Grid::new(1.1 * wk.width, 1.1 * wk.height, GRID_SPACING, |x, y| {
-        TAU * wk.noise(x, y)
+        TAU * wk.noise(x, y, 0.0)
     });
 
     for i in 0..(grid.cols() / 4) {

@@ -9,8 +9,8 @@ const HEIGHT: u32 = 6144;
 const XSTEP: f32 = 10.0;
 const YSTEP: f32 = 20.0;
 const LENGTH: usize = 1000;
-const DIST: f32 = 50.0;
-const LINES: usize = 1500;
+const DIST: f32 = 8.0;
+const LINES: usize = 1000;
 const X: f32 = 7.0;
 
 fn main() {
@@ -22,7 +22,7 @@ fn main() {
     canvas.fill(bg);
 
     for l in 0..LINES {
-        let mut l1 = pt2(0.0, 5.0 * l as f32);
+        let mut l1 = pt2(0.0, DIST * l as f32);
         let mut up = vec![];
         for _ in 0..LENGTH {
             if l1.x >= wk.width || l1.x < 0.0 || l1.y >= wk.height || l1.y <= 0.0 {
@@ -35,15 +35,12 @@ fn main() {
         }
 
         if up.len() > 3 {
-            let shape = ShapeBuilder::new()
-                .no_fill() 
-                .points(&up)
-                .build();
+            let shape = ShapeBuilder::new().no_fill().points(&up).build();
             shape.draw(&mut canvas);
         }
     }
     for l in 0..LINES {
-        let mut l1 = pt2(wk.width, 5.0 * l as f32);
+        let mut l1 = pt2(wk.width, DIST * l as f32);
         let mut up = vec![];
         for _ in 0..LENGTH {
             if l1.x > wk.width || l1.x < 0.0 || l1.y > wk.height || l1.y < 0.0 {
@@ -57,7 +54,8 @@ fn main() {
 
         if up.len() > 3 {
             let shape = ShapeBuilder::new()
-                .no_fill() 
+                .no_fill()
+                .stroke_weight(0.5)
                 .points(&up)
                 .build();
             shape.draw(&mut canvas);
