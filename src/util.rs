@@ -41,6 +41,7 @@ pub struct Wassily {
     rng: Pcg64,
     noise_fn: Box<dyn NoiseFn<[f64; 3]>>,
     noise_scale: f32,
+    colors: Vec<Color>,
 }
 
 impl Wassily {
@@ -48,12 +49,14 @@ impl Wassily {
         let rng = Pcg64::seed_from_u64(0);
         let noise_fn = Box::new(noise::OpenSimplex::new());
         let noise_scale = 0.003;
+        let colors = vec![];
         Self {
             width,
             height,
             rng,
             noise_fn,
             noise_scale,
+            colors,
         }
     }
 
@@ -67,6 +70,27 @@ impl Wassily {
 
     pub fn set_noise_fn<N: NoiseFn<[f64; 3]> + 'static>(&mut self, nf: N) {
         self.noise_fn = Box::new(nf)
+    }
+
+    pub fn set_colors(&mut self, img: Pixmap, n: usize) {
+        let w = img.width();
+        let h = img.height();
+        for _ in 0..n {
+            let i = self.rand_range(0.0, w as f32) as u32;
+            let j = self.rand_range(0.0, h as f32) as u32;
+            let p = img.pixel(i, j).unwrap();
+            let r = p.red();
+            let g = p.green();
+            let b = p.blue();
+            let c = Color::from_rgba8(r, g, b, 255);
+            self.colors.push(c);
+        }
+    }
+
+    pub fn color(&mut self) -> Color {
+        let n = self.colors.len();
+        let i = self.rand_range(0.0, n as f32) as usize;
+        self.colors[i]
     }
 
     pub fn width_n(&self) -> u32 {

@@ -35,7 +35,10 @@ fn main() {
         }
 
         if up.len() > 3 {
-            let shape = ShapeBuilder::new().no_fill().points(&up).build();
+            let shape = ShapeBuilder::new()
+                .no_fill() 
+                .points(&up)
+                .build();
             shape.draw(&mut canvas);
         }
     }
@@ -54,7 +57,7 @@ fn main() {
 
         if up.len() > 3 {
             let shape = ShapeBuilder::new()
-                .no_fill()
+                .no_fill() 
                 .stroke_weight(0.5)
                 .points(&up)
                 .build();
