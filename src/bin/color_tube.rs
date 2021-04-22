@@ -14,12 +14,12 @@ const LINES: usize = 1000;
 
 fn main() {
     let mut wk = Wassily::new(8191.0, 6144.0);
-    wk.set_seed(0);
+    wk.set_seed(4);
     wk.set_noise_scale(0.0019);
     let mut canvas = Pixmap::new(wk.width_n(), wk.height_n()).unwrap();
-    let img = Pixmap::load_png("sunset_1.png").expect("Can't loag image");
-    wk.set_colors(img, 2000);
-    let bg = Color::from_rgba8(242, 240, 233, 255);
+    let img = Pixmap::load_png("hl.png").expect("Can't loag image");
+    wk.set_colors(img, 1000);
+    let bg = wk.color(990);
     canvas.fill(bg);
 
     for i in 0..LINES {
@@ -50,11 +50,11 @@ fn main() {
 
         let shape = ShapeBuilder::new()
             // .fill_color(wk.rand_rgb())
-            .fill_color(wk.color())
+            .fill_color(wk.rand_color())
             .no_stroke()
             .points(&up)
             .build();
         shape.draw(&mut canvas);
     }
-    canvas.save_png("color_tube.png").unwrap();
+    canvas.save_png("ct.png").unwrap();
 }

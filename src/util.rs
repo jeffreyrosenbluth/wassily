@@ -1,6 +1,7 @@
 use noise::NoiseFn;
 use palette::{ConvertInto, Lab, Laba, Srgb, Srgba};
 use rand::prelude::*;
+use rand_distr::uniform::SampleUniform;
 use rand_pcg::Pcg64;
 use tiny_skia::*;
 
@@ -85,11 +86,22 @@ impl Wassily {
             let c = Color::from_rgba8(r, g, b, 255);
             self.colors.push(c);
         }
+        self.colors.sort_by_cached_key(|c| {
+            (1000.0 * (c.red() * c.red() + c.green() * c.green() + c.blue() * c.blue())) as u32
+        })
     }
 
-    pub fn color(&mut self) -> Color {
+    pub fn color(&self, i: usize) -> Color {
+        self.colors[i]
+    }
+
+    pub fn colors(&self) -> Vec<Color> {
+        self.colors.clone()
+    }
+
+    pub fn rand_color(&mut self) -> Color {
         let n = self.colors.len();
-        let i = self.rand_range(0.0, n as f32) as usize;
+        let i = self.rand_range(0, n);
         self.colors[i]
     }
 
@@ -105,7 +117,7 @@ impl Wassily {
         pt2(self.width / 2.0, self.height / 2.0)
     }
 
-    pub fn rand_range(&mut self, low: f32, high: f32) -> f32 {
+    pub fn rand_range<T: SampleUniform + PartialOrd>(&mut self, low: T, high: T) -> T {
         self.rng.gen_range(low..high)
     }
 
