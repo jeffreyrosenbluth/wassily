@@ -7,6 +7,7 @@ use tiny_skia::*;
 
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
+const EPSILON: f32 = 0.001;
 
 pub fn pt2(x: f32, y: f32) -> Point {
     Point::from_xy(x, y)
@@ -36,6 +37,15 @@ pub fn blue(alpha: f32) -> Color {
     Color::from_rgba(0.0, 0.0, 1.0, alpha).unwrap()
 }
 
+fn curl(f: impl Fn(f32, f32) -> f32, x: f32, y: f32, eps: f32) -> f32 {
+    let x0 = x - eps;
+    let x1 = x + eps;
+    let y0 = y - eps;
+    let y1 = y + eps;
+    let dfdx = (f(x1, y) - f(x0, y)) / (2.0 * eps);
+    let dfdy = (f(x, y1) - f(x, y0)) / (2.0 * eps);
+    dfdy.atan2(-dfdx)
+}
 pub struct Wassily {
     pub width: f32,
     pub height: f32,
@@ -127,6 +137,10 @@ impl Wassily {
             (self.noise_scale * y) as f64,
             (self.noise_scale * z) as f64,
         ]) as f32
+    }
+
+    pub fn curl(&self, x: f32, y: f32, z: f32) -> f32 {
+        curl(|x, y| self.noise(x, y, z) * TAU, x, y, EPSILON)
     }
 
     pub fn rand_rgb(&mut self) -> Color {
