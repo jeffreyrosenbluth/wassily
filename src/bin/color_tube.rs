@@ -54,7 +54,6 @@ fn main() {
 
         if up.len() >= 2 {
             let shape = ShapeBuilder::new()
-                // .fill_color(wk.rand_rgb())
                 .fill_color(wk.rand_color())
                 .no_stroke()
                 .points(&up)
