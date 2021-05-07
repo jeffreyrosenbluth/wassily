@@ -13,8 +13,8 @@ const X: f32 = 10.0; // 10.0
 const LINES: usize = 1000; // 1000
 const COLORS: usize = 1000; // 1000
 const SEED: u64 = 0; // 0
-const SCALE: f32 = 0.0019; // 0.0019
-const GRID: f32 = 15.0; // 15.0
+const SCALE: f32 = 0.003; // 0.0019
+const GRID: f32 = 5.0; // 15.0
 
 fn main() {
     let mut wk = Wassily::new(8191.0, 6144.0);
@@ -61,5 +61,5 @@ fn main() {
             shape.draw(&mut canvas);
         }
     }
-    canvas.save_png("ct12.png").unwrap();
+    canvas.save_png("squirm.png").unwrap();
 }

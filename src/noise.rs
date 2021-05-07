@@ -48,6 +48,10 @@ where
         self.noise_fn = nf;
     }
 
+    pub fn set_noise_factor(&mut self, f: f32) {
+        self.noise_factor = f;
+    }
+
     pub fn width_n(&self) -> u32 {
         self.width as u32
     }

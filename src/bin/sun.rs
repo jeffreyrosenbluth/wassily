@@ -23,9 +23,9 @@ fn main() {
     wk.set_seed(SEED);
     wk.set_noise_scale(SCALE);
     let mut canvas = Pixmap::new(wk.width_n(), wk.height_n()).unwrap();
-    let img = Pixmap::load_png("hudson.png").expect("Can't loag image");
+    let img = Pixmap::load_png("fruit.png").expect("Can't loag image");
     let mut palette = Palette::with_img(img, COLORS);
-    palette.sort_by_hue();
+    palette.sort_by_chroma();
 
     let bg = palette.colors[99];
     canvas.fill(bg);
@@ -70,5 +70,5 @@ fn main() {
             shape.draw(&mut canvas);
         }
     }
-    canvas.save_png("sun_chroma.png").unwrap();
+    canvas.save_png("sun_fruit.png").unwrap();
 }
