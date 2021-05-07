@@ -1,3 +1,6 @@
+use noise::{Billow, Cylinders, Displace, RidgedMulti, Value, Worley};
+#[allow(unused_imports)]
+
 use noise::{BasicMulti, Fbm, OpenSimplex, Perlin, SuperSimplex};
 use tiny_skia::*;
 use wassily::noise::*;
@@ -7,15 +10,18 @@ use colorous::*;
 
 const SIZE: u32 = 8191;
 const GRID: f32 = 10.0;
-const SCALE: f32 = 2.0;
+const SCALE: f32 = 4.0;
+const FACTOR: f32 = 2.0;
 
 fn main() {
     let mut canvas = Pixmap::new(SIZE, SIZE).unwrap();
-    let mut ns = Noise::<[f64; 2], _>::new(SIZE as f32, SIZE as f32, Fbm::new());
-    ns.set_noise_scales(SCALE, SCALE, 1.0);
-    let mut sm = 0.5;
-    let mut lg = 0.5;
+    let mut ns = Noise::<[f64; 2], _>::new(SIZE as f32, SIZE as f32, OpenSimplex::new());
+    let mut sm = 0.0;
+    let mut lg = 0.0;
     let mut c: colorous::Color;
+
+    ns.set_noise_scales(SCALE, SCALE, 1.0);
+    ns.set_noise_factor(FACTOR);
 
     for x in (0..SIZE).step_by(GRID as usize) {
         for y in (0..SIZE).step_by(GRID as usize) {
