@@ -1,7 +1,8 @@
-use noise::{Billow, Cylinders, Displace, RidgedMulti, Value, Worley};
 #[allow(unused_imports)]
 
 use noise::{BasicMulti, Fbm, OpenSimplex, Perlin, SuperSimplex};
+use noise::{Billow, Cylinders, Displace, RidgedMulti, Value, Worley};
+
 use tiny_skia::*;
 use wassily::noise::*;
 use wassily::shape::*;
