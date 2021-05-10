@@ -16,25 +16,25 @@ pub(crate) enum ShapeType {
 #[derive(Debug, Clone)]
 pub struct Shape {
     pub points: Box<Vec<Point>>,
-    pub fill_paint: Option<Texture>,
+    pub fill_texture: Option<Texture>,
     pub stroke: Stroke,
-    pub stroke_paint: Option<Texture>,
+    pub stroke_texture: Option<Texture>,
     shape: ShapeType,
 }
 
 impl<'a> Shape {
     pub(crate) fn new(
         points: Box<Vec<Point>>,
-        fill_paint: Option<Texture>,
+        fill_texture: Option<Texture>,
         stroke: Stroke,
-        stroke_paint: Option<Texture>,
+        stroke_texture: Option<Texture>,
         shape: ShapeType,
     ) -> Self {
         Self {
             points,
-            fill_paint,
+            fill_texture,
             stroke,
-            stroke_paint,
+            stroke_texture,
             shape,
         }
     }
@@ -58,14 +58,14 @@ impl<'a> Shape {
         for p in tail {
             pb.line_to(p.x, p.y);
         }
-        if self.fill_paint.is_some() {
+        if self.fill_texture.is_some() {
             pb.close();
         }
         let path = pb.finish();
-        if let Some(fp) = &self.fill_paint {
+        if let Some(fp) = &self.fill_texture {
             canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity());
         }
-        if let Some(sp) = &self.stroke_paint {
+        if let Some(sp) = &self.stroke_texture {
             canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
         }
     }
@@ -80,14 +80,14 @@ impl<'a> Shape {
             let p = tail.pop().unwrap();
             pb.quad_to(control.x, control.y, p.x, p.y);
         }
-        if self.fill_paint.is_some() {
+        if self.fill_texture.is_some() {
             pb.close();
         }
         let path = pb.finish();
-        if let Some(fp) = &self.fill_paint {
+        if let Some(fp) = &self.fill_texture {
             canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity());
         }
-        if let Some(sp) = &self.stroke_paint {
+        if let Some(sp) = &self.stroke_texture {
             canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
         }
     }
@@ -103,14 +103,14 @@ impl<'a> Shape {
             let p = tail.pop().unwrap();
             pb.cubic_to(control1.x, control1.y, control2.x, control2.y, p.x, p.y);
         }
-        if self.fill_paint.is_some() {
+        if self.fill_texture.is_some() {
             pb.close();
         }
         let path = pb.finish();
-        if let Some(fp) = &self.fill_paint {
+        if let Some(fp) = &self.fill_texture {
             canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity());
         }
-        if let Some(sp) = &self.stroke_paint {
+        if let Some(sp) = &self.stroke_texture {
             canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
         }
     }
@@ -123,13 +123,12 @@ impl<'a> Shape {
         let top = self.points[0].y;
         let right = self.points[1].x;
         let bottom = self.points[1].y;
-        let pb = PathBuilder::rect(left, top, left - right, top - bottom);
-        let path = pb.finish();
-        if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&pb, &fp, FillRule::Winding, Transform::identity());
+        let path = Path::rect(left, top, left - right, top - bottom);
+        if let Some(fp) = &self.fill_texture {
+            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity());
         }
-        if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&pb, &sp, &self.stroke, Transform::identity());
+        if let Some(sp) = &self.stroke_texture {
+            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
         }
     }
 
@@ -142,11 +141,11 @@ impl<'a> Shape {
         let w = self.points[1].x;
         let _h = self.points[1].y;
         // XXX Fixme to scale to ellipse when tiny_skia updates;
-        let pb = PathBuilder::from_circle(cx, cy, w).unwrap();
-        if let Some(fp) = &self.fill_paint {
+        let pb = Path::circle(cx, cy, w);
+        if let Some(fp) = &self.fill_texture {
             canvas.fill_path(&pb, &fp, FillRule::Winding, Transform::identity());
         }
-        if let Some(sp) = &self.stroke_paint {
+        if let Some(sp) = &self.stroke_texture {
             canvas.stroke_path(&pb, &sp, &self.stroke, Transform::identity());
         }
     }
@@ -163,7 +162,7 @@ impl<'a> Shape {
         pb.move_to(x0, y0);
         pb.line_to(x1, y1);
         let path = pb.finish();
-        if let Some(sp) = &self.stroke_paint {
+        if let Some(sp) = &self.stroke_texture {
             canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
         }
     }
@@ -171,8 +170,8 @@ impl<'a> Shape {
 
 #[derive(Debug, Clone)]
 pub struct ShapeBuilder {
-    fill_shader: Option<Texture>,
-    stroke_shader: Option<Texture>,
+    fill_texture: Option<Texture>,
+    stroke_texture: Option<Texture>,
     stroke_width: f32,
     line_cap: LineCap,
     line_join: LineJoin,
@@ -184,8 +183,8 @@ pub struct ShapeBuilder {
 impl<'a> ShapeBuilder {
     pub fn new() -> Self {
         Self {
-            fill_shader: Some(Texture::white()),
-            stroke_shader: Some(Texture::black()),
+            fill_texture: Some(Texture::white()),
+            stroke_texture: Some(Texture::black()),
             stroke_width: 1.0,
             line_cap: LineCap::default(),
             line_join: LineJoin::default(),
@@ -196,22 +195,22 @@ impl<'a> ShapeBuilder {
     }
 
     pub fn fill_color(mut self, color: RGBA) -> Self {
-        self.fill_shader = Some(Texture::SolidColor(color));
+        self.fill_texture = Some(Texture::SolidColor(color));
         self
     }
 
     pub fn no_fill(mut self) -> Self {
-        self.fill_shader = None;
+        self.fill_texture = None;
         self
     }
 
     pub fn no_stroke(mut self) -> Self {
-        self.stroke_shader = None;
+        self.stroke_texture = None;
         self
     }
 
     pub fn stroke_color(mut self, color: RGBA) -> Self {
-        self.stroke_shader = Some(Texture::SolidColor(color));
+        self.stroke_texture = Some(Texture::SolidColor(color));
         self
     }
 
@@ -230,10 +229,11 @@ impl<'a> ShapeBuilder {
         self
     }
 
-    pub fn stroke_dash(mut self, dash: StrokeDash) -> Self {
-        self.stroke_dash = Some(dash);
-        self
-    }
+    // XXX FIXME
+    // pub fn stroke_dash(mut self, dash: StrokeDash) -> Self {
+    //     self.stroke_dash = Some(dash);
+    //     self
+    // }
 
     pub fn points(mut self, pts: &[Point]) -> Self {
         self.points = Box::new(pts.to_vec());
@@ -248,7 +248,7 @@ impl<'a> ShapeBuilder {
 
     pub fn rect_xywh(mut self, xy: Point, wh: Point) -> Self {
         self.shape = ShapeType::Rect;
-        self.points = Box::new(vec![xy, pt2(xy.x + wh.x, xy.y + wh.y)]);
+        self.points = Box::new(vec![xy, Point::new(xy.x + wh.x, xy.y + wh.y)]);
         self
     }
 
@@ -260,7 +260,7 @@ impl<'a> ShapeBuilder {
 
     pub fn circle(mut self, center: Point, radius: f32) -> Self {
         self.shape = ShapeType::Ellipse;
-        self.points = Box::new(vec![center, pt2(radius, radius)]);
+        self.points = Box::new(vec![center, Point::new(radius, radius)]);
         self
     }
 
@@ -281,26 +281,23 @@ impl<'a> ShapeBuilder {
     }
 
     pub fn build(self) -> Shape {
-        let mut fill_paint = None;
-        let mut stroke_paint = None;
-        if let Some(fs) = self.fill_shader {
-            let mut fp = Texture::black();
-            fp.shader = fs;
-            fp.anti_alias = true;
-            fill_paint = Some(fp);
+        let mut fill_texture = None;
+        let mut stroke_texture = None;
+        if let Some(fs) = self.fill_texture {
+            // fp.anti_alias = true;
+            fill_texture = Some(fs);
         };
-        if let Some(ss) = self.stroke_shader {
-            let mut sp = Texture::black();
-            sp.shader = ss;
-            sp.anti_alias = true;
-            stroke_paint = Some(sp);
+        if let Some(ss) = self.stroke_texture {
+            // sp.shader = ss;
+            // sp.anti_alias = true;
+            stroke_texture = Some(ss);
         };
         let mut stroke = Stroke::default();
         stroke.width = self.stroke_width;
         stroke.line_cap = self.line_cap;
         stroke.line_join = self.line_join;
         stroke.width = self.stroke_width;
-        Shape::new(self.points, fill_paint, stroke, stroke_paint, self.shape)
+        Shape::new(self.points, fill_texture, stroke, stroke_texture, self.shape)
     }
 }
 
@@ -322,6 +319,6 @@ pub fn line(
     let mut pb = PathBuilder::new();
     pb.move_to(x0, y0);
     pb.line_to(x1, y1);
-    let path = pb.finish().unwrap();
-    canvas.stroke_path(&path, &stroke_paint, stroke, Transform::identity(), None);
+    let path = pb.finish();
+    canvas.stroke_path(&path, &stroke_paint, stroke, Transform::identity());
 }

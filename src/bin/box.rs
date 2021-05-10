@@ -1,8 +1,9 @@
 #![allow(dead_code)]
 
-use tiny_skia::*;
 use wassily::shape::*;
 use wassily::util::*;
+use wassily::base::*;
+use image::io::Reader as ImageReader;
 
 const WIDTH: f32 = 8191.0; // 8191.0
 const HEIGHT: f32 = 0.75 * WIDTH ;// 6144
@@ -20,8 +21,8 @@ fn main() {
     let mut wk = Wassily::new(WIDTH, HEIGHT);
     wk.set_seed(SEED);
     wk.set_noise_scale(SCALE);
-    let mut canvas = Pixmap::new(wk.width_n(), wk.height_n()).unwrap();
-    let img = Pixmap::load_png("orange.png").expect("Can't loag image");
+    let mut canvas = Canvas::new(wk.width, wk.height);
+    let img = ImageReader::open("organge.png").unwrap().decode().unwrap();
     wk.set_colors(img, COLORS);
     let bg = wk.color(999);
     canvas.fill(bg);

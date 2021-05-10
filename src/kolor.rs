@@ -5,34 +5,35 @@ use palette::{
 };
 use rand::prelude::*;
 use rand_pcg::Pcg64;
-use tiny_skia::{Color, Pixmap};
+use tiny_skia::{Pixmap};
+use crate::base::RGBA;
 
-pub fn black(alpha: f32) -> Color {
-    Color::from_rgba(0.0, 0.0, 0.0, alpha).unwrap()
+pub fn black(alpha: f32) -> RGBA {
+    RGBA::new(0.0, 0.0, 0.0, alpha)
 }
 
-pub fn white(alpha: f32) -> Color {
-    Color::from_rgba(1.0, 1.0, 1.0, alpha).unwrap()
+pub fn white(alpha: f32) -> RGBA {
+    RGBA::new(1.0, 1.0, 1.0, alpha)
 }
 
-pub fn red(alpha: f32) -> Color {
-    Color::from_rgba(1.0, 0.0, 0.0, alpha).unwrap()
+pub fn red(alpha: f32) -> RGBA {
+    RGBA::new(1.0, 0.0, 0.0, alpha)
 }
 
-pub fn green(alpha: f32) -> Color {
-    Color::from_rgba(0.0, 1.0, 0.0, alpha).unwrap()
+pub fn green(alpha: f32) -> RGBA {
+    RGBA::new(0.0, 1.0, 0.0, alpha)
 }
 
-pub fn blue(alpha: f32) -> Color {
-    Color::from_rgba(0.0, 0.0, 1.0, alpha).unwrap()
+pub fn blue(alpha: f32) -> RGBA {
+    RGBA::new(0.0, 0.0, 1.0, alpha)
 }
 
-/// Convert a tiny_skia 'Color' to a palette Lcha.
-pub fn lcha(c: Color) -> Lcha<D65> {
-    let r = c.red();
-    let g = c.green();
-    let b = c.blue();
-    let a = c.alpha();
+/// Convert a tiny_skia 'RGBA' to a palette Lcha.
+pub fn lcha(c: RGBA) -> Lcha<D65> {
+    let r = c.r;
+    let g = c.g;
+    let b = c.b;
+    let a = c.a;
     let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
     srgb.into()
 }
@@ -55,27 +56,26 @@ impl CosChannel {
     }
 }
 
-pub fn cos_color(r: CosChannel, g: CosChannel, b: CosChannel, theta: f32) -> Color {
+pub fn cos_color(r: CosChannel, g: CosChannel, b: CosChannel, theta: f32) -> RGBA {
     let red = r.a + r.b * (r.freq * theta + r.phase).cos();
     let green = g.a + g.b * (g.freq * theta + g.phase).cos();
     let blue = b.a + b.b * (b.freq * theta + b.phase).cos();
-    Color::from_rgba(
+    RGBA::new(
         red.clamp(0.0, 1.0),
         green.clamp(0.0, 1.0),
         blue.clamp(0.0, 1.0),
         1.0,
     )
-    .unwrap()
 }
 
 pub struct Palette {
-    pub colors: Vec<Color>,
+    pub colors: Vec<RGBA>,
     rng: Pcg64,
 }
 
 impl Palette {
-    /// Generate a palatte from a vector of 'Color's
-    pub fn new(colors: Vec<Color>) -> Self {
+    /// Generate a palatte from a vector of 'RGBA's
+    pub fn new(colors: Vec<RGBA>) -> Self {
         let rng = Pcg64::seed_from_u64(0);
         Palette { colors, rng }
     }
@@ -96,11 +96,11 @@ impl Palette {
         while x <= w as f32 {
             while y <= h as f32 {
                 let p = img.pixel(x as u32, y as u32).unwrap();
-                let r = p.red();
-                let g = p.green();
-                let b = p.blue();
-                let a = p.alpha();
-                let c = Color::from_rgba8(r, g, b, a);
+                let r = p.red() as f32 / 255.0;
+                let g = p.green() as f32 / 255.0;
+                let b = p.blue() as f32 / 255.0;
+                let a = p.alpha() as f32 / 255.0;
+                let c = RGBA::new(r, g, b, a);
                 cs.push(c);
                 y += delta;
             }
@@ -109,8 +109,7 @@ impl Palette {
         }
         cs.truncate(n);
         cs.sort_by_cached_key(|c| {
-            (1000.0 * (c.red() * c.red() + c.green() * c.green() + c.blue() * c.blue())) as u32
-        });
+            (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32;});
         Self::new(cs)
     }
 
@@ -142,27 +141,27 @@ impl Palette {
         })
     }
 
-    pub fn rand_color(&mut self) -> Color {
+    pub fn rand_color(&mut self) -> RGBA {
         self.colors[self.rng.gen_range(0..self.colors.len())]
     }
 
-    pub fn rand_lab(&mut self) -> Color {
+    pub fn rand_lab(&mut self) -> RGBA {
         let l: f32 = self.rng.gen_range(0.0..100.0);
         let a: f32 = self.rng.gen_range(-128.0..127.0);
         let b: f32 = self.rng.gen_range(-128.0..127.0);
         let rgb: Srgb = Lab::new(l, a, b).convert_into();
         let c = rgb.into_components();
-        Color::from_rgba(c.0, c.1, c.2, 1.0).unwrap()
+        RGBA::new(c.0, c.1, c.2, 1.0)
     }
 
-    pub fn rand_laba(&mut self) -> Color {
+    pub fn rand_laba(&mut self) -> RGBA {
         let l: f32 = self.rng.gen_range(0.0..100.0);
         let a: f32 = self.rng.gen_range(-128.0..127.0);
         let b: f32 = self.rng.gen_range(-128.0..127.0);
         let o: f32 = self.rng.gen_range(0.0..1.0);
         let rgba: Srgba = Laba::new(l, a, b, o).convert_into();
         let c = rgba.into_components();
-        Color::from_rgba(c.0, c.1, c.2, c.3).unwrap()
+        RGBA::new(c.0, c.1, c.2, c.3)
     }
 }
 

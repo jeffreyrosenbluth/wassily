@@ -1,12 +1,13 @@
 use crate::{Point, Transform, Vector};
 use lyon_geom::{Angle, Arc};
+use crate::util::TAU;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct RGBA {
-    r: f32,
-    g: f32,
-    b: f32,
-    a: f32,
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+    pub a: f32,
 }
 
 impl RGBA {
@@ -114,9 +115,24 @@ pub struct Path {
     pub(crate) transform: Transform,
 }
 
+impl Path {
+    pub fn rect(x: f32, y: f32, w: f32, h: f32) -> Self {
+        let mut pb = PathBuilder::new();
+        pb.push_rect(x, y, w, h);
+        pb.finish()
+    }
+
+    pub fn circle(cx: f32, cy: f32, r: f32) -> Self {
+        let mut pb = PathBuilder::new();
+        pb.arc(cx, cy, r, 0.0, TAU);
+        pb.finish()
+    }
+}
+
 pub struct PathBuilder {
     path: Path,
 }
+
 impl From<Path> for PathBuilder {
     fn from(path: Path) -> Self {
         PathBuilder { path }
@@ -153,7 +169,7 @@ impl PathBuilder {
     }
 
     /// Adds a rect to the path
-    pub fn rect(&mut self, x: f32, y: f32, width: f32, height: f32) {
+    pub fn push_rect(&mut self, x: f32, y: f32, width: f32, height: f32) {
         self.move_to(x, y);
         self.line_to(x + width, y);
         self.line_to(x + width, y + height);
