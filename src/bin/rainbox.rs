@@ -49,7 +49,7 @@ fn clamp(w: f32, h: f32, ps: &[Point]) -> Vec<Point> {
 
 fn gen(i: i32, s: f32, c: f32) -> Point {
     let x = i as f32 / 800.0 * 3.5 - 2.1;
-    let y = -0.2 * x.powi(5) - 0.5 * x.powi(4) + 0.8 * x.powi(3) + 2.3 * x.powi(2) + 0.1 * x - 1.75;
+    let y = -0.21 * x.powi(5) - 0.5 * x.powi(4) + 0.8 * x.powi(3) + 2.3 * x.powi(2) + 0.1 * x - 1.75;
     pt2(i as f32, c - s * y)
 }
 
@@ -71,7 +71,7 @@ fn main() {
 
     let mut noise = Noise::<[f64; 2], _>::new(WIDTH, HEIGHT, Perlin::new());
     noise.set_noise_scales(1.5, 1.5, 1.0);
-    noise.set_noise_factor(2.0);
+    noise.set_noise_factor(3.0);
     noise.set_noise_seed(1);
 
     for r in 0..500 {

@@ -6,13 +6,12 @@ const WIDTH: u32 = 4032;
 const HEIGHT: u32 = 3024;
 
 fn main() {
-    let mut canvas = Pixmap::load_png("napkin.png").expect("Can't load png");
+    let mut canvas = Pixmap::load_png("hudson.png").expect("Can't load png");
 
     let mut fill_paint = Paint::default();
     fill_paint.anti_alias = true;
     fill_paint.set_color(Color::TRANSPARENT);
 
-    canvas.fill(Color::from_rgba8(50, 50, 50, 175));
 
     let mut stroke_paint = Paint::default();
     stroke_paint.anti_alias = true;
