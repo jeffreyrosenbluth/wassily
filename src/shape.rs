@@ -1,5 +1,3 @@
-use crate::util::*;
-// use tiny_skia::*;
 use crate::base::*;
 use crate::{Point, Transform};
 
@@ -297,7 +295,13 @@ impl<'a> ShapeBuilder {
         stroke.line_cap = self.line_cap;
         stroke.line_join = self.line_join;
         stroke.width = self.stroke_width;
-        Shape::new(self.points, fill_texture, stroke, stroke_texture, self.shape)
+        Shape::new(
+            self.points,
+            fill_texture,
+            stroke,
+            stroke_texture,
+            self.shape,
+        )
     }
 }
 

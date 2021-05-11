@@ -1,9 +1,9 @@
 pub mod shape;
-pub mod grid;
 pub mod util;
 pub mod kolor;
 pub mod noise;
 pub mod base;
+pub mod skia;
 
 pub type IntRect = euclid::default::Box2D<i32>;
 pub type IntPoint = euclid::default::Point2D<i32>;

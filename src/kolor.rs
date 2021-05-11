@@ -1,3 +1,5 @@
+use crate::base::RGBA;
+use image::GenericImageView;
 use palette::{
     rgb::{Rgb, Rgba},
     white_point::D65,
@@ -5,8 +7,7 @@ use palette::{
 };
 use rand::prelude::*;
 use rand_pcg::Pcg64;
-use tiny_skia::{Pixmap};
-use crate::base::RGBA;
+use std::path::Path;
 
 pub fn black(alpha: f32) -> RGBA {
     RGBA::new(0.0, 0.0, 0.0, alpha)
@@ -86,7 +87,8 @@ impl Palette {
 
     /// Generate a palatte from the colors in an image and sort them by
     /// there euclidean distance from Black;
-    pub fn with_img(img: Pixmap, n: usize) -> Self {
+    pub fn with_img(path: &Path, n: usize) -> Self {
+        let img = image::open(path).expect("Could not find image file");
         let mut cs = vec![];
         let w = img.width();
         let h = img.height();
@@ -95,11 +97,11 @@ impl Palette {
         let mut y = 0.0;
         while x <= w as f32 {
             while y <= h as f32 {
-                let p = img.pixel(x as u32, y as u32).unwrap();
-                let r = p.red() as f32 / 255.0;
-                let g = p.green() as f32 / 255.0;
-                let b = p.blue() as f32 / 255.0;
-                let a = p.alpha() as f32 / 255.0;
+                let p = img.get_pixel(x as u32, y as u32);
+                let r = p.0[0] as f32 / 255.0;
+                let g = p.0[1] as f32 / 255.0;
+                let b = p.0[2] as f32 / 255.0;
+                let a = p.0[3] as f32 / 255.0;
                 let c = RGBA::new(r, g, b, a);
                 cs.push(c);
                 y += delta;
@@ -109,7 +111,8 @@ impl Palette {
         }
         cs.truncate(n);
         cs.sort_by_cached_key(|c| {
-            (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32;});
+            (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32;
+        });
         Self::new(cs)
     }
 
@@ -162,17 +165,5 @@ impl Palette {
         let rgba: Srgba = Laba::new(l, a, b, o).convert_into();
         let c = rgba.into_components();
         RGBA::new(c.0, c.1, c.2, c.3)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn color_set() {
-        let img = Pixmap::new(70, 50).unwrap();
-        let palette = Palette::with_img(img, 100);
-        assert_eq!(palette.colors.len(), 100);
     }
 }

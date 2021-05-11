@@ -1,6 +1,7 @@
-use crate::{Point, Transform, Vector};
-use lyon_geom::{Angle, Arc};
 use crate::util::TAU;
+pub use crate::{Point, Transform, Vector};
+use lyon_geom::{Angle, Arc};
+
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct RGBA {
@@ -110,9 +111,9 @@ pub enum FillRule {
 }
 
 pub struct Path {
-    pub(crate) cmds: Vec<PathCmd>,
-    pub(crate) fill_rule: FillRule,
-    pub(crate) transform: Transform,
+    pub cmds: Vec<PathCmd>,
+    pub fill_rule: FillRule,
+    pub transform: Transform,
 }
 
 impl Path {
@@ -169,11 +170,11 @@ impl PathBuilder {
     }
 
     /// Adds a rect to the path
-    pub fn push_rect(&mut self, x: f32, y: f32, width: f32, height: f32) {
+    pub fn push_rect(&mut self, x: f32, y: f32, w: f32, h: f32) {
         self.move_to(x, y);
-        self.line_to(x + width, y);
-        self.line_to(x + width, y + height);
-        self.line_to(x, y + height);
+        self.line_to(x + w, y);
+        self.line_to(x + w, y + h);
+        self.line_to(x, y + h);
         self.close();
     }
 
@@ -229,14 +230,6 @@ impl Canvas {
         Self { width, height }
     }
 
-    pub fn fill_path(
-        &mut self,
-        path: &Path,
-        fill_texture: &Texture,
-        fill_rule: FillRule,
-        transform: Transform,
-    ) {
-    }
 
     pub fn stroke_path(
         &mut self,
@@ -246,4 +239,6 @@ impl Canvas {
         transform: Transform,
     ) {
     }
+
+    pub fn fill(&mut self, color: RGBA) {}
 }

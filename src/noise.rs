@@ -1,7 +1,6 @@
-use crate::util::pt2;
+use crate::Point;
 use noise::{MultiFractal, NoiseFn, Seedable};
 use std::marker::PhantomData;
-use tiny_skia::Point;
 
 pub struct Noise<N, T>
 where
@@ -61,7 +60,7 @@ where
     }
 
     pub fn center(&self) -> Point {
-        pt2(self.width / 2.0, self.height / 2.0)
+        Point::new(self.width / 2.0, self.height / 2.0)
     }
 }
 
