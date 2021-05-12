@@ -1,4 +1,4 @@
-use crate::base;
+use crate::base::{self, RGBA};
 use tiny_skia as skia;
 use tiny_skia::Pixmap;
 
@@ -15,7 +15,6 @@ impl Canvas {
         &mut self,
         path: &base::Path,
         texture: base::Texture,
-        transform: base::Transform,
     ) {
         let skia_path: skia::Path = path.into();
         let paint = texture.into();
@@ -23,6 +22,29 @@ impl Canvas {
         let transform = to_transform(path.transform);
         self.0
             .fill_path(&skia_path, &paint, fill_rule, transform, None);
+    }
+
+    pub fn stroke_path(
+        &mut self,
+        path: &base::Path,
+        texture: base::Texture,
+        stroke: &base::Stroke,
+    ) {
+        let skia_path: skia::Path = path.into();
+        let paint = texture.into();
+        let stroke = stroke.into();
+        let transform = to_transform(path.transform);
+        self.0
+            .stroke_path(&skia_path, &paint, &stroke, transform, None);
+    }
+
+    pub fn background(&mut self, color: RGBA) {
+        let c = skia::Color::from_rgba(color.r, color.g, color.b, color.a);
+        self.0.fill(c.unwrap());
+    }
+
+    pub fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
+        self.0.save_png(path).unwrap();
     }
 }
 
@@ -38,7 +60,7 @@ impl From<base::FillRule> for skia::FillRule {
 impl From<&base::Path> for skia::Path {
     fn from(path: &base::Path) -> Self {
         let mut pb = skia::PathBuilder::new();
-        for cmd in path.cmds {
+        for cmd in path.cmds.clone() {
             match cmd {
                 base::PathCmd::MoveTo(p) => pb.move_to(p.x, p.y),
                 base::PathCmd::LineTo(p) => pb.line_to(p.x, p.y),
@@ -55,11 +77,11 @@ impl<'a> From<base::Texture> for skia::Paint<'a> {
     fn from(t: base::Texture) -> Self {
         match t {
             base::Texture::SolidColor(c) => {
-                let p = Self::default();
-                let r = c.r * 255.0; 
-                let g = c.g * 255.0; 
-                let b = c.b * 255.0; 
-                let a = c.a * 255.0; 
+                let mut p = Self::default();
+                let r = c.r * 255.0;
+                let g = c.g * 255.0;
+                let b = c.b * 255.0;
+                let a = c.a * 255.0;
                 p.set_color_rgba8(r as u8, g as u8, b as u8, a as u8);
                 p
             }
@@ -67,6 +89,25 @@ impl<'a> From<base::Texture> for skia::Paint<'a> {
     }
 }
 
-    fn to_transform(t: base::Transform) -> skia::Transform {
-        skia::Transform::from_row(t.m11, t.m22, t.m21, t.m12, t.m31, t.m32)
+fn to_transform(t: base::Transform) -> skia::Transform {
+    skia::Transform::from_row(t.m11, t.m12, t.m21, t.m22, t.m31, t.m32)
+}
+
+impl From<&base::Stroke> for skia::Stroke {
+    fn from(s: &base::Stroke) -> Self {
+        let mut skia_stroke = skia::Stroke::default();
+        skia_stroke.width = s.width;
+        skia_stroke.miter_limit = s.miter_limit;
+        skia_stroke.line_cap = match s.line_cap {
+            base::LineCap::Butt => {skia::LineCap::Butt}
+            base::LineCap::Round => {skia::LineCap::Round}
+            base::LineCap::Square => {skia::LineCap::Square}
+        };
+        skia_stroke.line_join = match s.line_join {
+            base::LineJoin::Miter => {skia::LineJoin::Miter}
+            base::LineJoin::Round => {skia::LineJoin::Round}
+            base::LineJoin::Bevel => {skia::LineJoin::Bevel}
+        };
+        skia_stroke
+    }
 }

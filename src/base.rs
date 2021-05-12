@@ -218,27 +218,3 @@ impl PathBuilder {
         self.path
     }
 }
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub struct Canvas {
-    width: f32,
-    height: f32,
-}
-
-impl Canvas {
-    pub fn new(width: f32, height: f32) -> Self {
-        Self { width, height }
-    }
-
-
-    pub fn stroke_path(
-        &mut self,
-        path: &Path,
-        stroke_texture: &Texture,
-        stroke: &Stroke,
-        transform: Transform,
-    ) {
-    }
-
-    pub fn fill(&mut self, color: RGBA) {}
-}

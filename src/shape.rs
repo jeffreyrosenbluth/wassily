@@ -1,5 +1,8 @@
 use crate::base::*;
-use crate::{Point, Transform};
+use crate::Point;
+
+#[cfg(feature = "tiny-skia")]
+use crate::skia::Canvas;
 
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {
@@ -60,11 +63,11 @@ impl<'a> Shape {
             pb.close();
         }
         let path = pb.finish();
-        if let Some(fp) = &self.fill_texture {
-            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity());
+        if let Some(fp) = self.fill_texture {
+            canvas.fill_path(&path, fp);
         }
-        if let Some(sp) = &self.stroke_texture {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
+        if let Some(sp) = self.stroke_texture {
+            canvas.stroke_path(&path, sp, &self.stroke)
         }
     }
 
@@ -82,11 +85,11 @@ impl<'a> Shape {
             pb.close();
         }
         let path = pb.finish();
-        if let Some(fp) = &self.fill_texture {
-            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity());
+        if let Some(fp) = self.fill_texture {
+            canvas.fill_path(&path, fp);
         }
-        if let Some(sp) = &self.stroke_texture {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
+        if let Some(sp) = self.stroke_texture {
+            canvas.stroke_path(&path, sp, &self.stroke);
         }
     }
 
@@ -105,28 +108,28 @@ impl<'a> Shape {
             pb.close();
         }
         let path = pb.finish();
-        if let Some(fp) = &self.fill_texture {
-            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity());
+        if let Some(fp) = self.fill_texture {
+            canvas.fill_path(&path, fp);
         }
-        if let Some(sp) = &self.stroke_texture {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
+        if let Some(sp) = self.stroke_texture {
+            canvas.stroke_path(&path, sp, &self.stroke);
         }
     }
 
     fn draw_rect(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
-            panic!("Rectangls points vector contains less than 2 points");
+            panic!("Rectangle's points vector contains less than 2 points");
         }
         let left = self.points[0].x;
         let top = self.points[0].y;
         let right = self.points[1].x;
         let bottom = self.points[1].y;
-        let path = Path::rect(left, top, left - right, top - bottom);
-        if let Some(fp) = &self.fill_texture {
-            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity());
+        let path = Path::rect(left, top, right - left, bottom - top);
+        if let Some(fp) = self.fill_texture {
+            canvas.fill_path(&path, fp);
         }
-        if let Some(sp) = &self.stroke_texture {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
+        if let Some(sp) = self.stroke_texture {
+            canvas.stroke_path(&path, sp, &self.stroke);
         }
     }
 
@@ -140,11 +143,11 @@ impl<'a> Shape {
         let _h = self.points[1].y;
         // XXX Fixme to scale to ellipse when tiny_skia updates;
         let pb = Path::circle(cx, cy, w);
-        if let Some(fp) = &self.fill_texture {
-            canvas.fill_path(&pb, &fp, FillRule::Winding, Transform::identity());
+        if let Some(fp) = self.fill_texture {
+            canvas.fill_path(&pb, fp);
         }
-        if let Some(sp) = &self.stroke_texture {
-            canvas.stroke_path(&pb, &sp, &self.stroke, Transform::identity());
+        if let Some(sp) = self.stroke_texture {
+            canvas.stroke_path(&pb, sp, &self.stroke);
         }
     }
 
@@ -160,8 +163,8 @@ impl<'a> Shape {
         pb.move_to(x0, y0);
         pb.line_to(x1, y1);
         let path = pb.finish();
-        if let Some(sp) = &self.stroke_texture {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity());
+        if let Some(sp) = self.stroke_texture {
+            canvas.stroke_path(&path, sp, &self.stroke);
         }
     }
 }
@@ -318,11 +321,11 @@ pub fn line(
     x1: f32,
     y1: f32,
     stroke: &Stroke,
-    stroke_paint: &Texture,
+    stroke_paint: Texture,
 ) {
     let mut pb = PathBuilder::new();
     pb.move_to(x0, y0);
     pb.line_to(x1, y1);
     let path = pb.finish();
-    canvas.stroke_path(&path, &stroke_paint, stroke, Transform::identity());
+    canvas.stroke_path(&path, stroke_paint, &stroke);
 }
