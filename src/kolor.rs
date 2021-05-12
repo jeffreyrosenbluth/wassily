@@ -29,7 +29,7 @@ pub fn blue(alpha: f32) -> RGBA {
     RGBA::new(0.0, 0.0, 1.0, alpha)
 }
 
-/// Convert a tiny_skia 'RGBA' to a palette Lcha.
+/// Convert a 'RGBA' to a palette Lcha.
 pub fn lcha(c: RGBA) -> Lcha<D65> {
     let r = c.r;
     let g = c.g;
@@ -111,7 +111,7 @@ impl Palette {
         }
         cs.truncate(n);
         cs.sort_by_cached_key(|c| {
-            (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32;
+            (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32
         });
         Self::new(cs)
     }

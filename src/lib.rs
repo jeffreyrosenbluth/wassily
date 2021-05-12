@@ -5,6 +5,8 @@ pub mod noise;
 pub mod base;
 pub mod skia;
 
+pub use euclid::point2;
+
 pub type IntRect = euclid::default::Box2D<i32>;
 pub type IntPoint = euclid::default::Point2D<i32>;
 pub type Point = euclid::default::Point2D<f32>;

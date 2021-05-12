@@ -2,7 +2,7 @@
 
 use noise::OpenSimplex;
 use std::path;
-use wassily::base::*;
+use wassily::point2;
 use wassily::kolor::*;
 use wassily::noise::*;
 use wassily::shape::*;
@@ -34,7 +34,7 @@ fn main() {
     canvas.background(bg);
 
     for i in 1..LINES {
-        let mut l1 = Point::new(i as f32 * 24.0, wk.height / 2.0);
+        let mut l1 = point2(i as f32 * 24.0, wk.height / 2.0);
         let mut up = vec![];
         for _ in 0..LENGTH {
             if !(0.0..wk.width).contains(&l1.x) || !(0.0..wk.height).contains(&l1.y) {
