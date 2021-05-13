@@ -4,7 +4,7 @@ use euclid::Angle;
 use noise::Perlin;
 use rand::prelude::*;
 use std::path;
-use wassily::{Point, Transform, kolor::Palette, noise::*, point2, shape::*};
+use wassily::{Point, Transform, kolor::Palette, noise::*, point2, shape::*, base::*};
 
 use wassily::skia::Canvas;
 
@@ -66,7 +66,7 @@ fn main() {
     //     .into_iter()
     //     .map(|i| (3.5 * PI * i as f32 / 800.0).sin())
     //     .collect();
-    let trans = Transform::rotation(Angle::radians(-2.0));
+    // let trans = Transform::rotation(Angle::radians(-2.0));
 
     let mut noise = Noise::<[f64; 2], _>::new(WIDTH, HEIGHT, Perlin::new());
     noise.set_noise_scales(1.5, 1.5, 1.0);

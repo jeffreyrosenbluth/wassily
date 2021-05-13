@@ -20,7 +20,3 @@ euclid = "0.20"
 lyon_geom = "0.17"
 image = "0.23"
 cfg-if = "1.0"
-
-[features]
-skia = []
-rqt = []

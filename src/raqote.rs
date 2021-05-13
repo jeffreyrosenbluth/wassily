@@ -1,4 +1,4 @@
-use crate::base;
+use crate::base::{self, Sketch};
 use raqote::DrawTarget;
 use raqote::{self, DrawOptions, Source};
 
@@ -9,14 +9,16 @@ impl Canvas {
         let dt = DrawTarget::new(width as i32, height as i32);
         Canvas(dt)
     }
+}
 
-    pub fn fill_path(&mut self, path: &base::Path, texture: base::Texture) {
+impl Sketch for Canvas {
+    fn fill_path(&mut self, path: &base::Path, texture: base::Texture) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         self.0.fill(&raqote_path, &source, &DrawOptions::default());
     }
 
-    pub fn stroke_path(
+    fn stroke_path(
         &mut self,
         path: &base::Path,
         texture: base::Texture,
@@ -29,19 +31,19 @@ impl Canvas {
             .stroke(&raqote_path, &source, &stroke, &DrawOptions::default());
     }
 
-    pub fn background(&mut self, color: base::RGBA) {
+    fn background(&mut self, color: base::RGBA) {
         let t = base::Texture::SolidColor(color);
         let c = t.into();
         self.0.clear(c);
     }
 
-    pub fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
+    fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.write_png(path).unwrap();
     }
 
-    // pub fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
-    //     Self(raqote::Pixmap::load_png(path).expect("Error loading png"))
-    // }
+    fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
+        Canvas::new(0, 0)
+    }
 }
 
 impl From<base::FillRule> for raqote::Winding {

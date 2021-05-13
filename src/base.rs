@@ -1,6 +1,5 @@
 pub use crate::{Point, Transform, Vector};
 
-
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct RGBA {
     pub r: f32,
@@ -226,4 +225,12 @@ impl PathBuilder {
     pub fn finish(self) -> Path {
         self.path
     }
+}
+
+pub trait Sketch {
+    fn fill_path(&mut self, path: &Path, texture: Texture);
+    fn stroke_path( &mut self, path: &Path, texture: Texture, stroke: &Stroke);
+    fn background(&mut self, color: RGBA);
+    fn save_png<P: AsRef<std::path::Path>>(&self, path: P);
+    fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self; 
 }

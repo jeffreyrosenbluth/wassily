@@ -1,4 +1,4 @@
-use crate::base::{self, RGBA};
+use crate::base::{self, Sketch, RGBA};
 use tiny_skia as skia;
 use tiny_skia::Pixmap;
 
@@ -10,12 +10,10 @@ impl Canvas {
         let pixmap = Pixmap::new(width, height).expect("Pixmap::new failed");
         Canvas(pixmap)
     }
+}
 
-    pub fn fill_path(
-        &mut self,
-        path: &base::Path,
-        texture: base::Texture,
-    ) {
+impl Sketch for Canvas {
+    fn fill_path(&mut self, path: &base::Path, texture: base::Texture) {
         let skia_path: skia::Path = path.into();
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = true;
@@ -25,7 +23,7 @@ impl Canvas {
             .fill_path(&skia_path, &paint, fill_rule, transform, None);
     }
 
-    pub fn stroke_path(
+    fn stroke_path(
         &mut self,
         path: &base::Path,
         texture: base::Texture,
@@ -40,16 +38,16 @@ impl Canvas {
             .stroke_path(&skia_path, &paint, &stroke, transform, None);
     }
 
-    pub fn background(&mut self, color: RGBA) {
+    fn background(&mut self, color: RGBA) {
         let c = skia::Color::from_rgba(color.r, color.g, color.b, color.a);
         self.0.fill(c.unwrap());
     }
 
-    pub fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
+    fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.save_png(path).unwrap();
     }
 
-    pub fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
+    fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
         Self(skia::Pixmap::load_png(path).expect("Error loading png"))
     }
 }
@@ -105,14 +103,14 @@ impl From<&base::Stroke> for skia::Stroke {
         skia_stroke.width = s.width;
         skia_stroke.miter_limit = s.miter_limit;
         skia_stroke.line_cap = match s.line_cap {
-            base::LineCap::Butt => {skia::LineCap::Butt}
-            base::LineCap::Round => {skia::LineCap::Round}
-            base::LineCap::Square => {skia::LineCap::Square}
+            base::LineCap::Butt => skia::LineCap::Butt,
+            base::LineCap::Round => skia::LineCap::Round,
+            base::LineCap::Square => skia::LineCap::Square,
         };
         skia_stroke.line_join = match s.line_join {
-            base::LineJoin::Miter => {skia::LineJoin::Miter}
-            base::LineJoin::Round => {skia::LineJoin::Round}
-            base::LineJoin::Bevel => {skia::LineJoin::Bevel}
+            base::LineJoin::Miter => skia::LineJoin::Miter,
+            base::LineJoin::Round => skia::LineJoin::Round,
+            base::LineJoin::Bevel => skia::LineJoin::Bevel,
         };
         skia_stroke
     }

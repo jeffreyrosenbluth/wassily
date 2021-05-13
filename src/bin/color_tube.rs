@@ -2,13 +2,13 @@
 
 use std::path;
 use noise::OpenSimplex;
-use wassily::{kolor::*, noise::*, point2, shape::*};
+use wassily::{kolor::*, noise::*, point2, shape::*, base::*};
 
 // use wassily::skia::Canvas;
  use wassily::raqote::Canvas;
 
-const WIDTH: u32 = 65 * 300; // 8191
-const HEIGHT: u32 = 65 * 225; // 6144
+const WIDTH: u32 = 1200; // 8191
+const HEIGHT: u32 = 800; // 6144
 const XSTEP: f32 = 17.0; // 7.0
 const YSTEP: f32 = 250.0; // 80.0
 const LENGTH: usize = 800; // 800

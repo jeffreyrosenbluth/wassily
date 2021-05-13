@@ -1,14 +1,6 @@
 use crate::base::*;
 use crate::Point;
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "rqt")] {
-        use crate::raqote::Canvas;
-    } else {
-        use crate::skia::Canvas;
-    }
-}
-
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {
     Poly,
@@ -45,7 +37,7 @@ impl<'a> Shape {
         }
     }
 
-    pub fn draw(&self, canvas: &mut Canvas) {
+    pub fn draw<T: Sketch>(&self, canvas: &mut T) {
         match self.shape {
             ShapeType::Poly => self.draw_poly(canvas),
             ShapeType::PolyQuad => self.draw_quad(canvas),
@@ -56,7 +48,7 @@ impl<'a> Shape {
         }
     }
 
-    fn draw_poly(&self, canvas: &mut Canvas) {
+    fn draw_poly<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         let tail = &self.points[1..];
@@ -76,7 +68,7 @@ impl<'a> Shape {
         }
     }
 
-    fn draw_quad(&self, canvas: &mut Canvas) {
+    fn draw_quad<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         let tail = &mut self.points[1..].to_vec();
@@ -98,7 +90,7 @@ impl<'a> Shape {
         }
     }
 
-    pub fn draw_cubic(&self, canvas: &mut Canvas) {
+    pub fn draw_cubic<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         let tail = &mut self.points[1..].to_vec();
@@ -121,7 +113,7 @@ impl<'a> Shape {
         }
     }
 
-    fn draw_rect(&self, canvas: &mut Canvas) {
+    fn draw_rect<T: Sketch>(&self, canvas: &mut T) {
         if self.points.len() < 2 {
             panic!("Rectangle's points vector contains less than 2 points");
         }
@@ -138,7 +130,7 @@ impl<'a> Shape {
         }
     }
 
-    fn draw_ellipse(&self, canvas: &mut Canvas) {
+    fn draw_ellipse<T: Sketch>(&self, canvas: &mut T) {
         if self.points.len() < 2 {
             panic!("Ellipse points vector contains less than 2 points");
         }
@@ -155,7 +147,7 @@ impl<'a> Shape {
         }
     }
 
-    fn draw_line(&self, canvas: &mut Canvas) {
+    fn draw_line<T: Sketch>(&self, canvas: &mut T) {
         if self.points.len() < 2 {
             panic!("Line points vector contains less than 2 points");
         }
@@ -315,8 +307,8 @@ pub fn stroke(weight: f32) -> Stroke {
     stroke
 }
 
-pub fn line(
-    canvas: &mut Canvas,
+pub fn line<T: Sketch>(
+    canvas: &mut T,
     x0: f32,
     y0: f32,
     x1: f32,
