@@ -1,10 +1,6 @@
-use colorous;
-use noise::NoiseFn;
 use rand_distr::{Distribution, Geometric};
 use rand::{thread_rng, Rng};
-use tiny_skia::*;
 use wassily::util::*;
-use wassily::grid::*;
 use wassily::shape::*;
 
 const WIDTH: u32 = 8_000;

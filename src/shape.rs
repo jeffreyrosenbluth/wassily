@@ -141,7 +141,6 @@ impl<'a> Shape {
         let cy = self.points[0].y;
         let w = self.points[1].x;
         let _h = self.points[1].y;
-        // XXX Fixme to scale to ellipse when tiny_skia updates;
         let pb = Path::circle(cx, cy, w);
         if let Some(fp) = self.fill_texture {
             canvas.fill_path(&pb, fp);

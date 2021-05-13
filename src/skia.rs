@@ -17,7 +17,8 @@ impl Canvas {
         texture: base::Texture,
     ) {
         let skia_path: skia::Path = path.into();
-        let paint = texture.into();
+        let mut paint: skia::Paint = texture.into();
+        paint.anti_alias = true;
         let fill_rule: skia::FillRule = path.fill_rule.into();
         let transform = to_transform(path.transform);
         self.0
@@ -31,7 +32,8 @@ impl Canvas {
         stroke: &base::Stroke,
     ) {
         let skia_path: skia::Path = path.into();
-        let paint = texture.into();
+        let mut paint: skia::Paint = texture.into();
+        paint.anti_alias = true;
         let stroke = stroke.into();
         let transform = to_transform(path.transform);
         self.0
@@ -45,6 +47,10 @@ impl Canvas {
 
     pub fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.save_png(path).unwrap();
+    }
+
+    pub fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
+        Self(skia::Pixmap::load_png(path).expect("Error loading png"))
     }
 }
 

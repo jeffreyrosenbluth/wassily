@@ -1,6 +1,5 @@
 use crate::util::TAU;
 pub use crate::{Point, Transform, Vector};
-use lyon_geom::{Angle, Arc};
 
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -123,9 +122,15 @@ impl Path {
         pb.finish()
     }
 
-    pub fn circle(cx: f32, cy: f32, r: f32) -> Self {
+    pub fn circle(x: f32, y: f32, r: f32) -> Self {
         let mut pb = PathBuilder::new();
-        pb.arc(cx, cy, r, 0.0, TAU);
+        pb.push_circle(x , y, r);
+        pb.finish()
+    }
+
+    pub fn ellipse(x: f32, y: f32, w: f32, h: f32) -> Self {
+        let mut pb = PathBuilder::new();
+        pb.push_ellipse(x , y, w, h);
         pb.finish()
     }
 }
@@ -178,6 +183,31 @@ impl PathBuilder {
         self.close();
     }
 
+    /// Create an elliptical path
+    pub fn push_ellipse(&mut self, x: f32, y: f32, w: f32, h: f32) {
+        let k = 0.5522848;
+        let x = x / 1.5;
+        let y = y / 1.5;
+        let x1 = x;
+        let y1 = y;
+        let cx = k * w / 2.0;
+        let cy = k * h / 2.0;
+        let x2 = x + w / 2.0;
+        let y2 = y + h / 2.0;
+        let x = x - w / 2.0;
+        let y = y - h / 2.0;
+        self.move_to(x, y1);
+        self.cubic_to(x, y1 - cy, x1 - cx, y, x1, y);
+        self.cubic_to(x1 + cx, y, x2, y1 - cy, x2, y1);
+        self.cubic_to(x2, y1 + cy, x1 + cx, y2, x1, y2);
+        self.cubic_to(x1 - cx, y2, x, y1 + cy, x , y1);
+        self.close();
+    }
+
+    pub fn push_circle(&mut self, x: f32, y: f32, r: f32) {
+        self.push_ellipse(x, y, 2.0 * r, 2.0 * r);
+    }
+
     /// Adds a cubic bezier from the current point to `x`, `y`,
     /// using control points `cx1`, `cy1` and `cx2`, `cy2`
     pub fn cubic_to(&mut self, cx1: f32, cy1: f32, cx2: f32, cy2: f32, x: f32, y: f32) {
@@ -191,26 +221,6 @@ impl PathBuilder {
     /// Closes the current subpath
     pub fn close(&mut self) {
         self.path.cmds.push(PathCmd::Close)
-    }
-
-    /// Adds an arc approximated by quadratic beziers with center `x`, `y`
-    /// and radius `r` starting at `start_angle` and sweeping by `sweep_angle`.
-    /// For a positive `sweep_angle` the sweep is done clockwise, for a negative
-    /// `sweep_angle` the sweep is done counterclockwise.
-    pub fn arc(&mut self, x: f32, y: f32, r: f32, start_angle: f32, sweep_angle: f32) {
-        //XXX: handle the current point being the wrong spot
-        let a: Arc<f32> = Arc {
-            center: Point::new(x, y),
-            radii: Vector::new(r, r),
-            start_angle: Angle::radians(start_angle),
-            sweep_angle: Angle::radians(sweep_angle),
-            x_rotation: Angle::zero(),
-        };
-        let start = a.from();
-        self.line_to(start.x, start.y);
-        a.for_each_quadratic_bezier(&mut |q| {
-            self.quad_to(q.ctrl.x, q.ctrl.y, q.to.x, q.to.y);
-        });
     }
 
     /// Completes the current path

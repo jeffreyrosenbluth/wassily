@@ -4,7 +4,7 @@ use euclid::{Rotation2D, Angle};
 use noise::Perlin;
 use rand::prelude::*;
 use std::path;
-use wassily::{Point, Transform, kolor::Palette, noise::*, point2, shape::*, util::PI};
+use wassily::{Point, Transform, kolor::Palette, noise::*, point2, shape::*};
 
 #[cfg(feature = "tiny-skia")]
 use wassily::skia::Canvas;
@@ -67,7 +67,7 @@ fn main() {
     //     .into_iter()
     //     .map(|i| (3.5 * PI * i as f32 / 800.0).sin())
     //     .collect();
-    // let trans = Rotation2D::new(Angle::radians(-2.0)).to_transform();
+    let trans = Transform::rotation(Angle::radians(-2.0));
 
     let mut noise = Noise::<[f64; 2], _>::new(WIDTH, HEIGHT, Perlin::new());
     noise.set_noise_scales(1.5, 1.5, 1.0);
