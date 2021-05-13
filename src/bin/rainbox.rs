@@ -1,12 +1,11 @@
 #![allow(dead_code)]
 
-use euclid::{Rotation2D, Angle};
+use euclid::Angle;
 use noise::Perlin;
 use rand::prelude::*;
 use std::path;
 use wassily::{Point, Transform, kolor::Palette, noise::*, point2, shape::*};
 
-#[cfg(feature = "tiny-skia")]
 use wassily::skia::Canvas;
 
 const WIDTH: f32 = 8191.0;

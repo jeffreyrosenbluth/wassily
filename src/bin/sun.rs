@@ -2,13 +2,8 @@
 
 use std::path;
 use noise::OpenSimplex;
-use wassily::shape::*;
-use wassily::util::{PI, TAU};
-use wassily::kolor::*;
-use wassily::noise::*;
-use wassily::{point2};
+use wassily::{kolor::*, noise::*, point2, shape::*, util::{PI, TAU}};
 
-#[cfg(feature = "tiny-skia")]
 use wassily::skia::Canvas;
 
 const WIDTH: f32 = 8191.0; // 8191.0

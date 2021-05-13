@@ -7,7 +7,6 @@ use wassily::kolor::*;
 use wassily::noise::*;
 use wassily::shape::*;
 
-#[cfg(feature = "tiny-skia")]
 use wassily::skia::Canvas;
 
 const WIDTH: f32 = 8191.0; // 8191.0

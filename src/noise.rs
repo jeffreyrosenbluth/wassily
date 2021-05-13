@@ -43,6 +43,12 @@ where
         self.z_scale = z_scale;
     }
 
+    pub fn set_noise_scale(&mut self, scale: f32) {
+        self.x_scale = scale;
+        self.y_scale = scale;
+        self.z_scale = scale;
+    }
+
     pub fn set_noise_fn(&mut self, nf: T) {
         self.noise_fn = nf;
     }

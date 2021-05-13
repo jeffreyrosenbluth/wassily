@@ -1,8 +1,13 @@
 use crate::base::*;
 use crate::Point;
 
-#[cfg(feature = "tiny-skia")]
-use crate::skia::Canvas;
+cfg_if::cfg_if! {
+    if #[cfg(feature = "rqt")] {
+        use crate::raqote::Canvas;
+    } else {
+        use crate::skia::Canvas;
+    }
+}
 
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {
@@ -284,12 +289,9 @@ impl<'a> ShapeBuilder {
         let mut fill_texture = None;
         let mut stroke_texture = None;
         if let Some(fs) = self.fill_texture {
-            // fp.anti_alias = true;
             fill_texture = Some(fs);
         };
         if let Some(ss) = self.stroke_texture {
-            // sp.shader = ss;
-            // sp.anti_alias = true;
             stroke_texture = Some(ss);
         };
         let mut stroke = Stroke::default();

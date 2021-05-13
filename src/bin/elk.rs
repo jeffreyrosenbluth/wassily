@@ -1,12 +1,9 @@
 use colorous;
 use wassily::base::*;
-use wassily::kolor::*;
 use wassily::shape::*;
-use wassily::util::*;
 use wassily::point2;
 
-#[cfg(feature = "tiny-skia")]
-use wassily::skia::Canvas;
+use wassily::raqote::Canvas;
 
 const WIDTH: u32 = 4032;
 const HEIGHT: u32 = 3024;
