@@ -232,5 +232,4 @@ pub trait Sketch {
     fn stroke_path( &mut self, path: &Path, texture: Texture, stroke: &Stroke);
     fn background(&mut self, color: RGBA);
     fn save_png<P: AsRef<std::path::Path>>(&self, path: P);
-    fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self; 
 }

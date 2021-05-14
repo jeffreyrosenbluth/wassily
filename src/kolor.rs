@@ -1,4 +1,5 @@
 use crate::base::RGBA;
+use color_thief::{get_palette, ColorFormat};
 use image::GenericImageView;
 use palette::{
     rgb::{Rgb, Rgba},
@@ -110,10 +111,30 @@ impl Palette {
             y = 0.0;
         }
         cs.truncate(n);
-        cs.sort_by_cached_key(|c| {
-            (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32
-        });
+        cs.sort_by_cached_key(|c| (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32);
         Self::new(cs)
+    }
+
+    pub fn steal(path: &Path, n: u8) -> Self {
+        fn find_color(t: image::ColorType) -> ColorFormat {
+            match t {
+                image::ColorType::Rgb8 => ColorFormat::Rgb,
+                image::ColorType::Rgba8 => ColorFormat::Rgba,
+                _ => unreachable!(),
+            }
+        }
+        let img = image::open(path).expect("Could not find image file");
+        let color_type = find_color(img.color());
+        let palette = get_palette(img.as_bytes(), color_type, 10, n).unwrap();
+        let palette = palette.into_iter().map(|c| {
+            RGBA::new(
+                c.r as f32 / 255.0,
+                c.g as f32 / 255.0,
+                c.b as f32 / 255.0,
+                1.0,
+            )
+        });
+        Self::new(palette.collect())
     }
 
     pub fn sort_by_hue(&mut self) {

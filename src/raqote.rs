@@ -9,6 +9,28 @@ impl Canvas {
         let dt = DrawTarget::new(width as i32, height as i32);
         Canvas(dt)
     }
+
+    // pub fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
+    //     let decoder = png::Decoder::new(File::open(path).unwrap());
+    //     let (info, mut reader) = decoder.read_info().unwrap();
+    //     let mut buf = vec![0; info.buffer_size()];
+    //     dbg!(&buf.len());
+    //     reader.next_frame(&mut buf).unwrap();
+    //     let mut image: Vec<u32> = Vec::new();
+    //     for i in buf.chunks(3) {
+    //         image.push(0xff << 24 |  ((i[0] as u32) << 16) | ((i[1] as u32) << 8) | (i[2] as u32))
+    //     }
+    //     let img = Image {
+    //         width: info.width as i32,
+    //         height: info.height as i32,
+    //         data: &image[..],
+    //     };
+    //     let mut canvas = Canvas::new(img.width as u32, img.height as u32);
+    //     canvas
+    //         .0
+    //         .draw_image_at(0.0, 0.0, &img, &DrawOptions::default());
+    //     canvas
+    // }
 }
 
 impl Sketch for Canvas {
@@ -18,12 +40,7 @@ impl Sketch for Canvas {
         self.0.fill(&raqote_path, &source, &DrawOptions::default());
     }
 
-    fn stroke_path(
-        &mut self,
-        path: &base::Path,
-        texture: base::Texture,
-        stroke: &base::Stroke,
-    ) {
+    fn stroke_path(&mut self, path: &base::Path, texture: base::Texture, stroke: &base::Stroke) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         let stroke = stroke.into();
@@ -41,9 +58,6 @@ impl Sketch for Canvas {
         self.0.write_png(path).unwrap();
     }
 
-    fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
-        Canvas::new(0, 0)
-    }
 }
 
 impl From<base::FillRule> for raqote::Winding {

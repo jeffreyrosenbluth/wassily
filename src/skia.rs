@@ -10,6 +10,10 @@ impl Canvas {
         let pixmap = Pixmap::new(width, height).expect("Pixmap::new failed");
         Canvas(pixmap)
     }
+
+    pub fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
+        Self(skia::Pixmap::load_png(path).expect("Error loading png"))
+    }
 }
 
 impl Sketch for Canvas {
@@ -45,10 +49,6 @@ impl Sketch for Canvas {
 
     fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.save_png(path).unwrap();
-    }
-
-    fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
-        Self(skia::Pixmap::load_png(path).expect("Error loading png"))
     }
 }
 

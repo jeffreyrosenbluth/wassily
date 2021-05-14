@@ -5,6 +5,7 @@ pub mod raqote;
 pub mod shape;
 pub mod skia;
 pub mod util;
+pub mod svg;
 
 pub use euclid::point2;
 

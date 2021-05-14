@@ -3,7 +3,7 @@ use wassily::base::*;
 use wassily::shape::*;
 use wassily::point2;
 
-use wassily::raqote::Canvas;
+use wassily::skia::Canvas;
 
 const WIDTH: u32 = 4032;
 const HEIGHT: u32 = 3024;
@@ -56,5 +56,5 @@ fn main() {
         .build();
     shape.draw(&mut canvas);
 
-    canvas.save_png("elk_skia.png");
+    canvas.save_png("elk_raqote.png");
 }
