@@ -115,7 +115,7 @@ impl Palette {
         Self::new(cs)
     }
 
-    pub fn steal(path: &Path, n: u8) -> Self {
+    pub fn steal(path: &Path, max_colors: u8) -> Self {
         fn find_color(t: image::ColorType) -> ColorFormat {
             match t {
                 image::ColorType::Rgb8 => ColorFormat::Rgb,
@@ -125,7 +125,7 @@ impl Palette {
         }
         let img = image::open(path).expect("Could not find image file");
         let color_type = find_color(img.color());
-        let palette = get_palette(img.as_bytes(), color_type, 10, n).unwrap();
+        let palette = get_palette(img.as_bytes(), color_type, 10, max_colors).unwrap();
         let palette = palette.into_iter().map(|c| {
             RGBA::new(
                 c.r as f32 / 255.0,

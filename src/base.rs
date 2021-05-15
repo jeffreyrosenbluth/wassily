@@ -13,6 +13,22 @@ impl RGBA {
         Self { r, g, b, a }
     }
 
+    pub fn with_8(r: u8, g: u8, b: u8, a: u8) -> Self {
+        let r = r as f32 / 255.0;
+        let g = g as f32 / 255.0;
+        let b = b as f32 / 255.0;
+        let a = a as f32 / 255.0;
+        Self { r, g, b, a }
+    }
+
+    pub fn as_8(&self) -> (u8, u8, u8, u8) {
+        let r = (self.r * 255.0) as u8;
+        let g = (self.g * 255.0) as u8;
+        let b = (self.b * 255.0) as u8;
+        let a = (self.a * 255.0) as u8;
+        (r, g, b, a)
+    }
+
     pub fn white() -> Self {
         RGBA {
             r: 1.0,
