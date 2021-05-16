@@ -1,8 +1,5 @@
 use colorous;
-use wassily::base::*;
-use wassily::shape::*;
-use wassily::point2;
-
+use wassily::prelude::*;
 use wassily::skia::Canvas;
 
 const WIDTH: u32 = 4032;

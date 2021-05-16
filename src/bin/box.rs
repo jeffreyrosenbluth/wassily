@@ -1,11 +1,7 @@
 #![allow(dead_code)]
 
 use noise::OpenSimplex;
-use std::path;
-use wassily::point2;
-use wassily::kolor::*;
-use wassily::noise::*;
-use wassily::shape::*;
+use wassily::prelude::*;
 
 use wassily::skia::Canvas;
 
@@ -26,11 +22,11 @@ fn main() {
     wk.set_noise_scales(SCALE, SCALE, 1.0);
     // wk.set_noise_factor(8.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = path::Path::new("orange.png");
+    let path = file_path("orange.png");
     let mut palette = Palette::with_img(path, COLORS);
 
     let bg = palette.colors[10];
-    canvas.background(bg);
+    canvas.fill(bg);
 
     for i in 1..LINES {
         let mut l1 = point2(i as f32 * 24.0, wk.height / 2.0);

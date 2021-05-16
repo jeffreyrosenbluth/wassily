@@ -1,14 +1,13 @@
-use tiny_skia::*;
-use wassily::shape::*;
-use wassily::util::*;
+use wassily::svg::Canvas;
+use wassily::prelude::*;
 
 const WIDTH: u32 = 900;
 const HEIGHT: u32 = 900;
 const ORDER: u32 = 6;
 
 fn main() {
-    let mut canvas = Pixmap::new(WIDTH, HEIGHT).unwrap();
-    canvas.fill(Color::from_rgba(0.0, 0.0, 0.0, 1.0).unwrap());
+    let mut canvas = Canvas::new(WIDTH, HEIGHT);
+    canvas.fill(RGBA::new(0.0, 0.0, 0.0, 1.0));
 
     let width = WIDTH as f32;
     let n = 2u32.pow(ORDER);
@@ -20,27 +19,25 @@ fn main() {
         let j = i as usize;
         path.push(hilbert(i, ORDER));
         let m = width / n as f32;
-        path[j] = pt2(m * path[j].x, m * path[j].y);
-        path[j] += pt2(m / 2.0, m / 2.0);
+        path[j] = point2(m * path[j].x, m * path[j].y);
+        path[j] = point2(path[j].x + m /2.0,  path[j].y +  m / 2.0);
     }
     path = path.into_iter().collect();
 
-    let color = Color::WHITE;
+    let color = RGBA::white();
 
     let shape = ShapeBuilder::new()
-        // .stroke_color(color)
-        // .stroke_weight(1.5)
         .no_stroke()
         .fill_color(color)
         .quad()
         .points(&path)
         .build();
     shape.draw(&mut canvas);
-    canvas.save_png("hilbert.png").unwrap();
+    canvas.save("hilbert.svg");
 }
 
 fn hilbert(k: u32, order: u32) -> Point {
-    let points = vec![pt2(0.0, 0.0), pt2(0.0, 1.0), pt2(1.0, 1.0), pt2(1.0, 0.0)];
+    let points = vec![point2(0.0, 0.0), point2(0.0, 1.0), point2(1.0, 1.0), point2(1.0, 0.0)];
     let idx = k as usize & 3;
     let mut v = points[idx];
     let mut i = k;

@@ -41,8 +41,15 @@ impl Sketch for Canvas {
         self.0
             .stroke_path(&skia_path, &paint, &stroke, transform, None);
     }
+     
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: base::Texture) {
+        let mut paint: skia::Paint = texture.into();
+        paint.anti_alias = true;
+        let rect: skia::Rect = skia::Rect::from_xywh(x, y, width, height).unwrap();
+        self.0.fill_rect(rect, &paint, skia::Transform::identity(), None);
+    }
 
-    fn background(&mut self, color: RGBA) {
+    fn fill(&mut self, color: RGBA) {
         let c = skia::Color::from_rgba(color.r, color.g, color.b, color.a);
         self.0.fill(c.unwrap());
     }

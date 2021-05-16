@@ -1,21 +1,14 @@
-use std::path;
+use wassily::prelude::*;
 use wassily::svg::Canvas;
-use wassily::{
-    base::*,
-    kolor::{black, Palette},
-    point2,
-    shape::*,
-    Point,
-};
 
 const WIDTH: f32 = 1200.0;
 const HEIGHT: f32 = 0.80 * WIDTH;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = path::Path::new("fruit.png");
+    let path = file_path("fruit.png");
     let palette = Palette::steal(path, 16);
-    canvas.background(RGBA::with_8(222, 222, 222, 255));
+    canvas.fill(RGBA::with_8(222, 222, 222, 255));
 
 
     let square = ShapeBuilder::new()

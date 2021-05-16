@@ -1,4 +1,4 @@
-use crate::base::{self, Sketch};
+use crate::base::{self, Sketch, Texture};
 use raqote::DrawTarget;
 use raqote::{self, DrawOptions, Source};
 
@@ -48,10 +48,15 @@ impl Sketch for Canvas {
             .stroke(&raqote_path, &source, &stroke, &DrawOptions::default());
     }
 
-    fn background(&mut self, color: base::RGBA) {
+    fn fill(&mut self, color: base::RGBA) {
         let t = base::Texture::SolidColor(color);
         let c = t.into();
         self.0.clear(c);
+    }
+
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: Texture) {
+        let src:raqote::Source = texture.into();
+        self.0.fill_rect(x, y, width, height, &src, &DrawOptions::default())
     }
 
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {

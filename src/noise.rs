@@ -1,4 +1,4 @@
-use crate::Point;
+use crate::prelude::Point;
 use noise::{MultiFractal, NoiseFn, Seedable};
 use std::marker::PhantomData;
 

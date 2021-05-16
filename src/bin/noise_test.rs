@@ -1,11 +1,11 @@
 use noise::*;
 use rand::prelude::*;
 use rand_pcg::Pcg64;
-use wassily::util::*;
+use wassily::prelude::*;
 
 fn main() {
     // let wk = WK::<[f64; 3], OpenSimplex>::new(8191.0, 8191.0, OpenSimplex::new());
-    let mut wk  = WK::<[f64; 2], _>::new(8191.0, 8191.0, BasicMulti::new());
+    let mut wk  = Noise::<[f64; 2], _>::new(8191.0, 8191.0, BasicMulti::new());
     wk.set_noise_seed(1);
     wk.set_octaves(4);
     wk.set_frequency(3.0);

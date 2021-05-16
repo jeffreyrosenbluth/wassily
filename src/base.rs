@@ -1,4 +1,4 @@
-pub use crate::{Point, Transform, Vector};
+pub use crate::prelude::{Point, Transform, Vector};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct RGBA {
@@ -244,6 +244,11 @@ impl PathBuilder {
 pub trait Sketch {
     fn fill_path(&mut self, path: &Path, texture: Texture);
     fn stroke_path( &mut self, path: &Path, texture: Texture, stroke: &Stroke);
-    fn background(&mut self, color: RGBA);
+    fn fill(&mut self, color: RGBA);
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: Texture) {
+        let rect = Path::rect(x, y, width, height);
+        self.fill_path(&rect, texture);
+    }
+
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
 }

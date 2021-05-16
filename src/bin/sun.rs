@@ -1,8 +1,5 @@
-#![allow(dead_code)]
-
-use std::path;
 use noise::OpenSimplex;
-use wassily::{kolor::*, noise::*, point2, shape::*, util::{PI, TAU}};
+use wassily::prelude::*;
 
 use wassily::skia::Canvas;
 
@@ -24,12 +21,12 @@ fn main() {
     wk.set_noise_scales(SCALE, SCALE, SCALE / WIDTH);
     wk.set_noise_factor(1.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = path::Path::new("fruit.png");
+    let path = file_path("fruit.png");
     let mut palette = Palette::with_img(path, COLORS);
     palette.sort_by_chroma();
 
     let bg = palette.colors[99];
-    canvas.background(bg);
+    canvas.fill(bg);
 
     for i in 1..LINES {
         let theta = i as f32 / LINES as f32 * TAU;
@@ -72,5 +69,5 @@ fn main() {
             shape.draw(&mut canvas);
         }
     }
-    canvas.save_png("sun_skia.png");
+    canvas.save("sun_skia.png");
 }

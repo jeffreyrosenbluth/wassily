@@ -1,8 +1,7 @@
 #![allow(dead_code)]
 
 use noise::Perlin;
-use std::path;
-use wassily::{Point, base::*, kolor::{Palette, black}, noise::*, point2, shape::*};
+use wassily::prelude::*;
 
 use wassily::svg::Canvas;
 
@@ -37,7 +36,7 @@ fn gen(i: i32, s: f32, c: f32) -> Point {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = path::Path::new("sunset_1.png");
+    let path = file_path("sunset_1.png");
     // let mut palette = Palette::with_img(path, 8);
     // palette.colors.reverse();
 

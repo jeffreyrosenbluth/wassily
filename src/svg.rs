@@ -50,12 +50,26 @@ impl Sketch for Canvas {
         self.0 = doc.add(svg_path);
     }
 
-    fn background(&mut self, color: base::RGBA) {
+    fn fill(&mut self, color: base::RGBA) {
         let doc = self.0.clone();
         let rect = vg::Rectangle::new()
             .set("width", "100%")
             .set("height", "100%")
             .set("fill", color.to_svg());
+        self.0 = doc.add(rect);
+    }
+
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: base::Texture) {
+        let doc = self.0.clone();
+        let color = match texture {
+            base::Texture::SolidColor(c) => c.to_svg(),
+        };
+        let rect = vg::Rectangle::new()
+            .set("x", x)
+            .set("y", y)
+            .set("width", width)
+            .set("height", height)
+            .set("fill", color);
         self.0 = doc.add(rect);
     }
 
