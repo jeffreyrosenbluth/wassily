@@ -10,7 +10,10 @@ pub struct Canvas(Document);
 impl Canvas {
     pub fn new(width: u32, height: u32) -> Self {
         let doc = Document::new();
-        let doc = doc.set("viewbox", (0, 0, width, height));
+        let doc = doc
+            .set("width", width)
+            .set("height", height)
+            .set("viewbox", (0, 0, width, height));
         Canvas(doc)
     }
 }
@@ -38,6 +41,7 @@ impl Sketch for Canvas {
         };
         let svg_path = svg_path
             .set("stroke", color)
+            .set("fill", "none")
             .set("stroke-miterlimit", stroke.miter_limit)
             .set("stroke-width", stroke.width)
             .set("stroke-linecap", linecap(&stroke))
@@ -89,7 +93,7 @@ fn fill_rule(path: &base::Path) -> &'static str {
 
 fn transform(path: &base::Path) -> String {
     format!(
-        "matrix({},{},{},{},{},{}",
+        "matrix({},{},{},{},{},{})",
         path.transform.m11,
         path.transform.m12,
         path.transform.m21,

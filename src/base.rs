@@ -200,8 +200,6 @@ impl PathBuilder {
     /// Create an elliptical path
     pub fn push_ellipse(&mut self, x: f32, y: f32, w: f32, h: f32) {
         let k = 0.5522848;
-        let x = x / 1.5;
-        let y = y / 1.5;
         let x1 = x;
         let y1 = y;
         let cx = k * w / 2.0;
