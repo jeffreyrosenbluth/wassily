@@ -54,7 +54,7 @@ impl Sketch for Canvas {
         self.0.clear(c);
     }
 
-    fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
+    fn save<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.write_png(path).unwrap();
     }
 

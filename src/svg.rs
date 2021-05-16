@@ -51,10 +51,15 @@ impl Sketch for Canvas {
     }
 
     fn background(&mut self, color: base::RGBA) {
-        todo!()
+        let doc = self.0.clone();
+        let rect = vg::Rectangle::new()
+            .set("width", "100%")
+            .set("height", "100%")
+            .set("fill", color.to_svg());
+        self.0 = doc.add(rect);
     }
 
-    fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
+    fn save<P: AsRef<std::path::Path>>(&self, path: P) {
         svg::save(path, &self.0).unwrap();
     }
 }

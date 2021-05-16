@@ -1,5 +1,5 @@
 use std::path;
-use wassily::raqote::Canvas;
+use wassily::svg::Canvas;
 use wassily::{
     base::*,
     kolor::{black, Palette},
@@ -14,22 +14,16 @@ const HEIGHT: f32 = 0.80 * WIDTH;
 fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let path = path::Path::new("fruit.png");
-    let mut palette = Palette::steal(path, 16);
-    let n = palette.colors.len();
+    let palette = Palette::steal(path, 16);
+    canvas.background(RGBA::with_8(222, 222, 222, 255));
 
-    let rect = ShapeBuilder::new()
-        .rect_xywh(point2(0.0, 0.0), point2(WIDTH, HEIGHT))
-        .no_stroke()
-        .fill_color(RGBA::with_8(50, 50, 50, 255))
-        .build();
-    rect.draw(&mut canvas);
 
     let square = ShapeBuilder::new()
         .circle(point2(WIDTH / 2.0, HEIGHT / 2.0), 100.0)
-        .fill_color(RGBA::with_8(200, 100, 150, 255))
-        .stroke_color(RGBA::with_8(0, 0, 255, 255))
+        .fill_color(palette.colors[7])
+        .stroke_color(RGBA::black())
         .stroke_weight(5.0)
         .build();
     square.draw(&mut canvas);
-    canvas.save_png("examine.png");
+    canvas.save("examine.svg");
 }

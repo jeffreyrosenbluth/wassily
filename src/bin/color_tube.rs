@@ -66,5 +66,5 @@ fn main() {
             shape.draw(&mut canvas);
         }
     }
-    canvas.save_png("squirm_raqote.png");
+    canvas.save("squirm_raqote.png");
 }

@@ -55,5 +55,5 @@ fn main() {
             shape.draw(&mut canvas);
         }
     }
-    canvas.save_png("box_skia.png");
+    canvas.save("box_skia.png");
 }

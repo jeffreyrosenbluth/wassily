@@ -86,5 +86,5 @@ fn main() {
 
         band.draw(&mut canvas);
     }
-    canvas.save_png("rainbox.svg");
+    canvas.save("rainbox.svg");
 }

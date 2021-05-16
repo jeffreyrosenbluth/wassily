@@ -56,5 +56,5 @@ fn main() {
         .build();
     shape.draw(&mut canvas);
 
-    canvas.save_png("elk_raqote.png");
+    canvas.save("elk_raqote.png");
 }
