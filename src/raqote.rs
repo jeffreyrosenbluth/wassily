@@ -34,13 +34,13 @@ impl Canvas {
 }
 
 impl Sketch for Canvas {
-    fn fill_path(&mut self, path: &base::Path, texture: base::Texture) {
+    fn fill_path(&mut self, path: &base::Path, texture: &base::Texture) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         self.0.fill(&raqote_path, &source, &DrawOptions::default());
     }
 
-    fn stroke_path(&mut self, path: &base::Path, texture: base::Texture, stroke: &base::Stroke) {
+    fn stroke_path(&mut self, path: &base::Path, texture: &base::Texture, stroke: &base::Stroke) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         let stroke = stroke.into();
@@ -49,12 +49,12 @@ impl Sketch for Canvas {
     }
 
     fn fill(&mut self, color: base::RGBA) {
-        let t = base::Texture::SolidColor(color);
+        let t = &base::Texture::SolidColor(color);
         let c = t.into();
         self.0.clear(c);
     }
 
-    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: Texture) {
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture) {
         let src:raqote::Source = texture.into();
         self.0.fill_rect(x, y, width, height, &src, &DrawOptions::default())
     }
@@ -92,8 +92,8 @@ impl From<&base::Path> for raqote::Path {
     }
 }
 
-impl From<base::Texture> for raqote::SolidSource {
-    fn from(t: base::Texture) -> Self {
+impl From<&base::Texture> for raqote::SolidSource {
+    fn from(t: &base::Texture) -> Self {
         match t {
             base::Texture::SolidColor(c) => {
                 let r = c.r * 255.0;
@@ -102,12 +102,14 @@ impl From<base::Texture> for raqote::SolidSource {
                 let a = c.a * 255.0;
                 raqote::SolidSource::from_unpremultiplied_argb(a as u8, r as u8, g as u8, b as u8)
             }
+            Texture::LinearGradient(_) => {todo!()}
+            Texture::RadialGradient(_) => {todo!()}
         }
     }
 }
 
-impl<'a> From<base::Texture> for raqote::Source<'a> {
-    fn from(t: base::Texture) -> Self {
+impl<'a> From<&base::Texture> for raqote::Source<'a> {
+    fn from(t: &base::Texture) -> Self {
         let c = t.into();
         Source::Solid(c)
     }

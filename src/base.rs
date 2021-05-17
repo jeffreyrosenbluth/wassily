@@ -48,9 +48,60 @@ impl RGBA {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct GradientStop {
+    pub position: f32,
+    pub color: RGBA,
+}
+
+impl GradientStop {
+    pub fn new(position: f32, color: RGBA) -> Self {
+        Self { position, color }
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Debug)]
+pub enum SpreadMode {
+    Pad,
+    Reflect,
+    Repeat,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct Gradient {
+    pub start: Point,
+    pub end: Point,
+    pub radius: f32,
+    pub stops: Vec<GradientStop>,
+    pub mode: SpreadMode,
+    pub transform: Transform,
+}
+
+impl Gradient {
+    pub fn new(
+        start: Point,
+        end: Point,
+        radius: f32,
+        stops: Vec<GradientStop>,
+        mode: SpreadMode,
+        transform: Transform,
+    ) -> Self {
+        Self {
+            start,
+            end,
+            radius,
+            stops,
+            mode,
+            transform,
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Debug)]
 pub enum Texture {
     SolidColor(RGBA),
+    LinearGradient(Gradient),
+    RadialGradient(Gradient),
 }
 
 impl Texture {
@@ -138,13 +189,13 @@ impl Path {
 
     pub fn circle(x: f32, y: f32, r: f32) -> Self {
         let mut pb = PathBuilder::new();
-        pb.push_circle(x , y, r);
+        pb.push_circle(x, y, r);
         pb.finish()
     }
 
     pub fn ellipse(x: f32, y: f32, w: f32, h: f32) -> Self {
         let mut pb = PathBuilder::new();
-        pb.push_ellipse(x , y, w, h);
+        pb.push_ellipse(x, y, w, h);
         pb.finish()
     }
 }
@@ -212,7 +263,7 @@ impl PathBuilder {
         self.cubic_to(x, y1 - cy, x1 - cx, y, x1, y);
         self.cubic_to(x1 + cx, y, x2, y1 - cy, x2, y1);
         self.cubic_to(x2, y1 + cy, x1 + cx, y2, x1, y2);
-        self.cubic_to(x1 - cx, y2, x, y1 + cy, x , y1);
+        self.cubic_to(x1 - cx, y2, x, y1 + cy, x, y1);
         self.close();
     }
 
@@ -242,10 +293,10 @@ impl PathBuilder {
 }
 
 pub trait Sketch {
-    fn fill_path(&mut self, path: &Path, texture: Texture);
-    fn stroke_path( &mut self, path: &Path, texture: Texture, stroke: &Stroke);
+    fn fill_path(&mut self, path: &Path, texture: &Texture);
+    fn stroke_path(&mut self, path: &Path, texture: &Texture, stroke: &Stroke);
     fn fill(&mut self, color: RGBA);
-    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: Texture) {
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture) {
         let rect = Path::rect(x, y, width, height);
         self.fill_path(&rect, texture);
     }

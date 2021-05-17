@@ -17,7 +17,7 @@ impl Canvas {
 }
 
 impl Sketch for Canvas {
-    fn fill_path(&mut self, path: &base::Path, texture: base::Texture) {
+    fn fill_path(&mut self, path: &base::Path, texture: &base::Texture) {
         let skia_path: skia::Path = path.into();
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = true;
@@ -27,12 +27,7 @@ impl Sketch for Canvas {
             .fill_path(&skia_path, &paint, fill_rule, transform, None);
     }
 
-    fn stroke_path(
-        &mut self,
-        path: &base::Path,
-        texture: base::Texture,
-        stroke: &base::Stroke,
-    ) {
+    fn stroke_path(&mut self, path: &base::Path, texture: &base::Texture, stroke: &base::Stroke) {
         let skia_path: skia::Path = path.into();
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = true;
@@ -41,12 +36,13 @@ impl Sketch for Canvas {
         self.0
             .stroke_path(&skia_path, &paint, &stroke, transform, None);
     }
-     
-    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: base::Texture) {
+
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &base::Texture) {
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = true;
         let rect: skia::Rect = skia::Rect::from_xywh(x, y, width, height).unwrap();
-        self.0.fill_rect(rect, &paint, skia::Transform::identity(), None);
+        self.0
+            .fill_rect(rect, &paint, skia::Transform::identity(), None);
     }
 
     fn fill(&mut self, color: RGBA) {
@@ -84,16 +80,62 @@ impl From<&base::Path> for skia::Path {
     }
 }
 
-impl<'a> From<base::Texture> for skia::Paint<'a> {
-    fn from(t: base::Texture) -> Self {
+impl From<base::RGBA> for skia::Color {
+    fn from(c: base::RGBA) -> Self {
+        let r = c.r;
+        let g = c.g;
+        let b = c.b;
+        let a = c.a;
+        skia::Color::from_rgba(r, g, b, a).unwrap()
+    }
+}
+
+impl<'a> From<&base::Texture> for skia::Paint<'a> {
+    fn from(t: &base::Texture) -> Self {
+        let mut p = Self::default();
         match t {
             base::Texture::SolidColor(c) => {
-                let mut p = Self::default();
-                let r = c.r * 255.0;
-                let g = c.g * 255.0;
-                let b = c.b * 255.0;
-                let a = c.a * 255.0;
-                p.set_color_rgba8(r as u8, g as u8, b as u8, a as u8);
+                p.set_color((*c).into());
+                p
+            }
+            base::Texture::LinearGradient(g) => {
+                let start = skia::Point {
+                    x: g.start.x,
+                    y: g.start.y,
+                };
+                let end = skia::Point {
+                    x: g.end.x,
+                    y: g.end.y,
+                };
+                let stops = g
+                    .stops
+                    .iter()
+                    .map(|s| skia::GradientStop::new(s.position, s.color.into()))
+                    .collect();
+                let mode = g.mode.into();
+                let transform = to_transform(g.transform);
+                p.shader = skia::LinearGradient::new(start, end, stops, mode, transform).unwrap();
+                p
+            }
+            base::Texture::RadialGradient(g) => {
+                let start = skia::Point {
+                    x: g.start.x,
+                    y: g.start.y,
+                };
+                let end = skia::Point {
+                    x: g.end.x,
+                    y: g.end.y,
+                };
+                let stops = g
+                    .stops
+                    .iter()
+                    .map(|s| skia::GradientStop::new(s.position, s.color.into()))
+                    .collect();
+                let mode = g.mode.into();
+                let transform = to_transform(g.transform);
+                let radius = g.radius;
+                p.shader =
+                    skia::RadialGradient::new(start, end, radius, stops, mode, transform).unwrap();
                 p
             }
         }
@@ -120,5 +162,15 @@ impl From<&base::Stroke> for skia::Stroke {
             base::LineJoin::Bevel => skia::LineJoin::Bevel,
         };
         skia_stroke
+    }
+}
+
+impl From<base::SpreadMode> for skia::SpreadMode {
+    fn from(sm: base::SpreadMode) -> Self {
+        match sm {
+            base::SpreadMode::Pad => skia::SpreadMode::Pad,
+            base::SpreadMode::Reflect => skia::SpreadMode::Reflect,
+            base::SpreadMode::Repeat => skia::SpreadMode::Repeat,
+        }
     }
 }

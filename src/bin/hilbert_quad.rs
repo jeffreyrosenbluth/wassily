@@ -1,5 +1,7 @@
-use wassily::svg::Canvas;
+use std::ops::Add;
+
 use wassily::prelude::*;
+use wassily::svg::Canvas;
 
 const WIDTH: u32 = 900;
 const HEIGHT: u32 = 900;
@@ -20,7 +22,7 @@ fn main() {
         path.push(hilbert(i, ORDER));
         let m = width / n as f32;
         path[j] = point2(m * path[j].x, m * path[j].y);
-        path[j] = point2(path[j].x + m /2.0,  path[j].y +  m / 2.0);
+        path[j] = point2(path[j].x + m / 2.0, path[j].y + m / 2.0);
     }
     path = path.into_iter().collect();
 
@@ -37,7 +39,12 @@ fn main() {
 }
 
 fn hilbert(k: u32, order: u32) -> Point {
-    let points = vec![point2(0.0, 0.0), point2(0.0, 1.0), point2(1.0, 1.0), point2(1.0, 0.0)];
+    let points = vec![
+        point2(0.0, 0.0),
+        point2(0.0, 1.0),
+        point2(1.0, 1.0),
+        point2(1.0, 0.0),
+    ];
     let idx = k as usize & 3;
     let mut v = points[idx];
     let mut i = k;

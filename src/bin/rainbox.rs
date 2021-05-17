@@ -3,7 +3,7 @@
 use noise::Perlin;
 use wassily::prelude::*;
 
-use wassily::svg::Canvas;
+use wassily::raqote::Canvas;
 
 const WIDTH: f32 = 8191.0;
 const HEIGHT: f32 = 0.80 * WIDTH;
@@ -45,7 +45,7 @@ fn main() {
     palette.colors.reverse();
     let n = palette.colors.len();
     // canvas.background(black(1.0));
-    // canvas.background(palette.colors[0]);
+    canvas.fill(palette.colors[0]);
 
     let mut rb: Vec<Vec<Point>> = vec![];
 
@@ -85,5 +85,5 @@ fn main() {
 
         band.draw(&mut canvas);
     }
-    canvas.save("rainbox.svg");
+    canvas.save("rainbox.png");
 }
