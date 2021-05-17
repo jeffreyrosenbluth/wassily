@@ -1,5 +1,5 @@
 use crate::base::*;
-use crate::Point;
+use crate::prelude::Point;
 
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {

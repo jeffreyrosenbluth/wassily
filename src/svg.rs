@@ -26,7 +26,8 @@ impl Sketch for Canvas {
             base::Texture::SolidColor(c) => c.to_svg(),
         };
         let svg_path = svg_path
-            .set("fill", color)
+            .set("fill", color.0)
+            .set("fill-opacity", color.1)
             .set("transform", transform(&path))
             .set("fill-rule", fill_rule(&path));
 
@@ -40,7 +41,8 @@ impl Sketch for Canvas {
             base::Texture::SolidColor(c) => c.to_svg(),
         };
         let svg_path = svg_path
-            .set("stroke", color)
+            .set("stroke", color.0)
+            .set("stroke-opacity", color.1)
             .set("fill", "none")
             .set("stroke-miterlimit", stroke.miter_limit)
             .set("stroke-width", stroke.width)
@@ -52,10 +54,12 @@ impl Sketch for Canvas {
 
     fn fill(&mut self, color: base::RGBA) {
         let doc = self.0.clone();
+        let color = color.to_svg();
         let rect = vg::Rectangle::new()
             .set("width", "100%")
             .set("height", "100%")
-            .set("fill", color.to_svg());
+            .set("fill", color.0)
+            .set("fill-opacity", color.1);
         self.0 = doc.add(rect);
     }
 
@@ -69,7 +73,7 @@ impl Sketch for Canvas {
             .set("y", y)
             .set("width", width)
             .set("height", height)
-            .set("fill", color);
+            .set("fill", color.0).set("fill-opacity", color.1);
         self.0 = doc.add(rect);
     }
 
@@ -97,9 +101,9 @@ impl From<&base::Path> for vg::Path {
 }
 
 impl RGBA {
-    fn to_svg(&self) -> String {
-        let (r, g, b, _) = self.as_8();
-        format!("rgb({},{},{})", r, g, b)
+    fn to_svg(&self) -> (String, f32) {
+        let (r, g, b, a) = self.as_8();
+        (format!("rgb({},{},{})", r, g, b), a as f32 / 255.0)
     }
 }
 

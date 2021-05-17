@@ -3,10 +3,10 @@ use noise::{BasicMulti, Fbm, OpenSimplex, Perlin, SuperSimplex};
 
 use colorous::*;
 use wassily::prelude::*;
-use wassily::skia::Canvas;
+use wassily::svg::Canvas;
 
-const SIZE: u32 = 8191;
-const GRID: f32 = 10.0;
+const SIZE: u32 = 1200;
+const GRID: f32 = 50.0;
 const SCALE: f32 = 4.0;
 const FACTOR: f32 = 2.0;
 
@@ -36,15 +36,10 @@ fn main() {
                 n = n.clamp(0.0, 1.0);
                 c = BLUES.eval_continuous(n as f64);
             }
-
-            let square = ShapeBuilder::new()
-                .rect_xywh(point2(x as f32, y as f32), point2(GRID, GRID))
-                .no_stroke()
-                .fill_color(RGBA::with_8(c.r, c.g, c.b, 255))
-                .build();
-            square.draw(&mut canvas);
+            
+            canvas.fill_rect(x as f32, y as f32, GRID, GRID, Texture::SolidColor(RGBA::with_8(c.r, c.g, c.b, 255)))
         }
     }
     dbg!(sm, lg);
-    canvas.save("vis.png");
+    canvas.save("vis.svg");
 }
