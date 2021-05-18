@@ -1,4 +1,4 @@
-use crate::base::{self, Sketch, RGBA};
+use crate::base::{self, Sketch, RGBA, Texture};
 use tiny_skia as skia;
 use tiny_skia::Pixmap;
 
@@ -90,15 +90,15 @@ impl From<base::RGBA> for skia::Color {
     }
 }
 
-impl<'a> From<&base::Texture> for skia::Paint<'a> {
-    fn from(t: &base::Texture) -> Self {
+impl<'a> From<&Texture> for skia::Paint<'a> {
+    fn from(t: &Texture) -> Self {
         let mut p = Self::default();
         match t {
-            base::Texture::SolidColor(c) => {
+            Texture::SolidColor(c) => {
                 p.set_color((*c).into());
                 p
             }
-            base::Texture::LinearGradient(g) => {
+            Texture::LinearGradient(g) => {
                 let start = skia::Point {
                     x: g.start.x,
                     y: g.start.y,
@@ -117,7 +117,7 @@ impl<'a> From<&base::Texture> for skia::Paint<'a> {
                 p.shader = skia::LinearGradient::new(start, end, stops, mode, transform).unwrap();
                 p
             }
-            base::Texture::RadialGradient(g) => {
+            Texture::RadialGradient(g) => {
                 let start = skia::Point {
                     x: g.start.x,
                     y: g.start.y,

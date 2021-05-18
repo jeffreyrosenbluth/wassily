@@ -1,6 +1,8 @@
 use crate::base::{self, Sketch, Texture};
-use raqote::DrawTarget;
+use base::RGBA;
+use palette::ConvertInto;
 use raqote::{self, DrawOptions, Source};
+use raqote::{DrawTarget, SolidSource};
 
 pub struct Canvas(DrawTarget);
 
@@ -9,28 +11,6 @@ impl Canvas {
         let dt = DrawTarget::new(width as i32, height as i32);
         Canvas(dt)
     }
-
-    // pub fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
-    //     let decoder = png::Decoder::new(File::open(path).unwrap());
-    //     let (info, mut reader) = decoder.read_info().unwrap();
-    //     let mut buf = vec![0; info.buffer_size()];
-    //     dbg!(&buf.len());
-    //     reader.next_frame(&mut buf).unwrap();
-    //     let mut image: Vec<u32> = Vec::new();
-    //     for i in buf.chunks(3) {
-    //         image.push(0xff << 24 |  ((i[0] as u32) << 16) | ((i[1] as u32) << 8) | (i[2] as u32))
-    //     }
-    //     let img = Image {
-    //         width: info.width as i32,
-    //         height: info.height as i32,
-    //         data: &image[..],
-    //     };
-    //     let mut canvas = Canvas::new(img.width as u32, img.height as u32);
-    //     canvas
-    //         .0
-    //         .draw_image_at(0.0, 0.0, &img, &DrawOptions::default());
-    //     canvas
-    // }
 }
 
 impl Sketch for Canvas {
@@ -49,20 +29,28 @@ impl Sketch for Canvas {
     }
 
     fn fill(&mut self, color: base::RGBA) {
-        let t = &base::Texture::SolidColor(color);
-        let c = t.into();
-        self.0.clear(c);
+        self.0.clear((&color).into());
     }
 
     fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture) {
-        let src:raqote::Source = texture.into();
-        self.0.fill_rect(x, y, width, height, &src, &DrawOptions::default())
+        let src: raqote::Source = texture.into();
+        self.0
+            .fill_rect(x, y, width, height, &src, &DrawOptions::default())
     }
 
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.write_png(path).unwrap();
     }
+}
 
+impl From<&RGBA> for SolidSource {
+    fn from(c: &RGBA) -> Self {
+        let r = c.r * 255.0;
+        let g = c.g * 255.0;
+        let b = c.b * 255.0;
+        let a = c.a * 255.0;
+        SolidSource::from_unpremultiplied_argb(a as u8, r as u8, g as u8, b as u8)
+    }
 }
 
 impl From<base::FillRule> for raqote::Winding {
@@ -92,26 +80,52 @@ impl From<&base::Path> for raqote::Path {
     }
 }
 
-impl From<&base::Texture> for raqote::SolidSource {
+impl From<&base::Texture> for raqote::Source<'_> {
     fn from(t: &base::Texture) -> Self {
         match t {
-            base::Texture::SolidColor(c) => {
-                let r = c.r * 255.0;
-                let g = c.g * 255.0;
-                let b = c.b * 255.0;
-                let a = c.a * 255.0;
-                raqote::SolidSource::from_unpremultiplied_argb(a as u8, r as u8, g as u8, b as u8)
+            Texture::SolidColor(c) => {
+                let sc: SolidSource = c.into();
+                sc.into()
             }
-            Texture::LinearGradient(_) => {todo!()}
-            Texture::RadialGradient(_) => {todo!()}
+            Texture::LinearGradient(g) => {
+                let stops = g
+                    .stops
+                    .iter()
+                    .map(|s| {
+                        let r = s.color.r * 255.0;
+                        let g = s.color.g * 255.0;
+                        let b = s.color.b * 255.0;
+                        let a = s.color.a * 255.0;
+                        raqote::GradientStop {
+                            position: s.position,
+                            color: raqote::Color::new(a as u8, r as u8, g as u8, b as u8),
+                        }
+                    })
+                    .collect();
+                let gradient = raqote::Gradient { stops };
+                let spread = g.mode.into();
+                Source::new_linear_gradient(gradient, g.start, g.end, spread)
+            }
+            Texture::RadialGradient(g) => {
+                let stops = g
+                    .stops
+                    .iter()
+                    .map(|s| {
+                        let r = s.color.r * 255.0;
+                        let g = s.color.g * 255.0;
+                        let b = s.color.b * 255.0;
+                        let a = s.color.a * 255.0;
+                        raqote::GradientStop {
+                            position: s.position,
+                            color: raqote::Color::new(a as u8, r as u8, g as u8, b as u8),
+                        }
+                    })
+                    .collect();
+                let gradient = raqote::Gradient { stops };
+                let spread = g.mode.into();
+                Source::new_radial_gradient(gradient, g.start, g.radius, spread)
+            }
         }
-    }
-}
-
-impl<'a> From<&base::Texture> for raqote::Source<'a> {
-    fn from(t: &base::Texture) -> Self {
-        let c = t.into();
-        Source::Solid(c)
     }
 }
 
@@ -131,5 +145,15 @@ impl From<&base::Stroke> for raqote::StrokeStyle {
             base::LineJoin::Bevel => raqote::LineJoin::Bevel,
         };
         raqote_stroke
+    }
+}
+
+impl From<base::SpreadMode> for raqote::Spread {
+    fn from(sm: base::SpreadMode) -> Self {
+        match sm {
+            base::SpreadMode::Pad => raqote::Spread::Pad,
+            base::SpreadMode::Reflect => raqote::Spread::Reflect,
+            base::SpreadMode::Repeat => raqote::Spread::Repeat,
+        }
     }
 }

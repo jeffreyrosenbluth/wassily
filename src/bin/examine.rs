@@ -39,5 +39,5 @@ fn main() {
         .build();
     circle.draw(&mut canvas);
 
-    canvas.save("examine.png");
+    canvas.save("examine_skia.png");
 }
