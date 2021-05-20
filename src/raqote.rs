@@ -1,6 +1,5 @@
 use crate::base::{self, Sketch, Texture};
 use base::RGBA;
-use palette::ConvertInto;
 use raqote::{self, DrawOptions, Source};
 use raqote::{DrawTarget, SolidSource};
 
