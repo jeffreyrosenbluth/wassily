@@ -1,4 +1,4 @@
-pub use crate::prelude::{Point, Transform, Vector};
+pub use crate::prelude::{point2, Point, Transform, Vector};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct RGBA {
@@ -202,11 +202,15 @@ impl Path {
 
 pub struct PathBuilder {
     path: Path,
+    position: Point,
 }
 
 impl From<Path> for PathBuilder {
     fn from(path: Path) -> Self {
-        PathBuilder { path }
+        PathBuilder {
+            path,
+            position: point2(0.0, 0.0),
+        }
     }
 }
 
@@ -218,22 +222,39 @@ impl PathBuilder {
                 fill_rule: FillRule::Winding,
                 transform: Transform::identity(),
             },
+            position: point2(0.0, 0.0),
         }
     }
 
     /// Moves the current point to `x`, `y`
     pub fn move_to(&mut self, x: f32, y: f32) {
+        self.position = point2(x, y);
         self.path.cmds.push(PathCmd::MoveTo(Point::new(x, y)))
+    }
+
+    pub fn move_by(&mut self, x: f32, y: f32) {
+        let (x, y) = (self.position.x + x, self. position.y + y);
+        self.position = point2(x, y);
+        self.path.cmds.push(PathCmd::MoveTo(Point::new(x, y)))
+
     }
 
     /// Adds a line segment from the current point to `x`, `y`
     pub fn line_to(&mut self, x: f32, y: f32) {
+        self.position = point2(x, y);
+        self.path.cmds.push(PathCmd::LineTo(Point::new(x, y)))
+    }
+
+    pub fn line_by(&mut self, x: f32, y: f32) {
+        let (x, y) = (self.position.x + x, self. position.y + y);
+        self.position = point2(x, y);
         self.path.cmds.push(PathCmd::LineTo(Point::new(x, y)))
     }
 
     /// Adds a quadratic bezier from the current point to `x`, `y`,
     /// using a control point of `cx`, `cy`
     pub fn quad_to(&mut self, cx: f32, cy: f32, x: f32, y: f32) {
+        self.position = point2(x, y);
         self.path
             .cmds
             .push(PathCmd::QuadTo(Point::new(cx, cy), Point::new(x, y)))
@@ -300,6 +321,5 @@ pub trait Sketch {
         let rect = Path::rect(x, y, width, height);
         self.fill_path(&rect, texture);
     }
-
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
 }
