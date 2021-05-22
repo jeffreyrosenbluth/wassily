@@ -1,12 +1,12 @@
-use noise::*;
+use ::noise::*;
 use wassily::prelude::*;
-use wassily::raqote::Canvas;
+use wassily::skia::Canvas;
 
-const WIDTH: u32 = 19200;
-const HEIGHT: u32 = 12000;
+const WIDTH: u32 = 2400;
+const HEIGHT: u32 = 1800;
 const OFFSET: f32 = 0.015;
 const D: f32 = 0.6;
-const GRID: f32 = 10.0;
+const GRID: f32 = 2.0;
 const SCALE: f32 = 1.0;
 const FACTOR: f32 = 1.5;
 
@@ -73,12 +73,12 @@ fn main() {
             n = n.abs().clamp(0.0, 1.0);
             let mut c = RGBA::new(1.0, 1.0, 1.0, 1.0);
             c.a = n;
-                let square = ShapeBuilder::new()
-                    .rect_xywh(point2(x as f32, y as f32), point2(GRID, GRID))
-                    .fill_color(c)
-                    .no_stroke()
-                    .build();
-                square.draw(&mut canvas);
+            let square = ShapeBuilder::new()
+                .rect_xywh(point2(x as f32, y as f32), point2(GRID, GRID))
+                .fill_color(c)
+                .no_stroke()
+                .build();
+            square.draw(&mut canvas);
         }
     }
 
@@ -90,6 +90,5 @@ fn main() {
         HEIGHT as f32,
         &Texture::SolidColor(color_left),
     );
-
-    canvas.save("half.png")
+    canvas.save("billow.png")
 }
