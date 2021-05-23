@@ -79,7 +79,10 @@ impl State {
     }
 }
 
-struct Lsystem {
+struct Lsystem<T>
+where
+    T: noise::NoiseFn<[f64; 3]>,
+{
     points: Vec<TaggedPoint>,
     direction: f32,
     angle: f32,
@@ -90,10 +93,22 @@ struct Lsystem {
     axiom: Axiom,
     rules: Rules,
     cmds: Cmds,
+    ns: Noise<[f64; 3], T>,
 }
 
-impl Lsystem {
-    fn new(start: Point, angle: f32, length: f32, axiom: Axiom, rules: Rules, cmds: Cmds) -> Self {
+impl<T> Lsystem<T>
+where
+    T: noise::NoiseFn<[f64; 3]>,
+{
+    fn new(
+        start: Point,
+        angle: f32,
+        length: f32,
+        axiom: Axiom,
+        rules: Rules,
+        cmds: Cmds,
+        ns: Noise<[f64; 3], T>,
+    ) -> Self {
         Self {
             points: vec![TaggedPoint::new(start)],
             direction: 0.0,
@@ -105,27 +120,30 @@ impl Lsystem {
             axiom,
             rules,
             cmds,
+            ns,
         }
     }
 
-    fn forward(&mut self, distance: f32) {
-        let dx = distance * self.direction.cos();
-        let dy = distance * self.direction.sin();
+    fn jitter(&mut self) -> Point {
+        let dx = self.length * self.direction.cos();
+        let dy = self.length * self.direction.sin();
         let n = self.points.len() - 1;
-        self.points.push(TaggedPoint::new(point2(
-            self.points[n].point.x + dx,
-            self.points[n].point.y + dy,
-        )));
+        let x = self.points[n].point.x + dx;
+        let y = self.points[n].point.y + dy;
+        let x1 = x + self.ns.noise(x, y, 0.0);
+        let y1 = y + self.ns.noise(x, y, 0.1);
+        point2(x1, y1)
     }
 
-    fn go(&mut self, distance: f32) {
-        let dx = distance * self.direction.cos();
-        let dy = distance * self.direction.sin();
-        let n = self.points.len() - 1;
-        self.points.push(TaggedPoint::with_pen(
-            point2(self.points[n].point.x + dx, self.points[n].point.y + dy),
-            false,
-        ));
+    fn forward(&mut self) {
+        let p = self.jitter();
+        self.points.push(TaggedPoint::new(p));
+    }
+
+    fn go(&mut self) {
+        let p = self.jitter();
+        self.points
+            .push(TaggedPoint::with_pen(p, false));
     }
 
     fn right(&mut self) {
@@ -151,46 +169,24 @@ impl Lsystem {
 
     fn interp(&mut self, sym: Sym) {
         match sym {
-            Sym::F => self.forward(self.length),
-            Sym::G => self.go(self.length),
+            Sym::F => self.forward(),
+            Sym::G => self.go(),
             Sym::Plus => self.right(),
             Sym::Minus => self.left(),
             Sym::Push => self.push(),
             Sym::Pop => self.pop(),
-            Sym::Null => {},
+            Sym::Null => {}
         }
     }
 
-    fn run<T>(&mut self, canvas: &mut Canvas, iters: u32, ns: Noise<[f64; 3], T>)
-    where
-        T: noise::NoiseFn<[f64; 3]>,
-    {
-        fn jitter(p: TaggedPoint, dx: f32, dy: f32) -> TaggedPoint {
-            if p.pen {
-                TaggedPoint::with_pen(point2(p.point.x + dx, p.point.y + dy), true)
-            } else {
-                p
-            }
-        }
+    fn run(&mut self, canvas: &mut Canvas, iters: u32) {
         let production = iter_rules(self.axiom.clone(), &self.rules, iters);
         let production = to_sym(production, &self.cmds);
         for k in production {
             self.interp(k);
         }
-        let points: Vec<TaggedPoint> = self
-            .points
-            .iter()
-            .map(|p| {
-                jitter(
-                    *p,
-                    ns.noise(p.point.x, p.point.y, 0.0),
-                    ns.noise(p.point.x, p.point.y, 0.1),
-                )
-            })
-            .collect();
-
         let path = ShapeBuilder::new()
-            .tagged_points(&points)
+            .tagged_points(&self.points)
             .no_fill()
             // .fill_color(RGBA::new(1.0, 0.0, 0.0, 0.5))
             .stroke_weight(self.thickness)
@@ -207,11 +203,9 @@ impl Lsystem {
 fn main() {
     let mut canvas = Canvas::new(8191, 8191);
     canvas.fill(RGBA::black());
-    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
-    ns.set_noise_factor(300.);
-    ns.set_noise_scale(10.0);
 
     // Dragon
+    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
     ns.set_noise_factor(300.);
     ns.set_noise_scale(10.0);
     let mut rules = HashMap::new();
@@ -227,12 +221,14 @@ fn main() {
         axiom.clone(),
         rules,
         cmds,
+        ns,
     );
     dragon.thickness = 8.0;
 
     // Koch Lake
-    ns.set_noise_factor(300.);
-    ns.set_noise_scale(30.0);
+    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
+    ns.set_noise_factor(500.);
+    ns.set_noise_scale(20.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "F+F+F+F".chars().collect();
     add_rule('F', "F+f-FF+F+FF+Ff+FF-f+FF-F-FF-Ff-FFF", &mut rules);
@@ -246,10 +242,12 @@ fn main() {
         axiom.clone(),
         rules,
         cmds,
+        ns,
     );
     lake.thickness = 8.0;
 
     // Koch 3
+    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
     ns.set_noise_factor(150.);
     ns.set_noise_scale(10.0);
     let mut rules = HashMap::new();
@@ -263,13 +261,15 @@ fn main() {
         axiom.clone(),
         rules,
         cmds,
+        ns,
     );
     koch3.thickness = 20.0;
     koch3.color = RGBA::new(1.0, 1.0, 1.0, 0.5);
 
     // Fern
-    ns.set_noise_factor(0.0);
-    ns.set_noise_scale(10.0);
+    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
+    ns.set_noise_factor(50.0);
+    ns.set_noise_scale(20.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "X".chars().collect();
     add_rule('F', "FF", &mut rules);
@@ -283,11 +283,32 @@ fn main() {
         axiom.clone(),
         rules,
         cmds,
+        ns,
     );
     fern.thickness = 20.0;
     fern.direction = -PI / 2.0;
     fern.color = RGBA::new(0.4, 0.8, 0.3, 1.0);
 
-    fern.run(&mut canvas, 6, ns);
+    // Sierpinski
+    // ns.set_noise_factor(0.0);
+    // ns.set_noise_scale(10.0);
+    // let mut rules = HashMap::new();
+    // let axiom: Vec<char> = "X".chars().collect();
+    // add_rule('F', "FF", &mut rules);
+    // add_rule('X', "F+[[X]-X]-F[-FX]+X", &mut rules);
+    // let mut cmds = std_cmds();
+    // cmds.insert('X', Sym::Null);
+    // let mut sier = Lsystem::new(
+    //     point2(4000.0, 8100.0),
+    //     50.0 * PI / 360.0,
+    //     50.0,
+    //     axiom.clone(),
+    //     rules,
+    //     cmds,
+    // );
+    // sier.thickness = 20.0;
+    // sier.direction = PI / 2.0;
+
+    fern.run(&mut canvas, 6);
     canvas.save("fern.png")
 }
