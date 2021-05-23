@@ -18,6 +18,7 @@ pub struct Shape {
     pub stroke: Stroke,
     pub stroke_texture: Box<Option<Texture>>,
     shape: ShapeType,
+    fillrule: FillRule,
 }
 
 impl<'a> Shape {
@@ -27,6 +28,7 @@ impl<'a> Shape {
         stroke: Stroke,
         stroke_texture: Box<Option<Texture>>,
         shape: ShapeType,
+        fillrule: FillRule,
     ) -> Self {
         Self {
             points,
@@ -34,6 +36,7 @@ impl<'a> Shape {
             stroke,
             stroke_texture,
             shape,
+            fillrule,
         }
     }
 
@@ -50,6 +53,7 @@ impl<'a> Shape {
 
     fn draw_poly<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
+        pb.set_fillrule(self.fillrule);
         let head = self.points[0];
         let tail = &self.points[1..];
         pb.move_to(head.x, head.y);
@@ -70,6 +74,7 @@ impl<'a> Shape {
 
     fn draw_quad<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
+        pb.set_fillrule(self.fillrule);
         let head = self.points[0];
         let tail = &mut self.points[1..].to_vec();
         pb.move_to(head.x, head.y);
@@ -92,6 +97,7 @@ impl<'a> Shape {
 
     pub fn draw_cubic<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
+        pb.set_fillrule(self.fillrule);
         let head = self.points[0];
         let tail = &mut self.points[1..].to_vec();
         pb.move_to(head.x, head.y);
@@ -175,6 +181,7 @@ pub struct ShapeBuilder {
     // stroke_dash: Option<StrokeDash>,
     points: Box<Vec<Point>>,
     shape: ShapeType,
+    fillrule: FillRule,
 }
 
 impl<'a> ShapeBuilder {
@@ -188,6 +195,7 @@ impl<'a> ShapeBuilder {
             // stroke_dash: None,
             points: Box::new(vec![]),
             shape: ShapeType::Poly,
+            fillrule: FillRule::Winding,
         }
     }
 
@@ -282,6 +290,11 @@ impl<'a> ShapeBuilder {
         self
     }
 
+    pub fn fill_rule(mut self, fillrule: FillRule) -> Self {
+        self.fillrule = fillrule;
+        self
+    }
+
     pub fn build(self) -> Shape {
         let mut fill_texture: Box<Option<Texture>> = Box::new(None);
         let mut stroke_texture: Box<Option<Texture>> = Box::new(None);
@@ -302,6 +315,7 @@ impl<'a> ShapeBuilder {
             stroke,
             stroke_texture,
             self.shape,
+            self.fillrule,
         )
     }
 }

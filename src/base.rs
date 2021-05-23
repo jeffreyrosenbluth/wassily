@@ -307,6 +307,14 @@ impl PathBuilder {
         self.path.cmds.push(PathCmd::Close)
     }
 
+    pub fn set_fillrule(&mut self, fillrule: FillRule) {
+        self.path.fill_rule = fillrule;
+    }
+
+    pub fn set_transform(&mut self, transform: Transform) {
+        self.path.transform = transform;
+    }
+
     /// Completes the current path
     pub fn finish(self) -> Path {
         self.path
