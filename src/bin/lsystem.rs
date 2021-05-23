@@ -6,10 +6,12 @@ use wassily::skia::Canvas;
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]
 enum Sym {
     F,
+    G,
     Plus,
     Minus,
     Push,
     Pop,
+    Null,
 }
 
 type Rules = HashMap<char, Vec<char>>;
@@ -19,8 +21,11 @@ type Cmds = HashMap<char, Sym>;
 fn std_cmds() -> Cmds {
     let mut cmds = HashMap::new();
     cmds.insert('F', Sym::F);
+    cmds.insert('G', Sym::G);
     cmds.insert('-', Sym::Minus);
     cmds.insert('+', Sym::Plus);
+    cmds.insert('[', Sym::Push);
+    cmds.insert(']', Sym::Pop);
     cmds
 }
 
@@ -60,14 +65,28 @@ fn to_sym(cs: Vec<char>, cmds: &Cmds) -> Vec<Sym> {
     cs.into_iter().map(|c| char_to_sym(c, cmds)).collect()
 }
 
+struct State {
+    position: Point,
+    direction: f32,
+}
+
+impl State {
+    fn new(position: Point, direction: f32) -> Self {
+        Self {
+            position,
+            direction,
+        }
+    }
+}
+
 struct Lsystem {
-    points: Vec<Point>,
+    points: Vec<TaggedPoint>,
     direction: f32,
     angle: f32,
     color: RGBA,
     length: f32,
     thickness: f32,
-    stack: Vec<Sym>,
+    stack: Vec<State>,
     axiom: Axiom,
     rules: Rules,
     cmds: Cmds,
@@ -76,7 +95,7 @@ struct Lsystem {
 impl Lsystem {
     fn new(start: Point, angle: f32, length: f32, axiom: Axiom, rules: Rules, cmds: Cmds) -> Self {
         Self {
-            points: vec![start],
+            points: vec![TaggedPoint::new(start)],
             direction: 0.0,
             angle,
             color: RGBA::white(),
@@ -93,8 +112,20 @@ impl Lsystem {
         let dx = distance * self.direction.cos();
         let dy = distance * self.direction.sin();
         let n = self.points.len() - 1;
-        self.points
-            .push(point2(self.points[n].x + dx, self.points[n].y + dy));
+        self.points.push(TaggedPoint::new(point2(
+            self.points[n].point.x + dx,
+            self.points[n].point.y + dy,
+        )));
+    }
+
+    fn go(&mut self, distance: f32) {
+        let dx = distance * self.direction.cos();
+        let dy = distance * self.direction.sin();
+        let n = self.points.len() - 1;
+        self.points.push(TaggedPoint::with_pen(
+            point2(self.points[n].point.x + dx, self.points[n].point.y + dy),
+            false,
+        ));
     }
 
     fn right(&mut self) {
@@ -105,13 +136,28 @@ impl Lsystem {
         self.direction += self.angle;
     }
 
+    fn push(&mut self) {
+        let n = self.points.len() - 1;
+        let state = State::new(self.points[n].point, self.direction);
+        self.stack.push(state);
+    }
+
+    fn pop(&mut self) {
+        let state = self.stack.pop().expect("Nothing to pop");
+        self.direction = state.direction;
+        self.points
+            .push(TaggedPoint::with_pen(state.position, false));
+    }
+
     fn interp(&mut self, sym: Sym) {
         match sym {
             Sym::F => self.forward(self.length),
+            Sym::G => self.go(self.length),
             Sym::Plus => self.right(),
             Sym::Minus => self.left(),
-            Sym::Push => {}
-            Sym::Pop => {}
+            Sym::Push => self.push(),
+            Sym::Pop => self.pop(),
+            Sym::Null => {},
         }
     }
 
@@ -119,22 +165,34 @@ impl Lsystem {
     where
         T: noise::NoiseFn<[f64; 3]>,
     {
+        fn jitter(p: TaggedPoint, dx: f32, dy: f32) -> TaggedPoint {
+            if p.pen {
+                TaggedPoint::with_pen(point2(p.point.x + dx, p.point.y + dy), true)
+            } else {
+                p
+            }
+        }
         let production = iter_rules(self.axiom.clone(), &self.rules, iters);
         let production = to_sym(production, &self.cmds);
         for k in production {
             self.interp(k);
         }
-        let points: Vec<Point> = self
+        let points: Vec<TaggedPoint> = self
             .points
             .iter()
-            .map(|p| point2(p.x + ns.noise(p.x, p.y, 0.0), p.y + ns.noise(p.x, p.y, 0.1)))
+            .map(|p| {
+                jitter(
+                    *p,
+                    ns.noise(p.point.x, p.point.y, 0.0),
+                    ns.noise(p.point.x, p.point.y, 0.1),
+                )
+            })
             .collect();
 
-
         let path = ShapeBuilder::new()
-            .points(&points)
+            .tagged_points(&points)
             .no_fill()
-            .fill_color(RGBA::new(1.0, 0.0, 0.0, 0.5))
+            // .fill_color(RGBA::new(1.0, 0.0, 0.0, 0.5))
             .stroke_weight(self.thickness)
             .stroke_color(self.color)
             .line_join(LineJoin::Bevel)
@@ -209,6 +267,27 @@ fn main() {
     koch3.thickness = 20.0;
     koch3.color = RGBA::new(1.0, 1.0, 1.0, 0.5);
 
-    koch3.run(&mut canvas, 4, ns);
-    canvas.save("lsys.png")
+    // Fern
+    ns.set_noise_factor(0.0);
+    ns.set_noise_scale(10.0);
+    let mut rules = HashMap::new();
+    let axiom: Vec<char> = "X".chars().collect();
+    add_rule('F', "FF", &mut rules);
+    add_rule('X', "F+[[X]-X]-F[-FX]+X", &mut rules);
+    let mut cmds = std_cmds();
+    cmds.insert('X', Sym::Null);
+    let mut fern = Lsystem::new(
+        point2(4000.0, 8100.0),
+        50.0 * PI / 360.0,
+        50.0,
+        axiom.clone(),
+        rules,
+        cmds,
+    );
+    fern.thickness = 20.0;
+    fern.direction = -PI / 2.0;
+    fern.color = RGBA::new(0.4, 0.8, 0.3, 1.0);
+
+    fern.run(&mut canvas, 6, ns);
+    canvas.save("fern.png")
 }

@@ -11,9 +11,29 @@ pub(crate) enum ShapeType {
     Line,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct TaggedPoint {
+    pub point: Point,
+    pub pen: bool,
+}
+
+impl TaggedPoint {
+    pub fn new(point: Point) -> Self {
+        Self { point, pen: true }
+    }
+
+    pub fn with_pen(point: Point, pen: bool) -> Self {
+        Self { point, pen }
+    }
+}
+
+pub fn tagged(ps: Vec<Point>) -> Vec<TaggedPoint> {
+    ps.iter().map(|p| TaggedPoint::new(*p)).collect()
+}
+
 #[derive(Debug, Clone)]
 pub struct Shape {
-    pub points: Box<Vec<Point>>,
+    pub points: Box<Vec<TaggedPoint>>,
     pub fill_texture: Box<Option<Texture>>,
     pub stroke: Stroke,
     pub stroke_texture: Box<Option<Texture>>,
@@ -23,7 +43,7 @@ pub struct Shape {
 
 impl<'a> Shape {
     pub(crate) fn new(
-        points: Box<Vec<Point>>,
+        points: Box<Vec<TaggedPoint>>,
         fill_texture: Box<Option<Texture>>,
         stroke: Stroke,
         stroke_texture: Box<Option<Texture>>,
@@ -54,11 +74,15 @@ impl<'a> Shape {
     fn draw_poly<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
         pb.set_fillrule(self.fillrule);
-        let head = self.points[0];
+        let head = self.points[0].point;
         let tail = &self.points[1..];
         pb.move_to(head.x, head.y);
         for p in tail {
-            pb.line_to(p.x, p.y);
+            if p.pen {
+                pb.line_to(p.point.x, p.point.y);
+            } else {
+                pb.move_to(p.point.x, p.point.y);
+            }
         }
         if self.fill_texture.is_some() {
             pb.close();
@@ -75,12 +99,12 @@ impl<'a> Shape {
     fn draw_quad<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
         pb.set_fillrule(self.fillrule);
-        let head = self.points[0];
+        let head = self.points[0].point;
         let tail = &mut self.points[1..].to_vec();
         pb.move_to(head.x, head.y);
         while tail.len() >= 2 {
-            let control = tail.pop().unwrap();
-            let p = tail.pop().unwrap();
+            let control = tail.pop().unwrap().point;
+            let p = tail.pop().unwrap().point;
             pb.quad_to(control.x, control.y, p.x, p.y);
         }
         if self.fill_texture.is_some() {
@@ -98,13 +122,13 @@ impl<'a> Shape {
     pub fn draw_cubic<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
         pb.set_fillrule(self.fillrule);
-        let head = self.points[0];
+        let head = self.points[0].point;
         let tail = &mut self.points[1..].to_vec();
         pb.move_to(head.x, head.y);
         while tail.len() >= 3 {
-            let control1 = tail.pop().unwrap();
-            let control2 = tail.pop().unwrap();
-            let p = tail.pop().unwrap();
+            let control1 = tail.pop().unwrap().point;
+            let control2 = tail.pop().unwrap().point;
+            let p = tail.pop().unwrap().point;
             pb.cubic_to(control1.x, control1.y, control2.x, control2.y, p.x, p.y);
         }
         if self.fill_texture.is_some() {
@@ -123,12 +147,12 @@ impl<'a> Shape {
         if self.points.len() < 2 {
             panic!("Rectangle's points vector contains less than 2 points");
         }
-        let left = self.points[0].x;
-        let top = self.points[0].y;
-        let right = self.points[1].x;
-        let bottom = self.points[1].y;
+        let left = self.points[0].point.x;
+        let top = self.points[0].point.y;
+        let right = self.points[1].point.x;
+        let bottom = self.points[1].point.y;
         let path = Path::rect(left, top, right - left, bottom - top);
-        if let Some(fp) = *self.fill_texture.clone(){
+        if let Some(fp) = *self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
         }
         if let Some(sp) = *self.stroke_texture.clone() {
@@ -140,10 +164,10 @@ impl<'a> Shape {
         if self.points.len() < 2 {
             panic!("Ellipse points vector contains less than 2 points");
         }
-        let cx = self.points[0].x;
-        let cy = self.points[0].y;
-        let w = self.points[1].x;
-        let _h = self.points[1].y;
+        let cx = self.points[0].point.x;
+        let cy = self.points[0].point.y;
+        let w = self.points[1].point.x;
+        let _h = self.points[1].point.y;
         let pb = Path::circle(cx, cy, w);
         if let Some(fp) = *self.fill_texture.clone() {
             canvas.fill_path(&pb, &fp);
@@ -157,10 +181,10 @@ impl<'a> Shape {
         if self.points.len() < 2 {
             panic!("Line points vector contains less than 2 points");
         }
-        let x0 = self.points[0].x;
-        let y0 = self.points[0].y;
-        let x1 = self.points[1].x;
-        let y1 = self.points[1].y;
+        let x0 = self.points[0].point.x;
+        let y0 = self.points[0].point.y;
+        let x1 = self.points[1].point.x;
+        let y1 = self.points[1].point.y;
         let mut pb = PathBuilder::new();
         pb.move_to(x0, y0);
         pb.line_to(x1, y1);
@@ -179,7 +203,7 @@ pub struct ShapeBuilder {
     line_cap: LineCap,
     line_join: LineJoin,
     // stroke_dash: Option<StrokeDash>,
-    points: Box<Vec<Point>>,
+    points: Box<Vec<TaggedPoint>>,
     shape: ShapeType,
     fillrule: FillRule,
 }
@@ -246,31 +270,44 @@ impl<'a> ShapeBuilder {
     // }
 
     pub fn points(mut self, pts: &[Point]) -> Self {
-        self.points = Box::new(pts.to_vec());
+        let points = pts.to_vec();
+        let tagged = points.iter().map(|p| TaggedPoint::new(*p)).collect();
+        self.points = Box::new(tagged);
+        self
+    }
+
+    pub fn tagged_points(mut self, tps: &[TaggedPoint]) -> Self {
+        self.points = Box::new(tps.to_vec());
         self
     }
 
     pub fn rect_ltrb(mut self, lt: Point, rb: Point) -> Self {
         self.shape = ShapeType::Rect;
-        self.points = Box::new(vec![lt, rb]);
+        self.points = Box::new(vec![TaggedPoint::new(lt), TaggedPoint::new(rb)]);
         self
     }
 
     pub fn rect_xywh(mut self, xy: Point, wh: Point) -> Self {
         self.shape = ShapeType::Rect;
-        self.points = Box::new(vec![xy, Point::new(xy.x + wh.x, xy.y + wh.y)]);
+        self.points = Box::new(vec![
+            TaggedPoint::new(xy),
+            TaggedPoint::new(Point::new(xy.x + wh.x, xy.y + wh.y)),
+        ]);
         self
     }
 
     pub fn ellipse(mut self, center: Point, wh: Point) -> Self {
         self.shape = ShapeType::Ellipse;
-        self.points = Box::new(vec![center, wh]);
+        self.points = Box::new(vec![TaggedPoint::new(center), TaggedPoint::new(wh)]);
         self
     }
 
     pub fn circle(mut self, center: Point, radius: f32) -> Self {
         self.shape = ShapeType::Ellipse;
-        self.points = Box::new(vec![center, Point::new(radius, radius)]);
+        self.points = Box::new(vec![
+            TaggedPoint::new(center),
+            TaggedPoint::new(Point::new(radius, radius)),
+        ]);
         self
     }
 
@@ -285,7 +322,7 @@ impl<'a> ShapeBuilder {
     }
 
     pub fn line(mut self, from: Point, to: Point) -> Self {
-        self.points = Box::new(vec![from, to]);
+        self.points = Box::new(vec![TaggedPoint::new(from), TaggedPoint::new(to)]);
         self.shape = ShapeType::Line;
         self
     }
