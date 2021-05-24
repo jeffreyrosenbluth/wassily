@@ -3,6 +3,9 @@ use std::collections::HashMap;
 use wassily::prelude::*;
 use wassily::skia::Canvas;
 
+const WIDTH: u32 = 8191;
+const HEIGHT: u32 = 8191;
+
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]
 enum Sym {
     F,
@@ -94,6 +97,9 @@ where
     rules: Rules,
     cmds: Cmds,
     ns: Noise<[f64; 3], T>,
+    width: u32,
+    height: u32,
+    depth: u32,
 }
 
 impl<T> Lsystem<T>
@@ -101,16 +107,18 @@ where
     T: noise::NoiseFn<[f64; 3]>,
 {
     fn new(
-        start: Point,
         angle: f32,
         length: f32,
         axiom: Axiom,
         rules: Rules,
         cmds: Cmds,
         ns: Noise<[f64; 3], T>,
+        width: u32,
+        height: u32,
+        depth: u32,
     ) -> Self {
         Self {
-            points: vec![TaggedPoint::new(start)],
+            points: vec![TaggedPoint::new(point2(0.0, 0.0))],
             direction: 0.0,
             angle,
             color: RGBA::white(),
@@ -121,6 +129,9 @@ where
             rules,
             cmds,
             ns,
+            width,
+            height,
+            depth,
         }
     }
 
@@ -142,8 +153,7 @@ where
 
     fn go(&mut self) {
         let p = self.jitter();
-        self.points
-            .push(TaggedPoint::with_pen(p, false));
+        self.points.push(TaggedPoint::with_pen(p, false));
     }
 
     fn right(&mut self) {
@@ -179,34 +189,63 @@ where
         }
     }
 
-    fn run(&mut self, canvas: &mut Canvas, iters: u32) {
-        let production = iter_rules(self.axiom.clone(), &self.rules, iters);
+    fn bounding_box(&self) -> (Point, Point) {
+        let mut low_x = f32::MAX;
+        let mut high_x = f32::MIN;
+        let mut low_y = f32::MAX;
+        let mut high_y = f32::MIN;
+
+        for q in &self.points {
+            let p = q.point;
+            if p.x < low_x {
+                low_x = p.x
+            }
+            if p.x > high_x {
+                high_x = p.x
+            }
+            if p.y < low_y {
+                low_y = p.y
+            }
+            if p.y > high_y {
+                high_y = p.y
+            }
+        }
+        (point2(low_x, low_y), point2(high_x, high_y))
+    }
+
+    fn run(&mut self, canvas: &mut Canvas) {
+        let production = iter_rules(self.axiom.clone(), &self.rules, self.depth);
         let production = to_sym(production, &self.cmds);
         for k in production {
             self.interp(k);
         }
+
+        let (low, high) = self.bounding_box();
+        let mx = 0.5 * (high.x + low.x);
+        let my = 0.5 * (high.y + low.y);
+        let x = self.width as f32 / 2.0 - mx;
+        let y = (self.height as f32) / 2.0 - my;
+        let transform = Transform::identity().post_translate(vec2(x, y));
+
         let path = ShapeBuilder::new()
             .tagged_points(&self.points)
             .no_fill()
-            // .fill_color(RGBA::new(1.0, 0.0, 0.0, 0.5))
             .stroke_weight(self.thickness)
             .stroke_color(self.color)
             .line_join(LineJoin::Bevel)
             .fill_rule(FillRule::EvenOdd)
-            // .quad()
+            .transform(transform)
             .build();
 
         path.draw(canvas);
     }
 }
 
-fn main() {
-    let mut canvas = Canvas::new(8191, 8191);
-    canvas.fill(RGBA::black());
-
-    // Dragon
-    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
-    ns.set_noise_factor(300.);
+// Dragon
+#[allow(dead_code)]
+fn dragon() -> Lsystem<OpenSimplex> {
+    let mut ns = Noise::<[f64; 3], _>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::new());
+    ns.set_noise_factor(0.);
     ns.set_noise_scale(10.0);
     let mut rules = HashMap::new();
     let axiom = vec!['F'];
@@ -215,19 +254,25 @@ fn main() {
     let mut cmds = std_cmds();
     cmds.insert('G', Sym::F);
     let mut dragon = Lsystem::new(
-        point2(6000., 2800.),
         PI / 2.0,
         60.0,
         axiom.clone(),
         rules,
         cmds,
         ns,
+        WIDTH,
+        HEIGHT,
+        13,
     );
     dragon.thickness = 8.0;
+    dragon
+}
 
-    // Koch Lake
-    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
-    ns.set_noise_factor(500.);
+// Koch Lake
+#[allow(dead_code)]
+fn lake() -> Lsystem<OpenSimplex> {
+    let mut ns = Noise::<[f64; 3], _>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::new());
+    ns.set_noise_factor(0.);
     ns.set_noise_scale(20.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "F+F+F+F".chars().collect();
@@ -236,39 +281,51 @@ fn main() {
     let mut cmds = std_cmds();
     cmds.insert('f', Sym::F);
     let mut lake = Lsystem::new(
-        point2(1950., 6290.0),
         PI / 2.0,
         20.0,
         axiom.clone(),
         rules,
         cmds,
         ns,
+        WIDTH,
+        HEIGHT,
+        3,
     );
     lake.thickness = 8.0;
+    lake
+}
 
-    // Koch 3
-    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
-    ns.set_noise_factor(150.);
+// Koch 3
+#[allow(dead_code)]
+fn koch3() -> Lsystem<OpenSimplex> {
+    let mut ns = Noise::<[f64; 3], _>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::new());
+    ns.set_noise_factor(0.);
     ns.set_noise_scale(10.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "F-F-F".chars().collect();
     add_rule('F', "FF-F+F-F-FF", &mut rules);
     let cmds = std_cmds();
     let mut koch3 = Lsystem::new(
-        point2(2700., 2700.0),
         PI / 2.0,
         115.0,
         axiom.clone(),
         rules,
         cmds,
         ns,
+        WIDTH,
+        HEIGHT,
+        3,
     );
     koch3.thickness = 20.0;
     koch3.color = RGBA::new(1.0, 1.0, 1.0, 0.5);
+    koch3
+}
 
-    // Fern
-    let mut ns = Noise::<[f64; 3], _>::new(8191.0, 8191.0, OpenSimplex::new());
-    ns.set_noise_factor(50.0);
+// Fern
+#[allow(dead_code)]
+fn fern() -> Lsystem<OpenSimplex> {
+    let mut ns = Noise::<[f64; 3], _>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::new());
+    ns.set_noise_factor(0.0);
     ns.set_noise_scale(20.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "X".chars().collect();
@@ -277,38 +334,54 @@ fn main() {
     let mut cmds = std_cmds();
     cmds.insert('X', Sym::Null);
     let mut fern = Lsystem::new(
-        point2(4000.0, 8100.0),
         50.0 * PI / 360.0,
         50.0,
         axiom.clone(),
         rules,
         cmds,
         ns,
+        WIDTH,
+        HEIGHT,
+        5,
     );
     fern.thickness = 20.0;
     fern.direction = -PI / 2.0;
     fern.color = RGBA::new(0.4, 0.8, 0.3, 1.0);
+    fern
+}
 
-    // Sierpinski
-    // ns.set_noise_factor(0.0);
-    // ns.set_noise_scale(10.0);
-    // let mut rules = HashMap::new();
-    // let axiom: Vec<char> = "X".chars().collect();
-    // add_rule('F', "FF", &mut rules);
-    // add_rule('X', "F+[[X]-X]-F[-FX]+X", &mut rules);
-    // let mut cmds = std_cmds();
-    // cmds.insert('X', Sym::Null);
-    // let mut sier = Lsystem::new(
-    //     point2(4000.0, 8100.0),
-    //     50.0 * PI / 360.0,
-    //     50.0,
-    //     axiom.clone(),
-    //     rules,
-    //     cmds,
-    // );
-    // sier.thickness = 20.0;
-    // sier.direction = PI / 2.0;
+// Sierpinski
+#[allow(dead_code)]
+fn sier() -> Lsystem<OpenSimplex> {
+    let mut ns = Noise::<[f64; 3], _>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::new());
+    ns.set_noise_factor(0.0);
+    ns.set_noise_scale(30.0);
+    let mut rules = HashMap::new();
+    let axiom: Vec<char> = "F+XF+F+XF".chars().collect();
+    add_rule('X', "XF-F+F-XF+F+XF-F+F-X", &mut rules);
+    let mut cmds = std_cmds();
+    cmds.insert('X', Sym::Null);
+    let mut sier = Lsystem::new(
+        PI / 2.0,
+        55.0,
+        axiom.clone(),
+        rules,
+        cmds,
+        ns,
+        WIDTH,
+        HEIGHT,
+        5,
+    );
+    sier.thickness = 20.0;
+    sier.direction = PI / 2.0;
+    sier
+}
 
-    fern.run(&mut canvas, 6);
-    canvas.save("fern.png")
+fn main() {
+    let mut canvas = Canvas::new(WIDTH, WIDTH);
+    canvas.fill(RGBA::black());
+
+    let mut lsys = sier();
+    lsys.run(&mut canvas);
+    canvas.save("sier.png")
 }

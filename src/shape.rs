@@ -39,6 +39,7 @@ pub struct Shape {
     pub stroke_texture: Box<Option<Texture>>,
     shape: ShapeType,
     fillrule: FillRule,
+    transform: Transform,
 }
 
 impl<'a> Shape {
@@ -49,6 +50,7 @@ impl<'a> Shape {
         stroke_texture: Box<Option<Texture>>,
         shape: ShapeType,
         fillrule: FillRule,
+        transform: Transform,
     ) -> Self {
         Self {
             points,
@@ -57,6 +59,7 @@ impl<'a> Shape {
             stroke_texture,
             shape,
             fillrule,
+            transform,
         }
     }
 
@@ -87,6 +90,7 @@ impl<'a> Shape {
         if self.fill_texture.is_some() {
             pb.close();
         }
+        pb.set_transform(self.transform);
         let path = pb.finish();
         if let Some(fp) = *self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
@@ -110,6 +114,7 @@ impl<'a> Shape {
         if self.fill_texture.is_some() {
             pb.close();
         }
+        pb.set_transform(self.transform);
         let path = pb.finish();
         if let Some(fp) = *self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
@@ -134,6 +139,7 @@ impl<'a> Shape {
         if self.fill_texture.is_some() {
             pb.close();
         }
+        pb.set_transform(self.transform);
         let path = pb.finish();
         if let Some(fp) = *self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
@@ -151,7 +157,8 @@ impl<'a> Shape {
         let top = self.points[0].point.y;
         let right = self.points[1].point.x;
         let bottom = self.points[1].point.y;
-        let path = Path::rect(left, top, right - left, bottom - top);
+        let mut path = Path::rect(left, top, right - left, bottom - top);
+        path.transform = self.transform;
         if let Some(fp) = *self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
         }
@@ -168,7 +175,8 @@ impl<'a> Shape {
         let cy = self.points[0].point.y;
         let w = self.points[1].point.x;
         let _h = self.points[1].point.y;
-        let pb = Path::circle(cx, cy, w);
+        let mut pb = Path::circle(cx, cy, w);
+        pb.transform = self.transform;
         if let Some(fp) = *self.fill_texture.clone() {
             canvas.fill_path(&pb, &fp);
         }
@@ -188,6 +196,7 @@ impl<'a> Shape {
         let mut pb = PathBuilder::new();
         pb.move_to(x0, y0);
         pb.line_to(x1, y1);
+        pb.set_transform(self.transform);
         let path = pb.finish();
         if let Some(sp) = *self.stroke_texture.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke);
@@ -206,6 +215,7 @@ pub struct ShapeBuilder {
     points: Box<Vec<TaggedPoint>>,
     shape: ShapeType,
     fillrule: FillRule,
+    transform: Transform,
 }
 
 impl<'a> ShapeBuilder {
@@ -220,6 +230,7 @@ impl<'a> ShapeBuilder {
             points: Box::new(vec![]),
             shape: ShapeType::Poly,
             fillrule: FillRule::Winding,
+            transform: Transform::identity(),
         }
     }
 
@@ -332,6 +343,11 @@ impl<'a> ShapeBuilder {
         self
     }
 
+    pub fn transform(mut self, transform: Transform) -> Self {
+        self.transform = transform;
+        self
+    }
+
     pub fn build(self) -> Shape {
         let mut fill_texture: Box<Option<Texture>> = Box::new(None);
         let mut stroke_texture: Box<Option<Texture>> = Box::new(None);
@@ -353,6 +369,7 @@ impl<'a> ShapeBuilder {
             stroke_texture,
             self.shape,
             self.fillrule,
+            self.transform
         )
     }
 }

@@ -6,6 +6,7 @@ pub use crate::noise::*;
 pub use crate::shape::*;
 pub use crate::util::*;
 pub use euclid::point2;
+pub use euclid::vec2;
 
 pub type IntRect = euclid::default::Box2D<i32>;
 pub type IntPoint = euclid::default::Point2D<i32>;
