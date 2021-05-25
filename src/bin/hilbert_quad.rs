@@ -26,7 +26,7 @@ fn main() {
     }
     path = path.into_iter().collect();
 
-    let color = RGBA::white();
+    let color = WHITE;
 
     let shape = ShapeBuilder::new()
         .no_stroke()

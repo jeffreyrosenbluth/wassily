@@ -5,7 +5,8 @@ use svg::node::element as vg;
 use svg::node::element::path::Data;
 use svg::Document;
 
-pub struct Canvas(Document);
+// The usize is for gradient ids'
+pub struct Canvas(Document, usize);
 
 impl Canvas {
     pub fn new(width: u32, height: u32) -> Self {
@@ -14,7 +15,7 @@ impl Canvas {
             .set("width", width)
             .set("height", height)
             .set("viewbox", (0, 0, width, height));
-        Canvas(doc)
+        Canvas(doc, 0)
     }
 }
 

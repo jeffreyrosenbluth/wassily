@@ -1,4 +1,5 @@
 use crate::base::{self, Sketch, RGBA, Texture};
+use skia::StrokeDash;
 use tiny_skia as skia;
 use tiny_skia::Pixmap;
 
@@ -160,6 +161,10 @@ impl From<&base::Stroke> for skia::Stroke {
             base::LineJoin::Miter => skia::LineJoin::Miter,
             base::LineJoin::Round => skia::LineJoin::Round,
             base::LineJoin::Bevel => skia::LineJoin::Bevel,
+        };
+        skia_stroke.dash = match &s.dash {
+            Some(dash) => {StrokeDash::new(dash.array.clone(), dash.offset)}
+            None => {None}
         };
         skia_stroke
     }

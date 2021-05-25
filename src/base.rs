@@ -8,8 +8,11 @@ pub struct RGBA {
     pub a: f32,
 }
 
+pub const WHITE: RGBA = RGBA::new(1.0, 1.0, 1.0, 1.0);
+pub const BLACK: RGBA = RGBA::new(0.0, 0.0, 0.0, 1.0);
+
 impl RGBA {
-    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
+    pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self { r, g, b, a }
     }
 
@@ -27,24 +30,6 @@ impl RGBA {
         let b = (self.b * 255.0) as u8;
         let a = (self.a * 255.0) as u8;
         (r, g, b, a)
-    }
-
-    pub fn white() -> Self {
-        RGBA {
-            r: 1.0,
-            g: 1.0,
-            b: 1.0,
-            a: 1.0,
-        }
-    }
-
-    pub fn black() -> Self {
-        RGBA {
-            r: 0.0,
-            g: 0.0,
-            b: 0.0,
-            a: 1.0,
-        }
     }
 }
 
@@ -106,11 +91,11 @@ pub enum Texture {
 
 impl Texture {
     pub fn white() -> Self {
-        Texture::SolidColor(RGBA::white())
+        Texture::SolidColor(WHITE)
     }
 
     pub fn black() -> Self {
-        Texture::SolidColor(RGBA::black())
+        Texture::SolidColor(BLACK)
     }
 }
 #[derive(Clone, PartialEq, Debug)]
@@ -119,6 +104,7 @@ pub struct Stroke {
     pub miter_limit: f32,
     pub line_cap: LineCap,
     pub line_join: LineJoin,
+    pub dash: Option<Dash>,
 }
 
 impl Default for Stroke {
@@ -128,6 +114,7 @@ impl Default for Stroke {
             miter_limit: 4.0,
             line_cap: LineCap::default(),
             line_join: LineJoin::default(),
+            dash: None,
         }
     }
 }
@@ -156,6 +143,18 @@ pub enum LineJoin {
 impl Default for LineJoin {
     fn default() -> Self {
         LineJoin::Miter
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Dash {
+    pub array: Vec<f32>,
+    pub offset: f32,
+}
+
+impl Dash {
+    pub fn new(array: Vec<f32>, offset: f32) -> Self {
+        Self { array, offset }
     }
 }
 
@@ -233,10 +232,9 @@ impl PathBuilder {
     }
 
     pub fn move_by(&mut self, x: f32, y: f32) {
-        let (x, y) = (self.position.x + x, self. position.y + y);
+        let (x, y) = (self.position.x + x, self.position.y + y);
         self.position = point2(x, y);
         self.path.cmds.push(PathCmd::MoveTo(Point::new(x, y)))
-
     }
 
     /// Adds a line segment from the current point to `x`, `y`
@@ -246,7 +244,7 @@ impl PathBuilder {
     }
 
     pub fn line_by(&mut self, x: f32, y: f32) {
-        let (x, y) = (self.position.x + x, self. position.y + y);
+        let (x, y) = (self.position.x + x, self.position.y + y);
         self.position = point2(x, y);
         self.path.cmds.push(PathCmd::LineTo(Point::new(x, y)))
     }

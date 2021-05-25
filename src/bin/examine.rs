@@ -31,12 +31,14 @@ fn main() {
     let path = pb.finish();
     canvas.fill_path(&path, &Texture::LinearGradient(gradient));
 
-    let circle = ShapeBuilder::new()
+    let mut circle = ShapeBuilder::new()
         .circle(point2(100.0 + WIDTH / 2.0, -100.0 + HEIGHT / 2.0), 100.0)
         .fill_color(palette.colors[2])
         .stroke_color(palette.colors[4])
         .stroke_weight(10.0)
         .build();
+
+    circle.stroke.dash = Some(Dash::new(vec![10., 18.], 16.));
     circle.draw(&mut canvas);
 
     canvas.save("examine_skia.png");

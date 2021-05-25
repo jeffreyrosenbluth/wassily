@@ -1,7 +1,7 @@
 use noise::*;
 use std::collections::HashMap;
 use wassily::prelude::*;
-use wassily::skia::Canvas;
+use wassily::raqote::Canvas;
 
 const WIDTH: u32 = 8191;
 const HEIGHT: u32 = 8191;
@@ -121,7 +121,7 @@ where
             points: vec![TaggedPoint::new(point2(0.0, 0.0))],
             direction: 0.0,
             angle,
-            color: RGBA::white(),
+            color: WHITE,
             length,
             thickness: 2.0,
             stack: vec![],
@@ -230,9 +230,11 @@ where
         let path = ShapeBuilder::new()
             .tagged_points(&self.points)
             .no_fill()
+            // .fill_color(RGBA::white())
             .stroke_weight(self.thickness)
             .stroke_color(self.color)
-            .line_join(LineJoin::Bevel)
+            // .line_join(LineJoin::Bevel)
+            .line_cap(LineCap::Square)
             .fill_rule(FillRule::EvenOdd)
             .transform(transform)
             .build();
@@ -377,11 +379,38 @@ fn sier() -> Lsystem<OpenSimplex> {
     sier
 }
 
+// Carpet
+#[allow(dead_code)]
+fn carpet() -> Lsystem<OpenSimplex> {
+    let mut ns = Noise::<[f64; 3], _>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::new());
+    ns.set_noise_factor(0.0);
+    ns.set_noise_scale(10.0);
+    let mut rules = HashMap::new();
+    let axiom: Vec<char> = "F-F-F-F".chars().collect();
+    add_rule('F', "F[F]-F+F[--F]+F-F", &mut rules);
+    let cmds = std_cmds();
+    let mut carpet = Lsystem::new(
+        PI / 2.0,
+        75.0,
+        axiom.clone(),
+        rules,
+        cmds,
+        ns,
+        WIDTH,
+        HEIGHT,
+        4,
+    );
+    carpet.color = RGBA::with_8(191, 36, 93, 100) ;
+    carpet.thickness = 15.0;
+    carpet.direction = PI / 2.0;
+    carpet
+}
 fn main() {
     let mut canvas = Canvas::new(WIDTH, WIDTH);
-    canvas.fill(RGBA::black());
+    canvas.fill(RGBA::with_8(242, 187, 197, 255));
+    // canvas.fill(RGBA::with_8(242, 232, 233, 255));
 
-    let mut lsys = sier();
+    let mut lsys = carpet();
     lsys.run(&mut canvas);
-    canvas.save("sier.png")
+    canvas.save("carpet.png")
 }
