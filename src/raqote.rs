@@ -143,6 +143,16 @@ impl From<&base::Stroke> for raqote::StrokeStyle {
             base::LineJoin::Round => raqote::LineJoin::Round,
             base::LineJoin::Bevel => raqote::LineJoin::Bevel,
         };
+        raqote_stroke.dash_array = match &s.dash {
+            Some(dash) => dash.array.clone(),
+            None => {
+                vec![]
+            }
+        };
+        raqote_stroke.dash_offset = match &s.dash {
+            Some(dash) => dash.offset,
+            None => 0.0,
+        };
         raqote_stroke
     }
 }

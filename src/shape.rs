@@ -211,7 +211,7 @@ pub struct ShapeBuilder {
     stroke_width: f32,
     line_cap: LineCap,
     line_join: LineJoin,
-    // stroke_dash: Option<StrokeDash>,
+    stroke_dash: Option<Dash>,
     points: Box<Vec<TaggedPoint>>,
     shape: ShapeType,
     fillrule: FillRule,
@@ -226,7 +226,7 @@ impl<'a> ShapeBuilder {
             stroke_width: 1.0,
             line_cap: LineCap::default(),
             line_join: LineJoin::default(),
-            // stroke_dash: None,
+            stroke_dash: None,
             points: Box::new(vec![]),
             shape: ShapeType::Poly,
             fillrule: FillRule::Winding,
@@ -274,11 +274,10 @@ impl<'a> ShapeBuilder {
         self
     }
 
-    // XXX FIXME
-    // pub fn stroke_dash(mut self, dash: StrokeDash) -> Self {
-    //     self.stroke_dash = Some(dash);
-    //     self
-    // }
+    pub fn stroke_dash(mut self, dash: Dash) -> Self {
+        self.stroke_dash = Some(dash);
+        self
+    }
 
     pub fn points(mut self, pts: &[Point]) -> Self {
         let points = pts.to_vec();

@@ -41,5 +41,5 @@ fn main() {
     circle.stroke.dash = Some(Dash::new(vec![10., 18.], 16.));
     circle.draw(&mut canvas);
 
-    canvas.save("examine_skia.png");
+    canvas.save("examine_raqote.png");
 }
