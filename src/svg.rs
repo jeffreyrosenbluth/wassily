@@ -23,10 +23,10 @@ impl Sketch for Canvas {
     fn fill_path(&mut self, path: &base::Path, texture: &base::Texture) {
         let doc = self.0.clone();
         let svg_path: vg::Path = path.into();
-        let color = match texture {
-            base::Texture::SolidColor(c) => c.to_svg(),
-            base::Texture::LinearGradient(_) => {todo!()}
-            base::Texture::RadialGradient(_) => {todo!()}
+        let color = match texture.kind {
+            base::TextureKind::SolidColor(c) => c.to_svg(),
+            base::TextureKind::LinearGradient(_) => {todo!()}
+            base::TextureKind::RadialGradient(_) => {todo!()}
         };
         let svg_path = svg_path
             .set("fill", color.0)
@@ -40,10 +40,10 @@ impl Sketch for Canvas {
     fn stroke_path(&mut self, path: &base::Path, texture: &base::Texture, stroke: &base::Stroke) {
         let doc = self.0.clone();
         let svg_path: vg::Path = path.into();
-        let color = match texture {
-            base::Texture::SolidColor(c) => c.to_svg(),
-            base::Texture::LinearGradient(_) => {todo!()}
-            base::Texture::RadialGradient(_) => {todo!()}
+        let color = match texture.kind {
+            base::TextureKind::SolidColor(c) => c.to_svg(),
+            base::TextureKind::LinearGradient(_) => {todo!()}
+            base::TextureKind::RadialGradient(_) => {todo!()}
         };
         let svg_path = svg_path
             .set("stroke", color.0)
@@ -70,10 +70,10 @@ impl Sketch for Canvas {
 
     fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &base::Texture) {
         let doc = self.0.clone();
-        let color = match texture {
-            base::Texture::SolidColor(c) => c.to_svg(),
-            base::Texture::LinearGradient(_) => {todo!()}
-            base::Texture::RadialGradient(_) => {todo!()}
+        let color = match texture.kind {
+            base::TextureKind::SolidColor(c) => c.to_svg(),
+            base::TextureKind::LinearGradient(_) => {todo!()}
+            base::TextureKind::RadialGradient(_) => {todo!()}
         };
         let rect = vg::Rectangle::new()
             .set("x", x)

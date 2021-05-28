@@ -1,5 +1,5 @@
 use wassily::prelude::*;
-use wassily::skia::Canvas;
+use wassily::svg::Canvas;
 
 const WIDTH: f32 = 1200.0;
 const HEIGHT: f32 = 0.80 * WIDTH;
@@ -29,7 +29,7 @@ fn main() {
     pb.cubic_to(740.0, 460.0, 440.0, 160.0, 60.0, 60.0);
     pb.close();
     let path = pb.finish();
-    canvas.fill_path(&path, &Texture::LinearGradient(gradient));
+    canvas.fill_path(&path, &Texture::new(TextureKind::LinearGradient(gradient)));
 
     let mut circle = ShapeBuilder::new()
         .circle(point2(100.0 + WIDTH / 2.0, -100.0 + HEIGHT / 2.0), 100.0)

@@ -83,19 +83,68 @@ impl Gradient {
 }
 
 #[derive(Clone, PartialEq, Debug)]
-pub enum Texture {
+pub enum TextureKind {
     SolidColor(RGBA),
     LinearGradient(Gradient),
     RadialGradient(Gradient),
 }
 
-impl Texture {
+impl TextureKind {
     pub fn white() -> Self {
-        Texture::SolidColor(WHITE)
+        TextureKind::SolidColor(WHITE)
     }
 
     pub fn black() -> Self {
-        Texture::SolidColor(BLACK)
+        TextureKind::SolidColor(BLACK)
+    }
+}
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+pub enum BlendMode {
+    Clear,
+    Source,
+    Destination,
+    SourceOver,
+    DestinationOver,
+    SourceIn,
+    DestinationIn,
+    SourceOut,
+    DestinationOut,
+    SourceAtop,
+    DestinationAtop,
+    Xor,
+    Plus,
+    Modulate,
+    Screen,
+    Overlay,
+    Darken,
+    Lighten,
+    ColorDodge,
+    ColorBurn,
+    HardLight,
+    SoftLight,
+    Difference,
+    Exclusion,
+    Multiply,
+    Hue,
+    Saturation,
+    Color,
+    Luminosity,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Texture {
+    pub kind: TextureKind,
+    pub mode: BlendMode,
+    pub anti_alias: bool,
+}
+
+impl Texture {
+    pub fn new(kind: TextureKind) -> Self {
+        Self {
+            kind,
+            mode: BlendMode::SourceOver,
+            anti_alias: true,
+        }
     }
 }
 #[derive(Clone, PartialEq, Debug)]

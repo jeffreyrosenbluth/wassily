@@ -56,7 +56,7 @@ fn main() {
         0.0,
         WIDTH as f32 / 2.0,
         HEIGHT as f32,
-        &Texture::SolidColor(color_left),
+        &Texture::new(TextureKind::SolidColor(color_left))
     );
     Canvas::fill_rect(
         &mut canvas,
@@ -64,7 +64,7 @@ fn main() {
         0.0,
         WIDTH as f32 / 2.0,
         HEIGHT as f32,
-        &Texture::SolidColor(color_right),
+        &Texture::new(TextureKind::SolidColor(color_right))
     );
 
     for x in (0..WIDTH).step_by(GRID as usize) {
@@ -88,7 +88,7 @@ fn main() {
         0.0,
         2.0 * WIDTH as f32 * OFFSET,
         HEIGHT as f32,
-        &Texture::SolidColor(color_left),
+        &Texture::new(TextureKind::SolidColor(color_left))
     );
 
     canvas.save("half.png")

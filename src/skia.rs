@@ -1,4 +1,6 @@
-use crate::base::{self, Sketch, Texture, RGBA};
+use std::borrow::BorrowMut;
+
+use crate::base::{self, Sketch, Texture, TextureKind, RGBA};
 use skia::StrokeDash;
 use tiny_skia as skia;
 use tiny_skia::Pixmap;
@@ -21,7 +23,8 @@ impl Sketch for Canvas {
     fn fill_path(&mut self, path: &base::Path, texture: &base::Texture) {
         let skia_path: skia::Path = path.into();
         let mut paint: skia::Paint = texture.into();
-        paint.anti_alias = true;
+        paint.anti_alias = texture.anti_alias;
+        paint.blend_mode = texture.mode.into();
         let fill_rule: skia::FillRule = path.fill_rule.into();
         let transform = to_transform(path.transform);
         self.0
@@ -32,6 +35,7 @@ impl Sketch for Canvas {
         let skia_path: skia::Path = path.into();
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = true;
+        paint.blend_mode = texture.mode.into();
         let stroke = stroke.into();
         let transform = to_transform(path.transform);
         self.0
@@ -41,6 +45,7 @@ impl Sketch for Canvas {
     fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &base::Texture) {
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = true;
+        paint.blend_mode = texture.mode.into();
         let rect: skia::Rect = skia::Rect::from_xywh(x, y, width, height).unwrap();
         self.0
             .fill_rect(rect, &paint, skia::Transform::identity(), None);
@@ -94,12 +99,12 @@ impl From<base::RGBA> for skia::Color {
 impl<'a> From<&Texture> for skia::Paint<'a> {
     fn from(t: &Texture) -> Self {
         let mut p = Self::default();
-        match t {
-            Texture::SolidColor(c) => {
-                p.set_color((*c).into());
+        match t.kind.clone() {
+            TextureKind::SolidColor(c) => {
+                p.set_color((c).into());
                 p
             }
-            Texture::LinearGradient(g) => {
+            TextureKind::LinearGradient(g) => {
                 let start = skia::Point {
                     x: g.start.x,
                     y: g.start.y,
@@ -118,7 +123,7 @@ impl<'a> From<&Texture> for skia::Paint<'a> {
                 p.shader = skia::LinearGradient::new(start, end, stops, mode, transform).unwrap();
                 p
             }
-            Texture::RadialGradient(g) => {
+            TextureKind::RadialGradient(g) => {
                 let start = skia::Point {
                     x: g.start.x,
                     y: g.start.y,
@@ -176,6 +181,42 @@ impl From<base::SpreadMode> for skia::SpreadMode {
             base::SpreadMode::Pad => skia::SpreadMode::Pad,
             base::SpreadMode::Reflect => skia::SpreadMode::Reflect,
             base::SpreadMode::Repeat => skia::SpreadMode::Repeat,
+        }
+    }
+}
+
+impl From<base::BlendMode> for skia::BlendMode {
+    fn from(mode: base::BlendMode) -> Self {
+        match mode {
+            base::BlendMode::Clear => {skia::BlendMode::Clear}
+            base::BlendMode::Source => {skia::BlendMode::Source}
+            base::BlendMode::Destination => {skia::BlendMode::Destination}
+            base::BlendMode::SourceOver => {skia::BlendMode::SourceOver}
+            base::BlendMode::DestinationOver => {skia::BlendMode::DestinationOver}
+            base::BlendMode::SourceIn => {skia::BlendMode::SourceIn}
+            base::BlendMode::DestinationIn => {skia::BlendMode::DestinationIn}
+            base::BlendMode::SourceOut => {skia::BlendMode::SourceOut}
+            base::BlendMode::DestinationOut => {skia::BlendMode::DestinationOut}
+            base::BlendMode::SourceAtop => {skia::BlendMode::SourceAtop}
+            base::BlendMode::DestinationAtop => {skia::BlendMode::DestinationAtop}
+            base::BlendMode::Xor => {skia::BlendMode::Xor}
+            base::BlendMode::Plus => {skia::BlendMode::Plus}
+            base::BlendMode::Modulate => {skia::BlendMode::Modulate}
+            base::BlendMode::Screen => {skia::BlendMode::Screen}
+            base::BlendMode::Overlay => {skia::BlendMode::Overlay}
+            base::BlendMode::Darken => {skia::BlendMode::Darken}
+            base::BlendMode::Lighten => {skia::BlendMode::Lighten}
+            base::BlendMode::ColorDodge => {skia::BlendMode::ColorDodge}
+            base::BlendMode::ColorBurn => {skia::BlendMode::ColorBurn}
+            base::BlendMode::HardLight => {skia::BlendMode::HardLight}
+            base::BlendMode::SoftLight => {skia::BlendMode::SoftLight}
+            base::BlendMode::Difference => {skia::BlendMode::Difference}
+            base::BlendMode::Exclusion => {skia::BlendMode::Exclusion}
+            base::BlendMode::Multiply => {skia::BlendMode::Multiply}
+            base::BlendMode::Hue => {skia::BlendMode::Hue}
+            base::BlendMode::Saturation => {skia::BlendMode::Saturation}
+            base::BlendMode::Color => {skia::BlendMode::Color}
+            base::BlendMode::Luminosity => {skia::BlendMode::Luminosity}
         }
     }
 }

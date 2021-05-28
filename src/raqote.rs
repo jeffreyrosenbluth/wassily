@@ -1,7 +1,6 @@
-use crate::base::{self, Sketch, Texture};
+use crate::base::{self, Sketch, Texture, TextureKind};
 use base::RGBA;
-use raqote::{self, DrawOptions, Source};
-use raqote::{DrawTarget, SolidSource};
+use raqote::{self, AntialiasMode, DrawOptions, DrawTarget, SolidSource, Source};
 
 pub struct Canvas(DrawTarget);
 
@@ -13,28 +12,51 @@ impl Canvas {
 }
 
 impl Sketch for Canvas {
-    fn fill_path(&mut self, path: &base::Path, texture: &base::Texture) {
+    fn fill_path(&mut self, path: &base::Path, texture: &Texture) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
-        self.0.fill(&raqote_path, &source, &DrawOptions::default());
+        let mut draw_options = DrawOptions::default();
+        draw_options.antialias = match texture.anti_alias {
+            true => AntialiasMode::Gray,
+            false => AntialiasMode::None,
+        };
+        draw_options.blend_mode = texture.mode.into();
+        self.0.fill(&raqote_path, &source, &draw_options);
     }
 
-    fn stroke_path(&mut self, path: &base::Path, texture: &base::Texture, stroke: &base::Stroke) {
+    fn stroke_path(
+        &mut self,
+        path: &base::Path,
+        texture: &Texture,
+        stroke: &base::Stroke,
+    ) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         let stroke = stroke.into();
+        let mut draw_options = DrawOptions::default();
+        draw_options.antialias = match texture.anti_alias {
+            true => AntialiasMode::Gray,
+            false => AntialiasMode::None,
+        };
+
         self.0
-            .stroke(&raqote_path, &source, &stroke, &DrawOptions::default());
+            .stroke(&raqote_path, &source, &stroke, &draw_options);
     }
 
     fn fill(&mut self, color: base::RGBA) {
-        self.0.clear((&color).into());
+        self.0.clear(color.into());
     }
 
     fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture) {
         let src: raqote::Source = texture.into();
+        let mut draw_options = DrawOptions::default();
+        draw_options.antialias = match texture.anti_alias {
+            true => AntialiasMode::Gray,
+            false => AntialiasMode::None,
+        };
+        draw_options.blend_mode = texture.mode.into();
         self.0
-            .fill_rect(x, y, width, height, &src, &DrawOptions::default())
+            .fill_rect(x, y, width, height, &src, &draw_options);
     }
 
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {
@@ -42,8 +64,8 @@ impl Sketch for Canvas {
     }
 }
 
-impl From<&RGBA> for SolidSource {
-    fn from(c: &RGBA) -> Self {
+impl From<RGBA> for SolidSource {
+    fn from(c: RGBA) -> Self {
         let r = c.r * 255.0;
         let g = c.g * 255.0;
         let b = c.b * 255.0;
@@ -81,12 +103,12 @@ impl From<&base::Path> for raqote::Path {
 
 impl From<&base::Texture> for raqote::Source<'_> {
     fn from(t: &base::Texture) -> Self {
-        match t {
-            Texture::SolidColor(c) => {
+        match t.kind.clone() {
+            TextureKind::SolidColor(c) => {
                 let sc: SolidSource = c.into();
                 sc.into()
             }
-            Texture::LinearGradient(g) => {
+            TextureKind::LinearGradient(g) => {
                 let stops = g
                     .stops
                     .iter()
@@ -105,7 +127,7 @@ impl From<&base::Texture> for raqote::Source<'_> {
                 let spread = g.mode.into();
                 Source::new_linear_gradient(gradient, g.start, g.end, spread)
             }
-            Texture::RadialGradient(g) => {
+            TextureKind::RadialGradient(g) => {
                 let stops = g
                     .stops
                     .iter()
@@ -163,6 +185,44 @@ impl From<base::SpreadMode> for raqote::Spread {
             base::SpreadMode::Pad => raqote::Spread::Pad,
             base::SpreadMode::Reflect => raqote::Spread::Reflect,
             base::SpreadMode::Repeat => raqote::Spread::Repeat,
+        }
+    }
+}
+
+impl From<base::BlendMode> for raqote::BlendMode {
+    fn from(mode: base::BlendMode) -> Self {
+        match mode {
+            base::BlendMode::Clear => raqote::BlendMode::Clear,
+            base::BlendMode::Source => raqote::BlendMode::Src,
+            base::BlendMode::Destination => raqote::BlendMode::Dst,
+            base::BlendMode::SourceOver => raqote::BlendMode::SrcOver,
+            base::BlendMode::DestinationOver => raqote::BlendMode::DstOver,
+            base::BlendMode::SourceIn => raqote::BlendMode::SrcIn,
+            base::BlendMode::DestinationIn => raqote::BlendMode::DstIn,
+            base::BlendMode::SourceOut => raqote::BlendMode::SrcOut,
+            base::BlendMode::DestinationOut => raqote::BlendMode::DstOut,
+            base::BlendMode::SourceAtop => raqote::BlendMode::SrcAtop,
+            base::BlendMode::DestinationAtop => raqote::BlendMode::DstAtop,
+            base::BlendMode::Xor => raqote::BlendMode::Xor,
+            base::BlendMode::Plus => raqote::BlendMode::Add,
+            base::BlendMode::Modulate => {
+                panic!("BlendMode::Modulate is not available in raqote")
+            }
+            base::BlendMode::Screen => raqote::BlendMode::Screen,
+            base::BlendMode::Overlay => raqote::BlendMode::Overlay,
+            base::BlendMode::Darken => raqote::BlendMode::Darken,
+            base::BlendMode::Lighten => raqote::BlendMode::Lighten,
+            base::BlendMode::ColorDodge => raqote::BlendMode::ColorDodge,
+            base::BlendMode::ColorBurn => raqote::BlendMode::ColorBurn,
+            base::BlendMode::HardLight => raqote::BlendMode::HardLight,
+            base::BlendMode::SoftLight => raqote::BlendMode::SoftLight,
+            base::BlendMode::Difference => raqote::BlendMode::Difference,
+            base::BlendMode::Exclusion => raqote::BlendMode::Exclusion,
+            base::BlendMode::Multiply => raqote::BlendMode::Multiply,
+            base::BlendMode::Hue => raqote::BlendMode::Hue,
+            base::BlendMode::Saturation => raqote::BlendMode::Saturation,
+            base::BlendMode::Color => raqote::BlendMode::Color,
+            base::BlendMode::Luminosity => raqote::BlendMode::Luminosity,
         }
     }
 }
