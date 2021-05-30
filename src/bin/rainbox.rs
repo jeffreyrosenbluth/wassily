@@ -5,7 +5,7 @@ use wassily::prelude::*;
 
 use wassily::raqote::Canvas;
 
-const WIDTH: f32 = 8191.0;
+const WIDTH: f32 = 1200.0;
 const HEIGHT: f32 = 0.80 * WIDTH;
 
 
@@ -51,8 +51,8 @@ fn main() {
 
     // let s: Vec<f32> = (0.    // let trans = Transform::create_rotation(Angle::radians(-2.0));
 
-    let mut noise = Noise::<[f64; 2], _>::new(WIDTH, HEIGHT, Perlin::new());
-    noise.set_noise_scales(1.5, 1.5, 1.0);
+    let mut noise = Noise::<_, 2>::new(WIDTH, HEIGHT, Perlin::default());
+    noise.set_noise_scales(1.5, 1.5);
     noise.set_noise_factor(5.0);
     noise.set_noise_seed(1);
 

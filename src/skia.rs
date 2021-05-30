@@ -1,5 +1,3 @@
-use std::borrow::BorrowMut;
-
 use crate::base::{self, Sketch, Texture, TextureKind, RGBA};
 use skia::StrokeDash;
 use tiny_skia as skia;
@@ -73,7 +71,7 @@ impl From<base::FillRule> for skia::FillRule {
 impl From<&base::Path> for skia::Path {
     fn from(path: &base::Path) -> Self {
         let mut pb = skia::PathBuilder::new();
-        for cmd in path.cmds.clone() {
+        for cmd in &path.cmds {
             match cmd {
                 base::PathCmd::MoveTo(p) => pb.move_to(p.x, p.y),
                 base::PathCmd::LineTo(p) => pb.line_to(p.x, p.y),
@@ -83,6 +81,16 @@ impl From<&base::Path> for skia::Path {
             }
         }
         pb.finish().unwrap()
+    }
+}
+
+impl From<&base::RGBA> for skia::Color {
+    fn from(c: &base::RGBA) -> Self {
+        let r = c.r;
+        let g = c.g;
+        let b = c.b;
+        let a = c.a;
+        skia::Color::from_rgba(r, g, b, a).unwrap()
     }
 }
 
@@ -99,9 +107,9 @@ impl From<base::RGBA> for skia::Color {
 impl<'a> From<&Texture> for skia::Paint<'a> {
     fn from(t: &Texture) -> Self {
         let mut p = Self::default();
-        match t.kind.clone() {
+        match &t.kind {
             TextureKind::SolidColor(c) => {
-                p.set_color((c).into());
+                p.set_color(c.into());
                 p
             }
             TextureKind::LinearGradient(g) => {
@@ -167,8 +175,8 @@ impl From<&base::Stroke> for skia::Stroke {
             base::LineJoin::Round => skia::LineJoin::Round,
             base::LineJoin::Bevel => skia::LineJoin::Bevel,
         };
-        skia_stroke.dash = match &s.dash {
-            Some(dash) => StrokeDash::new(dash.array.clone(), dash.offset),
+        skia_stroke.dash = match s.dash {
+            Some(ref dash) => StrokeDash::new(dash.array.clone(), dash.offset),
             None => None,
         };
         skia_stroke
@@ -188,35 +196,35 @@ impl From<base::SpreadMode> for skia::SpreadMode {
 impl From<base::BlendMode> for skia::BlendMode {
     fn from(mode: base::BlendMode) -> Self {
         match mode {
-            base::BlendMode::Clear => {skia::BlendMode::Clear}
-            base::BlendMode::Source => {skia::BlendMode::Source}
-            base::BlendMode::Destination => {skia::BlendMode::Destination}
-            base::BlendMode::SourceOver => {skia::BlendMode::SourceOver}
-            base::BlendMode::DestinationOver => {skia::BlendMode::DestinationOver}
-            base::BlendMode::SourceIn => {skia::BlendMode::SourceIn}
-            base::BlendMode::DestinationIn => {skia::BlendMode::DestinationIn}
-            base::BlendMode::SourceOut => {skia::BlendMode::SourceOut}
-            base::BlendMode::DestinationOut => {skia::BlendMode::DestinationOut}
-            base::BlendMode::SourceAtop => {skia::BlendMode::SourceAtop}
-            base::BlendMode::DestinationAtop => {skia::BlendMode::DestinationAtop}
-            base::BlendMode::Xor => {skia::BlendMode::Xor}
-            base::BlendMode::Plus => {skia::BlendMode::Plus}
-            base::BlendMode::Modulate => {skia::BlendMode::Modulate}
-            base::BlendMode::Screen => {skia::BlendMode::Screen}
-            base::BlendMode::Overlay => {skia::BlendMode::Overlay}
-            base::BlendMode::Darken => {skia::BlendMode::Darken}
-            base::BlendMode::Lighten => {skia::BlendMode::Lighten}
-            base::BlendMode::ColorDodge => {skia::BlendMode::ColorDodge}
-            base::BlendMode::ColorBurn => {skia::BlendMode::ColorBurn}
-            base::BlendMode::HardLight => {skia::BlendMode::HardLight}
-            base::BlendMode::SoftLight => {skia::BlendMode::SoftLight}
-            base::BlendMode::Difference => {skia::BlendMode::Difference}
-            base::BlendMode::Exclusion => {skia::BlendMode::Exclusion}
-            base::BlendMode::Multiply => {skia::BlendMode::Multiply}
-            base::BlendMode::Hue => {skia::BlendMode::Hue}
-            base::BlendMode::Saturation => {skia::BlendMode::Saturation}
-            base::BlendMode::Color => {skia::BlendMode::Color}
-            base::BlendMode::Luminosity => {skia::BlendMode::Luminosity}
+            base::BlendMode::Clear => skia::BlendMode::Clear,
+            base::BlendMode::Source => skia::BlendMode::Source,
+            base::BlendMode::Destination => skia::BlendMode::Destination,
+            base::BlendMode::SourceOver => skia::BlendMode::SourceOver,
+            base::BlendMode::DestinationOver => skia::BlendMode::DestinationOver,
+            base::BlendMode::SourceIn => skia::BlendMode::SourceIn,
+            base::BlendMode::DestinationIn => skia::BlendMode::DestinationIn,
+            base::BlendMode::SourceOut => skia::BlendMode::SourceOut,
+            base::BlendMode::DestinationOut => skia::BlendMode::DestinationOut,
+            base::BlendMode::SourceAtop => skia::BlendMode::SourceAtop,
+            base::BlendMode::DestinationAtop => skia::BlendMode::DestinationAtop,
+            base::BlendMode::Xor => skia::BlendMode::Xor,
+            base::BlendMode::Plus => skia::BlendMode::Plus,
+            base::BlendMode::Modulate => skia::BlendMode::Modulate,
+            base::BlendMode::Screen => skia::BlendMode::Screen,
+            base::BlendMode::Overlay => skia::BlendMode::Overlay,
+            base::BlendMode::Darken => skia::BlendMode::Darken,
+            base::BlendMode::Lighten => skia::BlendMode::Lighten,
+            base::BlendMode::ColorDodge => skia::BlendMode::ColorDodge,
+            base::BlendMode::ColorBurn => skia::BlendMode::ColorBurn,
+            base::BlendMode::HardLight => skia::BlendMode::HardLight,
+            base::BlendMode::SoftLight => skia::BlendMode::SoftLight,
+            base::BlendMode::Difference => skia::BlendMode::Difference,
+            base::BlendMode::Exclusion => skia::BlendMode::Exclusion,
+            base::BlendMode::Multiply => skia::BlendMode::Multiply,
+            base::BlendMode::Hue => skia::BlendMode::Hue,
+            base::BlendMode::Saturation => skia::BlendMode::Saturation,
+            base::BlendMode::Color => skia::BlendMode::Color,
+            base::BlendMode::Luminosity => skia::BlendMode::Luminosity,
         }
     }
 }

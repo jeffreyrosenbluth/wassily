@@ -1,8 +1,7 @@
 use crate::prelude::Point;
-use noise::{MultiFractal, NoiseFn, Seedable};
-use std::marker::PhantomData;
+use noise::{MultiFractal, noise_fns::NoiseFn, Seedable};
 
-pub struct Noise<N, T>
+pub struct Noise<T, const N: usize>
 where
     T: NoiseFn<N>,
 {
@@ -13,10 +12,9 @@ where
     y_scale: f32,
     z_scale: f32,
     noise_factor: f32,
-    phantom: PhantomData<N>,
 }
 
-impl<N, T> Noise<N, T>
+impl<T, const N: usize> Noise<T, N>
 where
     T: NoiseFn<N>,
 {
@@ -33,20 +31,7 @@ where
             y_scale,
             z_scale,
             noise_factor,
-            phantom: PhantomData,
         }
-    }
-
-    pub fn set_noise_scales(&mut self, x_scale: f32, y_scale: f32, z_scale: f32) {
-        self.x_scale = x_scale;
-        self.y_scale = y_scale;
-        self.z_scale = z_scale;
-    }
-
-    pub fn set_noise_scale(&mut self, scale: f32) {
-        self.x_scale = scale;
-        self.y_scale = scale;
-        self.z_scale = scale;
     }
 
     pub fn set_noise_fn(&mut self, nf: T) {
@@ -70,9 +55,9 @@ where
     }
 }
 
-impl<T> Noise<[f64; 2], T>
+impl<T> Noise<T, 2>
 where
-    T: NoiseFn<[f64; 2]>,
+    T: NoiseFn<2>,
 {
     pub fn noise(&self, x: f32, y: f32) -> f32 {
         let center = self.center();
@@ -82,11 +67,16 @@ where
                 (1.0 / center.y * self.y_scale * (y - center.y)) as f64,
             ]) as f32
     }
+
+    pub fn set_noise_scales(&mut self, x_scale: f32, y_scale: f32) {
+        self.x_scale = x_scale;
+        self.y_scale = y_scale;
+    }
 }
 
-impl<T> Noise<[f64; 3], T>
+impl<T> Noise<T, 3>
 where
-    T: NoiseFn<[f64; 3]>,
+    T: NoiseFn<3>,
 {
     pub fn noise(&self, x: f32, y: f32, z: f32) -> f32 {
         let center = self.center();
@@ -97,9 +87,15 @@ where
                 (self.z_scale * z) as f64,
             ]) as f32
     }
+
+    pub fn set_noise_scales(&mut self, x_scale: f32, y_scale: f32, z_scale: f32) {
+        self.x_scale = x_scale;
+        self.y_scale = y_scale;
+        self.z_scale = z_scale;
+    }
 }
 
-impl<N, T> Noise<N, T>
+impl<T, const N: usize> Noise<T, N>
 where
     T: NoiseFn<N> + Seedable + Clone,
 {
@@ -113,7 +109,7 @@ where
     }
 }
 
-impl<N, T> Noise<N, T>
+impl<T, const N: usize> Noise<T, N>
 where
     T: NoiseFn<N> + MultiFractal + Clone,
 {

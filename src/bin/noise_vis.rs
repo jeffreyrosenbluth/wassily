@@ -13,12 +13,12 @@ const FACTOR: f32 = 2.0;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    let mut ns = Noise::<[f64; 2], _>::new(WIDTH as f32, WIDTH as f32, OpenSimplex::new());
+    let mut ns = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, OpenSimplex::default());
     let mut sm = 0.0;
     let mut lg = 0.0;
     let mut c: colorous::Color;
 
-    ns.set_noise_scales(SCALE, SCALE, 1.0);
+    ns.set_noise_scales(SCALE, SCALE);
     ns.set_noise_factor(FACTOR);
 
     for x in (0..WIDTH).step_by(GRID as usize) {

@@ -5,7 +5,7 @@ use wassily::prelude::*;
 
 fn main() {
     // let wk = WK::<[f64; 3], OpenSimplex>::new(8191.0, 8191.0, OpenSimplex::new());
-    let mut wk  = Noise::<[f64; 2], _>::new(8191.0, 8191.0, BasicMulti::new());
+    let mut wk  = Noise::<_, 2>::new(8191.0, 8191.0, BasicMulti::default());
     wk.set_noise_seed(1);
     wk.set_octaves(4);
     wk.set_frequency(3.0);

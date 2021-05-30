@@ -27,13 +27,13 @@ fn tint(color: RGBA, k: f32) -> RGBA {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    let source = BasicMulti::new()
+    let source = BasicMulti::default()
         .set_frequency(4.0)
         .set_persistence(0.75);
     let turb = Turbulence::new(source).set_power(2.0);
 
-    let mut ks = Noise::<[f64; 2], _>::new(WIDTH as f32, WIDTH as f32, turb);
-    ks.set_noise_scales(SCALE, SCALE, 1.0);
+    let mut ks = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, turb);
+    ks.set_noise_scales(SCALE, SCALE);
     ks.set_noise_factor(FACTOR);
 
     // 0, 48, 73

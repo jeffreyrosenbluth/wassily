@@ -19,9 +19,9 @@ const SCALE: f32 = 6.0; // 0.0019
 const GRID: f32 = 5.0; // 15.0
 
 fn main() {
-    let mut wk = Noise::<[f64; 3], _>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::new());
+    let mut wk = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default());
     wk.set_noise_seed(SEED);
-    wk.set_noise_scale(SCALE);
+    wk.set_noise_scales(SCALE, SCALE, SCALE);
     let mut canvas = Canvas::new(wk.width_n(), wk.height_n());
 
     let path = file_path("hudson.png");

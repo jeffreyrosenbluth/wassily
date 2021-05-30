@@ -17,7 +17,7 @@ const SEED: u32 = 0; // 0
 const SCALE: f32 = 15.0; // 0.0019
 
 fn main() {
-    let mut wk = Noise::<[f64; 3], _>::new(WIDTH, HEIGHT, OpenSimplex::new());
+    let mut wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default());
     wk.set_noise_seed(SEED);
     wk.set_noise_scales(SCALE, SCALE, 1.0);
     // wk.set_noise_factor(8.0);

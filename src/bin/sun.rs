@@ -15,7 +15,7 @@ const RADIUS: f32 = 4000.0;
 const K: f32= 3.25;
 
 fn main() {
-    let mut wk = Noise::<[f64; 3], _>::new(WIDTH, HEIGHT, OpenSimplex::new());
+    let mut wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default());
     wk.set_noise_seed(SEED);
     wk.set_noise_scales(SCALE, SCALE, SCALE / WIDTH);
     wk.set_noise_factor(1.0);

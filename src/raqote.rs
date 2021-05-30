@@ -74,6 +74,16 @@ impl From<RGBA> for SolidSource {
     }
 }
 
+impl From<&RGBA> for SolidSource {
+    fn from(c: &RGBA) -> Self {
+        let r = c.r * 255.0;
+        let g = c.g * 255.0;
+        let b = c.b * 255.0;
+        let a = c.a * 255.0;
+        SolidSource::from_unpremultiplied_argb(a as u8, r as u8, g as u8, b as u8)
+    }
+}
+
 impl From<base::FillRule> for raqote::Winding {
     fn from(fr: base::FillRule) -> Self {
         match fr {
@@ -86,7 +96,7 @@ impl From<base::FillRule> for raqote::Winding {
 impl From<&base::Path> for raqote::Path {
     fn from(path: &base::Path) -> Self {
         let mut pb = raqote::PathBuilder::new();
-        for cmd in path.cmds.clone() {
+        for cmd in &path.cmds {
             match cmd {
                 base::PathCmd::MoveTo(p) => pb.move_to(p.x, p.y),
                 base::PathCmd::LineTo(p) => pb.line_to(p.x, p.y),
@@ -103,7 +113,7 @@ impl From<&base::Path> for raqote::Path {
 
 impl From<&base::Texture> for raqote::Source<'_> {
     fn from(t: &base::Texture) -> Self {
-        match t.kind.clone() {
+        match &t.kind {
             TextureKind::SolidColor(c) => {
                 let sc: SolidSource = c.into();
                 sc.into()
@@ -165,8 +175,8 @@ impl From<&base::Stroke> for raqote::StrokeStyle {
             base::LineJoin::Round => raqote::LineJoin::Round,
             base::LineJoin::Bevel => raqote::LineJoin::Bevel,
         };
-        raqote_stroke.dash_array = match &s.dash {
-            Some(dash) => dash.array.clone(),
+        raqote_stroke.dash_array = match s.dash {
+            Some(ref dash) => dash.array.clone(),
             None => {
                 vec![]
             }
