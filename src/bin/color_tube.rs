@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 
-use noise::OpenSimplex;
+use noise::{OpenSimplex, Seedable};
 use wassily::prelude::*;
 
 // use wassily::skia::Canvas;
- use wassily::raqote::Canvas;
+use wassily::raqote::Canvas;
 
 const WIDTH: u32 = 1200; // 8191
 const HEIGHT: u32 = 800; // 6144
@@ -19,9 +19,9 @@ const SCALE: f32 = 6.0; // 0.0019
 const GRID: f32 = 5.0; // 15.0
 
 fn main() {
-    let mut wk = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default());
-    wk.set_noise_seed(SEED);
-    wk.set_noise_scales(SCALE, SCALE, SCALE);
+    let wk = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+        .set_seed(SEED)
+        .set_noise_scales(SCALE, SCALE, SCALE);
     let mut canvas = Canvas::new(wk.width_n(), wk.height_n());
 
     let path = file_path("hudson.png");

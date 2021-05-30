@@ -1,4 +1,4 @@
-use noise::OpenSimplex;
+use noise::{OpenSimplex, Seedable};
 use wassily::prelude::*;
 
 use wassily::raqote::Canvas;
@@ -12,13 +12,13 @@ const LINES: usize = 4000; // 1000
 const SEED: u32 = 1; // 0
 const SCALE: f32 = 10.0; // 0.0019
 const RADIUS: f32 = 4000.0;
-const K: f32= 3.25;
+const K: f32 = 3.25;
 
 fn main() {
-    let mut wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default());
-    wk.set_noise_seed(SEED);
-    wk.set_noise_scales(SCALE, SCALE, SCALE / WIDTH);
-    wk.set_noise_factor(1.0);
+    let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
+        .set_seed(SEED)
+        .set_noise_scales(SCALE, SCALE, SCALE / WIDTH)
+        .set_noise_factor(1.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let path = file_path("fruit.png");
     let mut palette = Palette::with_img(path, LINES);

@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use noise::OpenSimplex;
+use noise::Seedable;
 use wassily::prelude::*;
 
 use wassily::skia::Canvas;
@@ -17,9 +18,9 @@ const SEED: u32 = 0; // 0
 const SCALE: f32 = 15.0; // 0.0019
 
 fn main() {
-    let mut wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default());
-    wk.set_noise_seed(SEED);
-    wk.set_noise_scales(SCALE, SCALE, 1.0);
+    let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
+    .set_seed(SEED)
+    .set_noise_scales(SCALE, SCALE, 1.0);
     // wk.set_noise_factor(8.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let path = file_path("orange.png");

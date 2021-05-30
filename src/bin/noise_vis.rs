@@ -13,13 +13,12 @@ const FACTOR: f32 = 2.0;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    let mut ns = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, OpenSimplex::default());
+    let ns = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, OpenSimplex::default())
+        .set_noise_scales(SCALE, SCALE)
+        .set_noise_factor(FACTOR);
     let mut sm = 0.0;
     let mut lg = 0.0;
     let mut c: colorous::Color;
-
-    ns.set_noise_scales(SCALE, SCALE);
-    ns.set_noise_factor(FACTOR);
 
     for x in (0..WIDTH).step_by(GRID as usize) {
         for y in (0..HEIGHT).step_by(GRID as usize) {
@@ -42,7 +41,7 @@ fn main() {
             let sc = RGBA::with_8(255 - c.r, 255 - c.g, 255 - c.b, 255);
 
             let square = ShapeBuilder::new()
-            // .circle(point2(x as f32, y as f32), 0.525 * GRID)
+                // .circle(point2(x as f32, y as f32), 0.525 * GRID)
                 .rect_xywh(point2(x as f32, y as f32), point2(GRID, GRID))
                 .fill_color(color)
                 .stroke_color(sc)

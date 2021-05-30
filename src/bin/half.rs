@@ -32,9 +32,9 @@ fn main() {
         .set_persistence(0.75);
     let turb = Turbulence::new(source).set_power(2.0);
 
-    let mut ks = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, turb);
-    ks.set_noise_scales(SCALE, SCALE);
-    ks.set_noise_factor(FACTOR);
+    let ks = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, turb)
+        .set_noise_scales(SCALE, SCALE)
+        .set_noise_factor(FACTOR);
 
     // 0, 48, 73
     let lr = 87;
@@ -56,7 +56,7 @@ fn main() {
         0.0,
         WIDTH as f32 / 2.0,
         HEIGHT as f32,
-        &Texture::new(TextureKind::SolidColor(color_left))
+        &Texture::new(TextureKind::SolidColor(color_left)),
     );
     Canvas::fill_rect(
         &mut canvas,
@@ -64,7 +64,7 @@ fn main() {
         0.0,
         WIDTH as f32 / 2.0,
         HEIGHT as f32,
-        &Texture::new(TextureKind::SolidColor(color_right))
+        &Texture::new(TextureKind::SolidColor(color_right)),
     );
 
     for x in (0..WIDTH).step_by(GRID as usize) {
@@ -73,12 +73,12 @@ fn main() {
             n = n.abs().clamp(0.0, 1.0);
             let mut c = RGBA::new(1.0, 1.0, 1.0, 1.0);
             c.a = n;
-                let square = ShapeBuilder::new()
-                    .rect_xywh(point2(x as f32, y as f32), point2(GRID, GRID))
-                    .fill_color(c)
-                    .no_stroke()
-                    .build();
-                square.draw(&mut canvas);
+            let square = ShapeBuilder::new()
+                .rect_xywh(point2(x as f32, y as f32), point2(GRID, GRID))
+                .fill_color(c)
+                .no_stroke()
+                .build();
+            square.draw(&mut canvas);
         }
     }
 
@@ -88,7 +88,7 @@ fn main() {
         0.0,
         2.0 * WIDTH as f32 * OFFSET,
         HEIGHT as f32,
-        &Texture::new(TextureKind::SolidColor(color_left))
+        &Texture::new(TextureKind::SolidColor(color_left)),
     );
 
     canvas.save("half.png")

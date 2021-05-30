@@ -27,14 +27,14 @@ fn tint(color: RGBA, k: f32) -> RGBA {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    let source = BasicMulti::default()
-        .set_frequency(4.0)
-        .set_persistence(0.75);
+    let source = BasicMulti::default();
     let turb = Turbulence::new(source).set_power(2.0);
 
-    let mut ks = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, turb);
-    ks.set_noise_scales(SCALE, SCALE);
-    ks.set_noise_factor(FACTOR);
+    let ks = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, turb)
+        .set_noise_scales(SCALE, SCALE)
+        .set_noise_factor(FACTOR)
+        .set_frequency(4.0)
+        .set_persistence(0.75);
 
     // 0, 48, 73
     let lr = 87;
@@ -56,7 +56,7 @@ fn main() {
         0.0,
         WIDTH as f32 / 2.0,
         HEIGHT as f32,
-        &Texture::new(TextureKind::SolidColor(color_left))
+        &Texture::new(TextureKind::SolidColor(color_left)),
     );
     Canvas::fill_rect(
         &mut canvas,
@@ -64,7 +64,7 @@ fn main() {
         0.0,
         WIDTH as f32 / 2.0,
         HEIGHT as f32,
-        &Texture::new(TextureKind::SolidColor(color_right))
+        &Texture::new(TextureKind::SolidColor(color_right)),
     );
 
     for x in (0..WIDTH).step_by(GRID as usize) {
@@ -88,7 +88,7 @@ fn main() {
         0.0,
         2.0 * WIDTH as f32 * OFFSET,
         HEIGHT as f32,
-        &Texture::new(TextureKind::SolidColor(color_left))
+        &Texture::new(TextureKind::SolidColor(color_left)),
     );
     canvas.save("billow.png")
 }

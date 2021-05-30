@@ -1,13 +1,12 @@
 #![allow(dead_code)]
 
-use noise::Perlin;
+use noise::{Perlin, Seedable};
 use wassily::prelude::*;
 
 use wassily::raqote::Canvas;
 
 const WIDTH: f32 = 1200.0;
 const HEIGHT: f32 = 0.80 * WIDTH;
-
 
 fn from_xy(h: f32, ps: &[Point]) -> Vec<Point> {
     ps.iter().map(|p| point2(p.x, p.y + h / 2.0)).collect()
@@ -51,10 +50,10 @@ fn main() {
 
     // let s: Vec<f32> = (0.    // let trans = Transform::create_rotation(Angle::radians(-2.0));
 
-    let mut noise = Noise::<_, 2>::new(WIDTH, HEIGHT, Perlin::default());
-    noise.set_noise_scales(1.5, 1.5);
-    noise.set_noise_factor(5.0);
-    noise.set_noise_seed(1);
+    let noise = Noise::<_, 2>::new(WIDTH, HEIGHT, Perlin::default())
+        .set_noise_scales(1.5, 1.5)
+        .set_noise_factor(5.0)
+        .set_seed(1);
 
     for r in 0..700 {
         let mut row = vec![];

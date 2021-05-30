@@ -1,5 +1,5 @@
 use crate::prelude::Point;
-use noise::{MultiFractal, noise_fns::NoiseFn, Seedable};
+use noise::{noise_fns::NoiseFn, MultiFractal, Seedable};
 
 pub struct Noise<T, const N: usize>
 where
@@ -34,12 +34,15 @@ where
         }
     }
 
-    pub fn set_noise_fn(&mut self, nf: T) {
-        self.noise_fn = nf;
+    pub fn set_noise_fn(self, noise_fn: T) -> Self {
+        Self { noise_fn, ..self }
     }
 
-    pub fn set_noise_factor(&mut self, f: f32) {
-        self.noise_factor = f;
+    pub fn set_noise_factor(self, noise_factor: f32) -> Self {
+        Self {
+            noise_factor,
+            ..self
+        }
     }
 
     pub fn width_n(&self) -> u32 {
@@ -61,16 +64,20 @@ where
 {
     pub fn noise(&self, x: f32, y: f32) -> f32 {
         let center = self.center();
+        // Perhaps refactor to use 'ScalePoint' from noise module
         self.noise_factor
-            * self.noise_fn.get([
-                (1.0 / center.x * self.x_scale * (x - center.x)) as f64,
-                (1.0 / center.y * self.y_scale * (y - center.y)) as f64,
-            ]) as f32
+            * self.noise_fn.get_f32([
+                (1.0 / center.x * self.x_scale * (x - center.x)),
+                (1.0 / center.y * self.y_scale * (y - center.y)),
+            ])
     }
 
-    pub fn set_noise_scales(&mut self, x_scale: f32, y_scale: f32) {
-        self.x_scale = x_scale;
-        self.y_scale = y_scale;
+    pub fn set_noise_scales(self, x_scale: f32, y_scale: f32) -> Self {
+        Self {
+            x_scale,
+            y_scale,
+            ..self
+        }
     }
 }
 
@@ -81,55 +88,68 @@ where
     pub fn noise(&self, x: f32, y: f32, z: f32) -> f32 {
         let center = self.center();
         self.noise_factor
-            * self.noise_fn.get([
-                (1.0 / center.x * self.x_scale * (x - center.x)) as f64,
-                (1.0 / center.y * self.y_scale * (y - center.y)) as f64,
-                (self.z_scale * z) as f64,
-            ]) as f32
+            * self.noise_fn.get_f32([
+                (1.0 / center.x * self.x_scale * (x - center.x)),
+                (1.0 / center.y * self.y_scale * (y - center.y)),
+                (self.z_scale * z),
+            ])
     }
 
-    pub fn set_noise_scales(&mut self, x_scale: f32, y_scale: f32, z_scale: f32) {
-        self.x_scale = x_scale;
-        self.y_scale = y_scale;
-        self.z_scale = z_scale;
+    pub fn set_noise_scales(self, x_scale: f32, y_scale: f32, z_scale: f32) -> Self {
+        Self {
+            x_scale,
+            y_scale,
+            z_scale,
+            ..self
+        }
     }
 }
 
-impl<T, const N: usize> Noise<T, N>
+impl<T, const N: usize> Seedable for Noise<T, N>
 where
-    T: NoiseFn<N> + Seedable + Clone,
+    T: NoiseFn<N> + Seedable,
 {
-    pub fn noise_seed(&self) -> u32 {
+    fn set_seed(self, seed: u32) -> Self {
+        Self {
+            noise_fn: self.noise_fn.set_seed(seed),
+            ..self
+        }
+    }
+
+    fn seed(&self) -> u32 {
         self.noise_fn.seed()
     }
-
-    pub fn set_noise_seed(&mut self, seed: u32) {
-        let nf = self.noise_fn.clone().set_seed(seed);
-        self.set_noise_fn(nf);
-    }
 }
 
-impl<T, const N: usize> Noise<T, N>
+impl<T, const N: usize> MultiFractal for Noise<T, N>
 where
-    T: NoiseFn<N> + MultiFractal + Clone,
+    T: NoiseFn<N> + MultiFractal,
 {
-    pub fn set_octaves(&mut self, o: usize) {
-        let nf = self.noise_fn.clone().set_octaves(o);
-        self.set_noise_fn(nf);
+    fn set_octaves(self, octaves: usize) -> Self {
+        Self {
+            noise_fn: self.noise_fn.set_octaves(octaves),
+            ..self
+        }
     }
 
-    pub fn set_frequency(&mut self, f: f64) {
-        let nf = self.noise_fn.clone().set_frequency(f);
-        self.set_noise_fn(nf);
+    fn set_frequency(self, frequency: f64) -> Self {
+        Self {
+            noise_fn: self.noise_fn.set_frequency(frequency),
+            ..self
+        }
     }
 
-    pub fn set_persistence(&mut self, p: f64) {
-        let nf = self.noise_fn.clone().set_persistence(p);
-        self.set_noise_fn(nf);
+    fn set_lacunarity(self, lacunarity: f64) -> Self {
+        Self {
+            noise_fn: self.noise_fn.set_lacunarity(lacunarity),
+            ..self
+        }
     }
 
-    pub fn set_lacunarity(&mut self, l: f64) {
-        let nf = self.noise_fn.clone().set_lacunarity(l);
-        self.set_noise_fn(nf);
+    fn set_persistence(self, persistence: f64) -> Self {
+        Self {
+            noise_fn: self.noise_fn.set_persistence(persistence),
+            ..self
+        }
     }
 }
