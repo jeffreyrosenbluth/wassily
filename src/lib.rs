@@ -7,3 +7,4 @@ pub mod shape;
 pub mod skia;
 pub mod svg;
 pub mod util;
+pub mod lines;
