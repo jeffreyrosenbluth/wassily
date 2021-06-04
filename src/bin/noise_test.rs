@@ -5,7 +5,7 @@ use wassily::prelude::*;
 
 fn main() {
     // let wk = WK::<[f64; 3], OpenSimplex>::new(8191.0, 8191.0, OpenSimplex::new());
-    let wk = Noise::<_, 2>::new(8191.0, 8191.0, BasicMulti::default())
+    let wk = Noise::<_, 2>::new(8191.0, 8191.0, BasicMulti::<Perlin>::default())
         .set_seed(1)
         .set_octaves(4)
         .set_frequency(3.0)

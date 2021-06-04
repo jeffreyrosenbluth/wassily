@@ -27,7 +27,7 @@ fn tint(color: RGBA, k: f32) -> RGBA {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    let source = BasicMulti::default();
+    let source: BasicMulti<Perlin> = BasicMulti::default();
     let turb = Turbulence::new(source).set_power(2.0);
 
     let ks = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, turb)
