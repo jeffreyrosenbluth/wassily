@@ -5,6 +5,7 @@ pub use crate::kolor::*;
 pub use crate::noise::*;
 pub use crate::shape::*;
 pub use crate::util::*;
+pub use crate::lines::*;
 pub use euclid::point2;
 pub use euclid::vec2;
 

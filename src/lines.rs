@@ -1,4 +1,7 @@
-use crate::prelude::*;
+use crate::base::*;
+use crate::noise::*;
+use crate::shape::*;
+use crate::prelude::{Vector, vec2};
 use noise::OpenSimplex;
 use rand::prelude::*;
 use rand_distr::{Distribution, Normal};
