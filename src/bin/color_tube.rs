@@ -6,16 +6,16 @@ use wassily::prelude::*;
 // use wassily::skia::Canvas;
 use wassily::raqote::Canvas;
 
-const WIDTH: u32 = 1200; // 8191
-const HEIGHT: u32 = 800; // 6144
-const XSTEP: f32 = 17.0; // 7.0
-const YSTEP: f32 = 250.0; // 80.0
+const WIDTH: u32 = 8000; // 8191
+const HEIGHT: u32 = 4500; // 6144
+const XSTEP: f32 = 7.0; // 7.0
+const YSTEP: f32 = 80.0; // 80.0
 const LENGTH: usize = 800; // 800
 const X: f32 = 10.0; // 10.0
 const LINES: usize = 1000; // 1000
 const COLORS: usize = 1000; // 1000
 const SEED: u32 = 2; // 0
-const SCALE: f32 = 6.0; // 0.0019
+const SCALE: f32 = 2.; // 0.0019
 const GRID: f32 = 5.0; // 15.0
 
 fn main() {
@@ -24,11 +24,11 @@ fn main() {
         .set_noise_scales(SCALE, SCALE, SCALE);
     let mut canvas = Canvas::new(wk.width_n(), wk.height_n());
 
-    let path = file_path("hudson.png");
+    let path = file_path("rock.png");
     let mut palette = Palette::with_img(path, COLORS);
 
     let bg = palette.colors[(0.99 * COLORS as f32) as usize];
-    canvas.fill(bg);
+    canvas.fill(WHITE);
 
     for i in 0..LINES {
         let mut l1 = point2(GRID * i as f32, wk.height / 2.0);
@@ -65,5 +65,5 @@ fn main() {
             shape.draw(&mut canvas);
         }
     }
-    canvas.save("squirm_raqote.png");
+    canvas.save("ct.png");
 }

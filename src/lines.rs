@@ -7,9 +7,9 @@ pub struct DotLine {
     pub start: Point,
     pub end: Point,
     noise_strength: f32,
-    pub stdev: f32,
-    pub color: RGBA,
-    pub weight: u32,
+    stdev: f32,
+    color: RGBA,
+    weight: u32,
 }
 
 impl DotLine {
@@ -26,6 +26,21 @@ impl DotLine {
 
     pub fn noise_strength(mut self, strength: f32) -> Self {
         self.noise_strength = strength;
+        self
+    }
+
+    pub fn stdev(mut self, stdev: f32) -> Self {
+        self.stdev = stdev;
+        self
+    }
+
+    pub fn color(mut self, color: RGBA) -> Self {
+        self.color = color;
+        self
+    }
+
+    pub fn weight(mut self, weight: u32) -> Self {
+        self.weight = weight;
         self
     }
 
