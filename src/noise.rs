@@ -1,6 +1,8 @@
 use crate::prelude::Point;
+use crate::util::TAU;
 use noise::{noise_fns::NoiseFn, MultiFractal, Seedable};
 
+#[derive(Copy, Clone)]
 pub struct Noise<T, const N: usize>
 where
     T: NoiseFn<N>,
@@ -45,15 +47,7 @@ where
         }
     }
 
-    pub fn width_n(&self) -> u32 {
-        self.width as u32
-    }
-
-    pub fn height_n(&self) -> u32 {
-        self.height as u32
-    }
-
-    pub fn center(&self) -> Point {
+    fn center(&self) -> Point {
         Point::new(self.width / 2.0, self.height / 2.0)
     }
 }
@@ -70,6 +64,10 @@ where
                 (1.0 / center.x * self.x_scale * (x - center.x)),
                 (1.0 / center.y * self.y_scale * (y - center.y)),
             ])
+    }
+
+    pub fn angle(&self, x: f32, y: f32) -> f32 {
+        self.noise(x, y) % TAU
     }
 
     pub fn set_noise_scales(self, x_scale: f32, y_scale: f32) -> Self {
@@ -93,6 +91,10 @@ where
                 (1.0 / center.y * self.y_scale * (y - center.y)),
                 (self.z_scale * z),
             ])
+    }
+
+    pub fn angle(&self, x: f32, y: f32, z: f32) -> f32 {
+        self.noise(x, y, z) % TAU
     }
 
     pub fn set_noise_scales(self, x_scale: f32, y_scale: f32, z_scale: f32) -> Self {

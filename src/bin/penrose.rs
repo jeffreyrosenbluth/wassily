@@ -91,7 +91,7 @@ fn main() {
         .points(&ps)
         .fill_color(palette.rand_laba())
         .no_stroke()
-        .transform(trans1)
+        .transform(&trans1)
         .build();
     side1.draw(&mut canvas);
 
@@ -102,7 +102,7 @@ fn main() {
         .points(&ps)
         .fill_color(palette.rand_laba())
         .no_stroke()
-        .transform(trans2)
+        .transform(&trans2)
         .build();
     side2.draw(&mut canvas);
 
@@ -113,7 +113,7 @@ fn main() {
         .points(&ps)
         .fill_color(palette.rand_laba())
         .no_stroke()
-        .transform(trans3)
+        .transform(&trans3)
         .build();
     side3.draw(&mut canvas);
 

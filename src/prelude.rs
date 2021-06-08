@@ -6,7 +6,6 @@ pub use crate::noise::*;
 pub use crate::shape::*;
 pub use crate::util::*;
 pub use crate::lines::*;
-pub use euclid::point2;
 pub use euclid::vec2;
 
 pub type IntRect = euclid::default::Box2D<i32>;
@@ -17,4 +16,8 @@ pub type Vector = euclid::default::Vector2D<f32>;
 
 pub fn file_path(path: &str) -> &path::Path {
     path::Path::new(path)
+}
+
+pub fn point2(x: f32, y: f32) -> Point {
+    euclid::point2(x, y)
 }

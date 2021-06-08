@@ -1,7 +1,8 @@
 use crate::base::*;
 use crate::noise::*;
+use crate::prelude::{vec2, Vector};
 use crate::shape::*;
-use crate::prelude::{Vector, vec2};
+use crate::util::PI;
 use noise::OpenSimplex;
 use rand::prelude::*;
 use rand_distr::{Distribution, Normal};
@@ -60,7 +61,7 @@ impl DotLine {
         let c = RGBA::new(self.color.r, self.color.g, self.color.b, 0.20);
         for t in 0..length {
             let t = t as f32;
-            let p: Point = point2(self.start.x + t * v.x, self.start.y + t * v.y);
+            let p = point2(self.start.x + t * v.x, self.start.y + t * v.y);
             let nx = ns.noise(p.x, p.y, 0.0);
             let ny = ns.noise(p.x, p.y, 10.3711);
             for _ in 0..self.weight {
@@ -72,6 +73,38 @@ impl DotLine {
                     .fill_color(c)
                     .build();
                 dot.draw(canvas);
+            }
+        }
+    }
+
+    pub fn draw_hair<T: Sketch>(&self, canvas: &mut T) {
+        let ns = Noise::<_, 3>::new(1200.0, 1200.0, OpenSimplex::default())
+            .set_noise_factor(self.noise_strength)
+            .set_noise_scales(10.0, 10.0, 1.0);
+        let ks = ns.set_noise_factor(10.0);
+        let v: Vector = self.end - self.start;
+        let length = v.length();
+        let mut rng = thread_rng();
+        let normal = Normal::new(0.0, self.stdev).unwrap();
+        let c = RGBA::new(self.color.r, self.color.g, self.color.b, 0.10);
+        let texture = Texture::new(TextureKind::SolidColor(c));
+        let stroke = Stroke::default();
+        // let a = f32::atan2(v.y, v.x) + PI;
+        for t in 0..length as u32 {
+            let t = t as f32 / length;
+            let (dx, dy) = (t * v.x, t * v.y);
+            let l = point2(self.start.x + t * v.x, self.start.y + t * v.y);
+            let nx = ns.noise(l.x, l.y, 0.0);
+            let ny = ns.noise(l.x, l.y, 10.3711);
+            let b = ks.angle(l.x, l.y, 434.29) / 8.0;
+            let p = point2(l.x + nx, l.y + ny);
+            let a = f32::atan2(dy + ny, dx + nx) + PI;
+            for _ in 0..self.weight {
+                let r = normal.sample(&mut rng);
+                let d = a + b;
+                let q1 = point2(p.x - r * d.cos(), p.y - r * d.sin());
+                let q2 = point2(p.x + r * d.cos(), p.y + r * d.sin());
+                line(canvas, q1.x, q1.y, q2.x, q2.y, &stroke, &texture);
             }
         }
     }

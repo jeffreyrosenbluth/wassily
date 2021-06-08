@@ -22,7 +22,7 @@ fn main() {
     let wk = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
         .set_seed(SEED)
         .set_noise_scales(SCALE, SCALE, SCALE);
-    let mut canvas = Canvas::new(wk.width_n(), wk.height_n());
+    let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
     let path = file_path("rock.png");
     let mut palette = Palette::with_img(path, COLORS);

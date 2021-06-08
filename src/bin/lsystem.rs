@@ -236,7 +236,7 @@ where
             // .line_join(LineJoin::Bevel)
             .line_cap(LineCap::Square)
             .fill_rule(FillRule::EvenOdd)
-            .transform(transform)
+            .transform(&transform)
             .build();
 
         path.draw(canvas);

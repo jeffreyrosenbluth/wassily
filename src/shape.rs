@@ -1,5 +1,5 @@
 use crate::base::*;
-use crate::prelude::Point;
+use crate::prelude::{Point, vec2};
 
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {
@@ -342,8 +342,17 @@ impl<'a> ShapeBuilder {
         self
     }
 
-    pub fn transform(mut self, transform: Transform) -> Self {
-        self.transform = transform;
+    pub fn transform(mut self, transform: &Transform) -> Self {
+        let t = self.transform.post_transform(transform);
+        self.transform = t;
+        self
+    }
+
+    /// Interpret points as cartiesian coordinates with center at (0, 0).
+    pub fn cartesian(mut self, width: f32, height: f32) -> Self {
+        self.transform = self.transform
+            .post_scale(1.0, -1.0)
+            .post_translate(vec2(width / 2.0, height / 2.0));
         self
     }
 
@@ -368,7 +377,7 @@ impl<'a> ShapeBuilder {
             stroke_texture,
             self.shape,
             self.fillrule,
-            self.transform
+            self.transform,
         )
     }
 }
@@ -386,7 +395,7 @@ pub fn line<T: Sketch>(
     x1: f32,
     y1: f32,
     stroke: &Stroke,
-    stroke_texture: Texture,
+    stroke_texture: &Texture,
 ) {
     let mut pb = PathBuilder::new();
     pb.move_to(x0, y0);

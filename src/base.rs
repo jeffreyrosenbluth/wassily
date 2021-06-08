@@ -27,6 +27,14 @@ impl RGBA {
         Self { r, g, b, a }
     }
 
+    pub fn rgb(r: f32, g: f32, b:f32) -> Self {
+        Self {r, g, b, a: 1.0 }
+    }
+
+    pub fn rgb8(r: u8, g: u8, b:u8) -> Self {
+        Self::with_8(r, g, b, 255)
+    }
+
     pub fn with_8(r: u8, g: u8, b: u8, a: u8) -> Self {
         let r = r as f32 / 255.0;
         let g = g as f32 / 255.0;
@@ -41,6 +49,10 @@ impl RGBA {
         let b = (self.b * 255.0) as u8;
         let a = (self.a * 255.0) as u8;
         (r, g, b, a)
+    }
+
+    pub fn set_opacity(self, opacity: f32) -> Self {
+        Self {a: opacity, ..self}
     }
 }
 
@@ -109,6 +121,12 @@ impl TextureKind {
         TextureKind::SolidColor(BLACK)
     }
 }
+
+impl Default for TextureKind {
+    fn default() -> Self {
+        Self::SolidColor(BLACK)
+    }
+}
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub enum BlendMode {
     Clear,
@@ -158,6 +176,17 @@ impl Texture {
         }
     }
 }
+
+impl Default for Texture {
+    fn default() -> Self {
+        Self {
+            kind: TextureKind::default(),
+            mode: BlendMode::SourceOver,
+            anti_alias: true,
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Debug)]
 pub struct Stroke {
     pub width: f32,
