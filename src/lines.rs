@@ -1,12 +1,64 @@
 use crate::base::*;
 use crate::noise::*;
 use crate::prelude::{vec2, Vector};
-use crate::shape::*;
-use crate::util::PI;
+use crate::util::Rand;
 use noise::OpenSimplex;
 use rand::prelude::*;
 use rand_distr::{Distribution, Normal};
 
+pub struct SandLine {
+    pub start: Point,
+    pub end: Point,
+    g: f32,
+    rando: Rand,
+    grains: u32,
+    thickness: f32,
+    color: RGBA,
+}
+
+impl SandLine {
+    pub fn new(start: Point, end: Point, grains: u32, thickness: f32, color: RGBA) -> Self {
+        let mut rando = Rand::new(0);
+        let g = rando.rand_range(0.01, 0.1);
+        Self {
+            start,
+            end,
+            g,
+            rando,
+            grains,
+            thickness,
+            color,
+        }
+    }
+
+    pub fn draw<T: Sketch>(&mut self, canvas: &mut T) {
+        let v: Vector = self.end - self.start;
+        let n: Vector = vec2(v.y, -v.x).normalize(); // n . v == 0, n is the normal.
+        let length = v.length();
+        for t in 0..length as u32 {
+            let t = t as f32 / length;
+            let x = self.start.x + t * v.x;
+            let y = self.start.y + t * v.y;
+            self.g += self.rando.rand_range(-0.05, 0.05);
+            // clamp g to 0..1 with a 0.05 in the opposite direction
+            if self.g < 0.0 {
+                self.g = 0.05
+            }
+            if self.g > 1.0 {
+                self.g = 0.95
+            }
+            let w = self.g / (self.grains - 1) as f32;
+            let mut delta = 1.0;
+            for i in 0..self.grains {
+                let a = 0.1 - i as f32 / (10.0 * self.grains as f32);
+                let x = x + delta * n.x * self.thickness / 2.0 * (i as f32 * w);
+                let y = y + delta * n.y * self.thickness / 2.0 * (i as f32 * w);
+                delta *= -1.0;
+                pixel(x, y, self.color.set_opacity(a), canvas);
+            }
+        }
+    }
+}
 pub struct DotLine {
     pub start: Point,
     pub end: Point,
@@ -52,59 +104,24 @@ impl DotLine {
         let ns = Noise::<_, 3>::new(1200.0, 1200.0, OpenSimplex::default())
             .set_noise_factor(self.noise_strength)
             .set_noise_scales(10.0, 10.0, 1.0);
-        let v: Vector = (self.end - self.start).normalize();
-        let n: Vector = vec2(v.y, -v.x); // n . v == 0, n is the normal.
+        let v: Vector = self.end - self.start;
+        let n: Vector = vec2(v.y, -v.x).normalize(); // n . v == 0, n is the normal.
         let mut rng = thread_rng();
         let normal = Normal::new(0.0, self.stdev).unwrap();
-        let length = ((self.end.x - self.start.x).powi(2) + (self.end.y - self.start.y).powi(2))
-            .sqrt() as u32;
-        let c = RGBA::new(self.color.r, self.color.g, self.color.b, 0.20);
-        for t in 0..length {
-            let t = t as f32;
+        let length = v.length();
+        let c = RGBA::new(self.color.r, self.color.g, self.color.b, 1.0);
+        for t in 0..length as u32 {
+            let t = t as f32 / length;
             let p = point2(self.start.x + t * v.x, self.start.y + t * v.y);
             let nx = ns.noise(p.x, p.y, 0.0);
             let ny = ns.noise(p.x, p.y, 10.3711);
             for _ in 0..self.weight {
                 let r = normal.sample(&mut rng);
+                let mut a = 1.0 / (20.0 + r.abs());
+                a = a.clamp(0.0, 1.0);
+                let o = c.set_opacity(a);
                 let q = point2(p.x + r * n.x + nx, p.y + r * n.y + ny);
-                let dot = ShapeBuilder::new()
-                    .rect_xywh(q, point2(1.0, 1.0))
-                    .no_stroke()
-                    .fill_color(c)
-                    .build();
-                dot.draw(canvas);
-            }
-        }
-    }
-
-    pub fn draw_hair<T: Sketch>(&self, canvas: &mut T) {
-        let ns = Noise::<_, 3>::new(1200.0, 1200.0, OpenSimplex::default())
-            .set_noise_factor(self.noise_strength)
-            .set_noise_scales(10.0, 10.0, 1.0);
-        let ks = ns.set_noise_factor(10.0);
-        let v: Vector = self.end - self.start;
-        let length = v.length();
-        let mut rng = thread_rng();
-        let normal = Normal::new(0.0, self.stdev).unwrap();
-        let c = RGBA::new(self.color.r, self.color.g, self.color.b, 0.10);
-        let texture = Texture::new(TextureKind::SolidColor(c));
-        let stroke = Stroke::default();
-        // let a = f32::atan2(v.y, v.x) + PI;
-        for t in 0..length as u32 {
-            let t = t as f32 / length;
-            let (dx, dy) = (t * v.x, t * v.y);
-            let l = point2(self.start.x + t * v.x, self.start.y + t * v.y);
-            let nx = ns.noise(l.x, l.y, 0.0);
-            let ny = ns.noise(l.x, l.y, 10.3711);
-            let b = ks.angle(l.x, l.y, 434.29) / 8.0;
-            let p = point2(l.x + nx, l.y + ny);
-            let a = f32::atan2(dy + ny, dx + nx) + PI;
-            for _ in 0..self.weight {
-                let r = normal.sample(&mut rng);
-                let d = a + b;
-                let q1 = point2(p.x - r * d.cos(), p.y - r * d.sin());
-                let q2 = point2(p.x + r * d.cos(), p.y + r * d.sin());
-                line(canvas, q1.x, q1.y, q2.x, q2.y, &stroke, &texture);
+                pixel(q.x, q.y, o, canvas);
             }
         }
     }

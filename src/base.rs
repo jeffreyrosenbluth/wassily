@@ -11,6 +11,9 @@ pub trait Sketch {
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
 }
 
+pub fn pixel<T: Sketch>(x: f32, y: f32, color: RGBA, canvas: &mut T) {
+    canvas.fill_rect(x, y, 1.0, 1.0, &Texture::solid_color(color));
+}
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct RGBA {
     pub r: f32,
@@ -27,11 +30,11 @@ impl RGBA {
         Self { r, g, b, a }
     }
 
-    pub fn rgb(r: f32, g: f32, b:f32) -> Self {
-        Self {r, g, b, a: 1.0 }
+    pub fn rgb(r: f32, g: f32, b: f32) -> Self {
+        Self { r, g, b, a: 1.0 }
     }
 
-    pub fn rgb8(r: u8, g: u8, b:u8) -> Self {
+    pub fn rgb8(r: u8, g: u8, b: u8) -> Self {
         Self::with_8(r, g, b, 255)
     }
 
@@ -52,7 +55,7 @@ impl RGBA {
     }
 
     pub fn set_opacity(self, opacity: f32) -> Self {
-        Self {a: opacity, ..self}
+        Self { a: opacity, ..self }
     }
 }
 
@@ -174,6 +177,18 @@ impl Texture {
             mode: BlendMode::SourceOver,
             anti_alias: true,
         }
+    }
+
+    pub fn solid_color(color: RGBA) -> Self {
+        Self {
+            kind: TextureKind::SolidColor(color),
+            mode: BlendMode::SourceOver,
+            anti_alias: true,
+        }
+    }
+
+    pub fn mode(self, mode: BlendMode) -> Self {
+        Self {mode, ..self}
     }
 }
 

@@ -34,9 +34,9 @@ pub fn tagged(ps: Vec<Point>) -> Vec<TaggedPoint> {
 #[derive(Debug, Clone)]
 pub struct Shape {
     pub points: Box<Vec<TaggedPoint>>,
-    pub fill_texture: Box<Option<TextureKind>>,
+    pub fill_texture: Box<Option<Texture>>,
     pub stroke: Stroke,
-    pub stroke_texture: Box<Option<TextureKind>>,
+    pub stroke_texture: Box<Option<Texture>>,
     shape: ShapeType,
     fillrule: FillRule,
     transform: Transform,
@@ -45,9 +45,9 @@ pub struct Shape {
 impl<'a> Shape {
     pub(crate) fn new(
         points: Box<Vec<TaggedPoint>>,
-        fill_texture: Box<Option<TextureKind>>,
+        fill_texture: Box<Option<Texture>>,
         stroke: Stroke,
-        stroke_texture: Box<Option<TextureKind>>,
+        stroke_texture: Box<Option<Texture>>,
         shape: ShapeType,
         fillrule: FillRule,
         transform: Transform,
@@ -93,10 +93,10 @@ impl<'a> Shape {
         pb.set_transform(self.transform);
         let path = pb.finish();
         if let Some(fp) = *self.fill_texture.clone() {
-            canvas.fill_path(&path, &Texture::new(fp));
+            canvas.fill_path(&path, &fp);
         }
         if let Some(sp) = *self.stroke_texture.clone() {
-            canvas.stroke_path(&path, &Texture::new(sp), &self.stroke)
+            canvas.stroke_path(&path, &sp, &self.stroke)
         }
     }
 
@@ -117,10 +117,10 @@ impl<'a> Shape {
         pb.set_transform(self.transform);
         let path = pb.finish();
         if let Some(fp) = *self.fill_texture.clone() {
-            canvas.fill_path(&path, &Texture::new(fp));
+            canvas.fill_path(&path, &fp);
         }
         if let Some(sp) = *self.stroke_texture.clone() {
-            canvas.stroke_path(&path, &Texture::new(sp), &self.stroke);
+            canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
@@ -142,10 +142,10 @@ impl<'a> Shape {
         pb.set_transform(self.transform);
         let path = pb.finish();
         if let Some(fp) = *self.fill_texture.clone() {
-            canvas.fill_path(&path, &Texture::new(fp));
+            canvas.fill_path(&path, &fp);
         }
         if let Some(sp) = *self.stroke_texture.clone() {
-            canvas.stroke_path(&path, &Texture::new(sp), &self.stroke);
+            canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
@@ -160,10 +160,10 @@ impl<'a> Shape {
         let mut path = Path::rect(left, top, right - left, bottom - top);
         path.transform = self.transform;
         if let Some(fp) = *self.fill_texture.clone() {
-            canvas.fill_path(&path, &Texture::new(fp));
+            canvas.fill_path(&path, &fp);
         }
         if let Some(sp) = *self.stroke_texture.clone() {
-            canvas.stroke_path(&path, &Texture::new(sp), &self.stroke);
+            canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
@@ -178,10 +178,10 @@ impl<'a> Shape {
         let mut pb = Path::circle(cx, cy, w);
         pb.transform = self.transform;
         if let Some(fp) = *self.fill_texture.clone() {
-            canvas.fill_path(&pb, &Texture::new(fp));
+            canvas.fill_path(&pb, &fp);
         }
         if let Some(sp) = *self.stroke_texture.clone() {
-            canvas.stroke_path(&pb, &Texture::new(sp), &self.stroke);
+            canvas.stroke_path(&pb, &sp, &self.stroke);
         }
     }
 
@@ -199,15 +199,15 @@ impl<'a> Shape {
         pb.set_transform(self.transform);
         let path = pb.finish();
         if let Some(sp) = *self.stroke_texture.clone() {
-            canvas.stroke_path(&path, &Texture::new(sp), &self.stroke);
+            canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct ShapeBuilder {
-    fill_texture: Option<TextureKind>,
-    stroke_texture: Option<TextureKind>,
+    fill_texture: Option<Texture>,
+    stroke_texture: Option<Texture>,
     stroke_width: f32,
     line_cap: LineCap,
     line_join: LineJoin,
@@ -221,8 +221,8 @@ pub struct ShapeBuilder {
 impl<'a> ShapeBuilder {
     pub fn new() -> Self {
         Self {
-            fill_texture: Some(TextureKind::white()),
-            stroke_texture: Some(TextureKind::black()),
+            fill_texture: Some(Texture::solid_color(BLACK)),
+            stroke_texture: Some(Texture::solid_color(BLACK)),
             stroke_width: 1.0,
             line_cap: LineCap::default(),
             line_join: LineJoin::default(),
@@ -235,12 +235,12 @@ impl<'a> ShapeBuilder {
     }
 
     pub fn fill_color(mut self, color: RGBA) -> Self {
-        self.fill_texture = Some(TextureKind::SolidColor(color));
+        self.fill_texture = Some(Texture::solid_color(color));
         self
     }
 
-    pub fn fill_texture(mut self, texture: TextureKind) -> Self {
-        self.fill_texture = Some(texture);
+    pub fn fill_texture(mut self, texture: &Texture) -> Self {
+        self.fill_texture = Some(texture.clone());
         self
     }
 
@@ -255,7 +255,7 @@ impl<'a> ShapeBuilder {
     }
 
     pub fn stroke_color(mut self, color: RGBA) -> Self {
-        self.stroke_texture = Some(TextureKind::SolidColor(color));
+        self.stroke_texture = Some(Texture::solid_color(color));
         self
     }
 
@@ -357,8 +357,8 @@ impl<'a> ShapeBuilder {
     }
 
     pub fn build(self) -> Shape {
-        let mut fill_texture: Box<Option<TextureKind>> = Box::new(None);
-        let mut stroke_texture: Box<Option<TextureKind>> = Box::new(None);
+        let mut fill_texture: Box<Option<Texture>> = Box::new(None);
+        let mut stroke_texture: Box<Option<Texture>> = Box::new(None);
         if let Some(fs) = self.fill_texture {
             fill_texture = Box::new(Some(fs));
         };

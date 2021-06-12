@@ -75,6 +75,12 @@ pub struct Palette {
     rng: Pcg64,
 }
 
+impl Default for Palette {
+    fn default() -> Self {
+       Palette::new(vec![]) 
+    }
+}
+
 impl Palette {
     /// Generate a palatte from a vector of 'RGBA's
     pub fn new(colors: Vec<RGBA>) -> Self {
