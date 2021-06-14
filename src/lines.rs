@@ -17,19 +17,35 @@ pub struct SandLine {
 }
 
 impl SandLine {
-    pub fn new(start: Point, end: Point, grains: u32, thickness: f32, color: RGBA) -> Self {
-        let mut rando = Rand::new(0);
-        let g = rando.rand_range(0.01, 0.1);
+    pub fn new(start: Point, end: Point) -> Self {
+        let seed: u64 = random();
+        let mut rando = Rand::new(seed);
+        let g = rando.rand_range(0.05, 0.95);
         Self {
             start,
             end,
             g,
             rando,
-            grains,
-            thickness,
-            color,
+            grains: 64,
+            thickness: 40.0,
+            color: BLACK,
         }
     }
+
+        pub fn grains(mut self, grains: u32) -> Self {
+            self.grains = grains;
+            self
+        }
+
+        pub fn thickness(mut self, thickness: f32) -> Self {
+            self.thickness = thickness;
+            self
+        }
+
+        pub fn color(mut self, color: RGBA) -> Self {
+            self.color = color;
+            self
+        }
 
     pub fn draw<T: Sketch>(&mut self, canvas: &mut T) {
         let v: Vector = self.end - self.start;
