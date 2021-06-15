@@ -6,6 +6,7 @@ pub use crate::noise::*;
 pub use crate::shape::*;
 pub use crate::util::*;
 pub use crate::lines::*;
+pub use crate::color_names::*;
 pub use euclid::vec2;
 
 pub type IntRect = euclid::default::Box2D<i32>;
