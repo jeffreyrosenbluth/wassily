@@ -3,7 +3,7 @@ use wassily::prelude::*;
 use wassily::raqote::Canvas;
 
 const WIDTH: u32 = 18000;
-const HEIGHT: u32 = 18000;
+const HEIGHT: u32 = 54 * 300;
 const ORDER: u32 = 4;
 
 fn main() {
@@ -45,7 +45,7 @@ fn main() {
             .grains(1024);
         sand.draw(&mut canvas);
     }
-    canvas.save("hilbert_sand_1.png");
+    canvas.save("hilbert_sand_2.png");
 }
 
 fn hilbert(k: u32, order: u32) -> Point {

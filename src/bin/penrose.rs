@@ -3,7 +3,6 @@ use std::vec;
 use euclid::Angle;
 use euclid::Point2D;
 use euclid::UnknownUnit;
-use rand::prelude::*;
 use wassily::prelude::*;
 use wassily::skia::Canvas;
 

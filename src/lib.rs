@@ -8,3 +8,4 @@ pub mod skia;
 pub mod svg;
 pub mod util;
 pub mod lines;
+pub mod color_names;
