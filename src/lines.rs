@@ -1,6 +1,6 @@
 use crate::base::*;
 use crate::noise::*;
-use crate::prelude::{vec2, Vector};
+use crate::prelude::{vec2, Vector, BLACK};
 use crate::util::Rand;
 use noise::OpenSimplex;
 use rand::prelude::*;

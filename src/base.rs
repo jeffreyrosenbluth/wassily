@@ -22,9 +22,6 @@ pub struct RGBA {
     pub a: f32,
 }
 
-pub const WHITE: RGBA = RGBA::new(1.0, 1.0, 1.0, 1.0);
-pub const BLACK: RGBA = RGBA::new(0.0, 0.0, 0.0, 1.0);
-
 impl RGBA {
     pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self { r, g, b, a }
@@ -117,17 +114,17 @@ pub enum TextureKind {
 
 impl TextureKind {
     pub fn white() -> Self {
-        TextureKind::SolidColor(WHITE)
+        TextureKind::SolidColor(RGBA::rgb8(255, 255, 255))
     }
 
     pub fn black() -> Self {
-        TextureKind::SolidColor(BLACK)
+        TextureKind::SolidColor(RGBA::rgb8(0, 0, 0))
     }
 }
 
 impl Default for TextureKind {
     fn default() -> Self {
-        Self::SolidColor(BLACK)
+        Self::SolidColor(RGBA::rgb8(0, 0, 0))
     }
 }
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
