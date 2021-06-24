@@ -3,10 +3,10 @@
 use noise::{Perlin, Seedable};
 use wassily::prelude::*;
 
-use wassily::raqote::Canvas;
+use wassily::skia::Canvas;
 
-const WIDTH: f32 = 1200.0;
-const HEIGHT: f32 = 0.80 * WIDTH;
+const WIDTH: f32 = 8191.0;
+const HEIGHT: f32 = 4500.0;
 
 fn from_xy(h: f32, ps: &[Point]) -> Vec<Point> {
     ps.iter().map(|p| point2(p.x, p.y + h / 2.0)).collect()
@@ -28,23 +28,24 @@ fn clamp(w: f32, h: f32, ps: &[Point]) -> Vec<Point> {
 
 fn gen(i: i32, s: f32, c: f32) -> Point {
     let x = i as f32 / 800.0 * 3.5 - 2.1;
-    // let y = -0.2 * x.powi(5) - 0.5 * x.powi(4) + 0.8 * x.powi(3) + 2.3 * x.powi(2) + 0.1 * x - 1.75;
-    let y = (x / 4.0).sin();
+    let y = -0.2 * x.powi(5) - 0.5 * x.powi(4) + 0.8 * x.powi(3) + 2.3 * x.powi(2) + 0.1 * x - 1.75;
+    // let y = (x / 4.0).sin();
     point2(i as f32, c - s * y)
 }
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = file_path("sunset_1.png");
-    // let mut palette = Palette::with_img(path, 8);
+    let path = file_path("hl.png");
+    let mut palette = Palette::with_img(path, 1000);
     // palette.colors.reverse();
 
-    let mut palette = Palette::steal(path, 16);
+    // let mut palette = Palette::steal(path, 16);
     palette.sort_by_hue();
     palette.colors.reverse();
+    palette.rotate_hue(180.0);
     let n = palette.colors.len();
     // canvas.background(black(1.0));
-    canvas.fill(palette.colors[0]);
+    canvas.fill(palette.colors[10]);
 
     let mut rb: Vec<Vec<Point>> = vec![];
 

@@ -9,11 +9,11 @@ fn main() {
     let mut imgbuf = ImageBuffer::new(width, height);
     let mut rng = Pcg64::seed_from_u64(0);
 
-    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+    for (x, _y, pixel) in imgbuf.enumerate_pixels_mut() {
         if x % 2 == 0  {
             let r = rng.gen_range(0u8..255);
-            let g = rng.gen_range(0..255);
-            let b = rng.gen_range(0..255);
+            let _g = rng.gen_range(0..255);
+            let _b = rng.gen_range(0..255);
             *pixel = image::Rgb([r, 0, 0]);
         } 
     }

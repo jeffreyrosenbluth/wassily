@@ -1,3 +1,5 @@
+use std::{fmt::Display, str::FromStr};
+
 pub use crate::prelude::{point2, Point, Transform, Vector};
 
 pub trait Sketch {
@@ -53,6 +55,26 @@ impl RGBA {
 
     pub fn set_opacity(self, opacity: f32) -> Self {
         Self { a: opacity, ..self }
+    }
+}
+
+impl Display for RGBA {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[{:.2}, {:.2}, {:.2}, {:.2}]",
+            self.r, self.g, self.b, self.a
+        )
+    }
+}
+
+impl FromStr for RGBA {
+    type Err = std::num::ParseIntError;
+    fn from_str(hex_code: &str) -> Result<Self, Self::Err> {
+        let r: u8 = u8::from_str_radix(&hex_code[1..3], 16)?;
+        let g: u8 = u8::from_str_radix(&hex_code[3..5], 16)?;
+        let b: u8 = u8::from_str_radix(&hex_code[5..7], 16)?;
+        Ok(RGBA::rgb8(r, g, b))
     }
 }
 
@@ -185,7 +207,7 @@ impl Texture {
     }
 
     pub fn mode(self, mode: BlendMode) -> Self {
-        Self {mode, ..self}
+        Self { mode, ..self }
     }
 }
 

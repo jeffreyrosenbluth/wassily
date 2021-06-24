@@ -4,7 +4,7 @@ use image::GenericImageView;
 use palette::{
     rgb::{Rgb, Rgba},
     white_point::D65,
-    Alpha, ConvertInto, Lab, Laba, Lcha, Srgb, Srgba,
+    Alpha, ConvertInto, Lab, LabHue, Laba, Lcha, Srgb, Srgba,
 };
 use rand::prelude::*;
 use rand_pcg::Pcg64;
@@ -77,7 +77,7 @@ pub struct Palette {
 
 impl Default for Palette {
     fn default() -> Self {
-       Palette::new(vec![]) 
+        Palette::new(vec![])
     }
 }
 
@@ -141,6 +141,21 @@ impl Palette {
             )
         });
         Self::new(palette.collect())
+    }
+
+    pub fn rotate_hue(&mut self, degrees: f32) {
+        self.colors = self
+            .colors
+            .iter()
+            .map(|c| {
+                let mut l = lcha(*c);
+                let hue = (l.hue.to_degrees() + degrees) % 360.0;
+                l.hue = LabHue::from_degrees(hue);
+                let rgba: Srgba = l.convert_into();
+                let c = rgba.into_components();
+                RGBA::new(c.0, c.1, c.2, c.3)
+            })
+            .collect();
     }
 
     pub fn sort_by_hue(&mut self) {

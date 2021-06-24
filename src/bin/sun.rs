@@ -1,17 +1,17 @@
 use noise::{OpenSimplex, Seedable};
 use wassily::prelude::*;
 
-use wassily::raqote::Canvas;
+use wassily::skia::Canvas;
 
-const WIDTH: f32 = 65.0 * 300.0; // 8191.0
-const HEIGHT: f32 = 48.0 * 300.0; // 6144
+const WIDTH: f32 = 8191.0;
+const HEIGHT: f32 = 8191.0;
 const XSTEP: f32 = 10.0; // 7.0
 const YSTEP: f32 = 10.0; // 80.0
 const LENGTH: usize = 1200; // 800
 const LINES: usize = 4000; // 1000
 const SEED: u32 = 1; // 0
 const SCALE: f32 = 10.0; // 0.0019
-const RADIUS: f32 = 4000.0;
+const RADIUS: f32 = 2500.0;
 const K: f32 = 3.25;
 
 fn main() {
@@ -20,11 +20,14 @@ fn main() {
         .set_noise_scales(SCALE, SCALE, SCALE / WIDTH)
         .set_noise_factor(1.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = file_path("fruit.png");
+    let path = file_path("hl.png");
     let mut palette = Palette::with_img(path, LINES);
-    palette.sort_by_chroma();
+    palette.rotate_hue(150.0);
+    // palette.sort_by_chroma();
+    let mut stolen = Palette::steal(path, 16);
+    stolen.rotate_hue(150.0);
 
-    let bg = palette.colors[99];
+    let bg = stolen.colors[2];
     canvas.fill(bg);
 
     for i in 1..LINES {
@@ -47,12 +50,13 @@ fn main() {
         if curve.len() >= 2 {
             let shape = ShapeBuilder::new()
                 .no_fill()
-                .stroke_weight(5.0)
-                .stroke_color(palette.colors[i])
+                .stroke_weight(8.0)
+                .stroke_color(palette.rand_color())
+                // .stroke_color(palette.colors[i])
                 .points(&curve)
                 .build();
             shape.draw(&mut canvas);
         }
     }
-    canvas.save("sun_large.png");
+    canvas.save("solar_k3.25.png");
 }

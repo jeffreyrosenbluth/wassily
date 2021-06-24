@@ -259,6 +259,11 @@ impl<'a> ShapeBuilder {
         self
     }
 
+    pub fn stroke_texture(mut self, texture: &Texture) -> Self {
+        self.stroke_texture = Some(texture.clone());
+        self
+    }
+
     pub fn stroke_weight(mut self, weight: f32) -> Self {
         self.stroke_width = weight;
         self

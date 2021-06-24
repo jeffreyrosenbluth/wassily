@@ -1,5 +1,3 @@
-use std::ops::Add;
-
 use wassily::prelude::*;
 use wassily::svg::Canvas;
 

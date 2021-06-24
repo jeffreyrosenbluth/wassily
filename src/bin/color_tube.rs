@@ -24,10 +24,10 @@ fn main() {
         .set_noise_scales(SCALE, SCALE, SCALE);
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
-    let path = file_path("rock.png");
+    let path = file_path("candy.png");
     let mut palette = Palette::with_img(path, COLORS);
 
-    let bg = palette.colors[(0.99 * COLORS as f32) as usize];
+    let _bg = palette.colors[(0.99 * COLORS as f32) as usize];
     canvas.fill(WHITE);
 
     for i in 0..LINES {
