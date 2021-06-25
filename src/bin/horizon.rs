@@ -3,16 +3,15 @@ use wassily::skia::Canvas;
 
 const WIDTH: u32 = 1200;
 const HEIGHT: u32 = 1200;
-const PIX_SZ: f32 = 32.0;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    let dots = stipple(WIDTH as f32 - PIX_SZ, HEIGHT as f32 - PIX_SZ, 100_000);
-    let mut palette = Palette::with_img(file_path("w1.png"), 1000);
+    let dots = stipple(WIDTH as f32, HEIGHT as f32, 1_00_000);
+    let mut palette = Palette::with_img(file_path("weeds.png"), 1000);
     palette.sort_by_hue();
     palette.colors.reverse();
     canvas.fill(BLACK);
-    palette.rotate_hue(330.);
+    // palette.rotate_hue(30.);
     for d in dots {
         // let color = palette.rand_color();
         let sz = map_range(d.y, 0.0, HEIGHT as f32, 10.0, 100.0);
@@ -26,11 +25,11 @@ fn main() {
         //     .build()
         //     .draw(&mut canvas);
         canvas.fill_rect(
-            d.x - 10.0,
-            d.y - 10.0,
+            d.x,
+            d.y,
             100.0,
             tz,
-            &Texture::solid_color(color.set_opacity(0.5)),
+            &Texture::solid_color(color.set_opacity(0.1)),
         );
     }
     canvas.save("horizon.png");
