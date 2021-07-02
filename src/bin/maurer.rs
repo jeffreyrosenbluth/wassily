@@ -1,6 +1,5 @@
-use tiny_skia::*;
-use wassily::shape::*;
-use wassily::util::*;
+use wassily::prelude::*;
+use wassily::skia::Canvas;
 
 const WIDTH: u32 = 900;
 const HEIGHT: u32 = 900;
@@ -19,24 +18,24 @@ fn rose(n: f32, d: f32) -> Vec<Point> {
         let r = size * (n * k).sin();
         let x = r * k.cos() + w / 2.0;
         let y = r * k.sin() + HEIGHT as f32 / 2.0 + 75.0;
-        vertices.push(pt2(x, y));
+        vertices.push(point2(x, y));
     }
     vertices
 }
 
 fn main() {
     // let mut pixmap = Pixmap::new(WIDTH, HEIGHT).unwrap();
-    let mut canvas = Pixmap::load_png("soupwc.png").expect("Can't load png");
-    canvas.fill(Color::from_rgba(0.0, 0.0, 0.0, 0.75).unwrap());
+    let mut canvas = Canvas::new(WIDTH, HEIGHT);
+    canvas.fill(RGBA::new(0.0, 0.0, 0.0, 0.75));
 
     let d = D + 0.01;
     let ps0 = rose(N, d);
     let shape = ShapeBuilder::new()
         .no_fill()
-        .stroke_color(Color::from_rgba8(255, 255, 255, 100))
+        .stroke_color(RGBA::with_8(255, 255, 255, 100))
         .stroke_weight(0.2)
         .points(&ps0)
         .build();
     shape.draw_cubic(&mut canvas);
-    canvas.save_png("maurer.png").unwrap();
+    canvas.save("maurer.png");
 }

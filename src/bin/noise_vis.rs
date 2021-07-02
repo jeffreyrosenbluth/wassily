@@ -1,29 +1,27 @@
 #[allow(unused_imports)]
-
 use noise::{BasicMulti, Fbm, OpenSimplex, Perlin, SuperSimplex};
-use tiny_skia::*;
-use wassily::noise::*;
-use wassily::shape::*;
-use wassily::util::pt2;
-use colorous::*;
 
-const SIZE: u32 = 8191;
-const GRID: f32 = 10.0;
+use colorous::*;
+use wassily::prelude::*;
+use wassily::raqote::Canvas;
+
+const WIDTH: u32 = 19200;
+const HEIGHT: u32 = 14400;
+const GRID: f32 = 250.0;
 const SCALE: f32 = 4.0;
 const FACTOR: f32 = 2.0;
 
 fn main() {
-    let mut canvas = Pixmap::new(SIZE, SIZE).unwrap();
-    let mut ns = Noise::<[f64; 2], _>::new(SIZE as f32, SIZE as f32, OpenSimplex::new());
+    let mut canvas = Canvas::new(WIDTH, HEIGHT);
+    let ns = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, OpenSimplex::default())
+        .set_noise_scales(SCALE, SCALE)
+        .set_noise_factor(FACTOR);
     let mut sm = 0.0;
     let mut lg = 0.0;
     let mut c: colorous::Color;
 
-    ns.set_noise_scales(SCALE, SCALE, 1.0);
-    ns.set_noise_factor(FACTOR);
-
-    for x in (0..SIZE).step_by(GRID as usize) {
-        for y in (0..SIZE).step_by(GRID as usize) {
+    for x in (0..WIDTH).step_by(GRID as usize) {
+        for y in (0..HEIGHT).step_by(GRID as usize) {
             let mut n = ns.noise(x as f32, y as f32);
             if n > lg {
                 lg = n
@@ -34,19 +32,25 @@ fn main() {
             if n < 0.0 {
                 n = n.abs().clamp(0.0, 1.0);
                 c = ORANGES.eval_continuous(n as f64);
-            }  else {
+            } else {
                 n = n.clamp(0.0, 1.0);
                 c = BLUES.eval_continuous(n as f64);
             }
 
+            let color = RGBA::with_8(c.r, c.g, c.b, 255);
+            let sc = RGBA::with_8(255 - c.r, 255 - c.g, 255 - c.b, 255);
+
             let square = ShapeBuilder::new()
-                .rect_xywh(pt2(x as f32, y as f32), pt2(GRID, GRID))
-                .no_stroke()
-                .fill_color(tiny_skia::Color::from_rgba8(c.r, c.g, c.b, 255))
+                // .circle(point2(x as f32, y as f32), 0.525 * GRID)
+                .rect_xywh(point2(x as f32, y as f32), point2(GRID, GRID))
+                .fill_color(color)
+                .stroke_color(sc)
+                .stroke_weight(GRID / 2.0)
                 .build();
+
             square.draw(&mut canvas);
         }
     }
     dbg!(sm, lg);
-    canvas.save_png("vis.png").unwrap();
+    canvas.save("vis_50.png");
 }

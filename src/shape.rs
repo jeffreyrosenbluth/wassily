@@ -1,5 +1,5 @@
-use crate::util::*;
-use tiny_skia::*;
+use crate::base::*;
+use crate::prelude::{Point, vec2, BLACK};
 
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {
@@ -11,33 +11,59 @@ pub(crate) enum ShapeType {
     Line,
 }
 
-#[derive(Debug, Clone)]
-pub struct Shape<'a> {
-    pub points: Box<Vec<Point>>,
-    pub fill_paint: Option<Paint<'a>>,
-    pub stroke: Stroke,
-    pub stroke_paint: Option<Paint<'a>>,
-    shape: ShapeType,
+#[derive(Debug, Clone, Copy)]
+pub struct TaggedPoint {
+    pub point: Point,
+    pub pen: bool,
 }
 
-impl<'a> Shape<'a> {
+impl TaggedPoint {
+    pub fn new(point: Point) -> Self {
+        Self { point, pen: true }
+    }
+
+    pub fn with_pen(point: Point, pen: bool) -> Self {
+        Self { point, pen }
+    }
+}
+
+pub fn tagged(ps: Vec<Point>) -> Vec<TaggedPoint> {
+    ps.iter().map(|p| TaggedPoint::new(*p)).collect()
+}
+
+#[derive(Debug, Clone)]
+pub struct Shape {
+    pub points: Box<Vec<TaggedPoint>>,
+    pub fill_texture: Box<Option<Texture>>,
+    pub stroke: Stroke,
+    pub stroke_texture: Box<Option<Texture>>,
+    shape: ShapeType,
+    fillrule: FillRule,
+    transform: Transform,
+}
+
+impl<'a> Shape {
     pub(crate) fn new(
-        points: Box<Vec<Point>>,
-        fill_paint: Option<Paint<'a>>,
+        points: Box<Vec<TaggedPoint>>,
+        fill_texture: Box<Option<Texture>>,
         stroke: Stroke,
-        stroke_paint: Option<Paint<'a>>,
+        stroke_texture: Box<Option<Texture>>,
         shape: ShapeType,
+        fillrule: FillRule,
+        transform: Transform,
     ) -> Self {
         Self {
             points,
-            fill_paint,
+            fill_texture,
             stroke,
-            stroke_paint,
+            stroke_texture,
             shape,
+            fillrule,
+            transform,
         }
     }
 
-    pub fn draw(&self, canvas: &mut Pixmap) {
+    pub fn draw<T: Sketch>(&self, canvas: &mut T) {
         match self.shape {
             ShapeType::Poly => self.draw_poly(canvas),
             ShapeType::PolyQuad => self.draw_quad(canvas),
@@ -48,168 +74,193 @@ impl<'a> Shape<'a> {
         }
     }
 
-    fn draw_poly(&self, canvas: &mut Pixmap) {
+    fn draw_poly<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
-        let head = self.points[0];
+        pb.set_fillrule(self.fillrule);
+        let head = self.points[0].point;
         let tail = &self.points[1..];
         pb.move_to(head.x, head.y);
         for p in tail {
-            pb.line_to(p.x, p.y);
+            if p.pen {
+                pb.line_to(p.point.x, p.point.y);
+            } else {
+                pb.move_to(p.point.x, p.point.y);
+            }
         }
-        if self.fill_paint.is_some() {
+        if self.fill_texture.is_some() {
             pb.close();
         }
-        let path = pb.finish().unwrap();
-        if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity(), None);
+        pb.set_transform(self.transform);
+        let path = pb.finish();
+        if let Some(fp) = *self.fill_texture.clone() {
+            canvas.fill_path(&path, &fp);
         }
-        if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity(), None);
+        if let Some(sp) = *self.stroke_texture.clone() {
+            canvas.stroke_path(&path, &sp, &self.stroke)
         }
     }
 
-    fn draw_quad(&self, canvas: &mut Pixmap) {
+    fn draw_quad<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
-        let head = self.points[0];
+        pb.set_fillrule(self.fillrule);
+        let head = self.points[0].point;
         let tail = &mut self.points[1..].to_vec();
         pb.move_to(head.x, head.y);
         while tail.len() >= 2 {
-            let control = tail.pop().unwrap();
-            let p = tail.pop().unwrap();
+            let control = tail.pop().unwrap().point;
+            let p = tail.pop().unwrap().point;
             pb.quad_to(control.x, control.y, p.x, p.y);
         }
-        if self.fill_paint.is_some() {
+        if self.fill_texture.is_some() {
             pb.close();
         }
-        let path = pb.finish().unwrap();
-        if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity(), None);
+        pb.set_transform(self.transform);
+        let path = pb.finish();
+        if let Some(fp) = *self.fill_texture.clone() {
+            canvas.fill_path(&path, &fp);
         }
-        if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity(), None);
+        if let Some(sp) = *self.stroke_texture.clone() {
+            canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
-    pub fn draw_cubic(&self, canvas: &mut Pixmap) {
+    pub fn draw_cubic<T: Sketch>(&self, canvas: &mut T) {
         let mut pb = PathBuilder::new();
-        let head = self.points[0];
+        pb.set_fillrule(self.fillrule);
+        let head = self.points[0].point;
         let tail = &mut self.points[1..].to_vec();
         pb.move_to(head.x, head.y);
         while tail.len() >= 3 {
-            let control1 = tail.pop().unwrap();
-            let control2 = tail.pop().unwrap();
-            let p = tail.pop().unwrap();
+            let control1 = tail.pop().unwrap().point;
+            let control2 = tail.pop().unwrap().point;
+            let p = tail.pop().unwrap().point;
             pb.cubic_to(control1.x, control1.y, control2.x, control2.y, p.x, p.y);
         }
-        if self.fill_paint.is_some() {
+        if self.fill_texture.is_some() {
             pb.close();
         }
-        let path = pb.finish().unwrap();
-        if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&path, &fp, FillRule::Winding, Transform::identity(), None);
+        pb.set_transform(self.transform);
+        let path = pb.finish();
+        if let Some(fp) = *self.fill_texture.clone() {
+            canvas.fill_path(&path, &fp);
         }
-        if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity(), None);
+        if let Some(sp) = *self.stroke_texture.clone() {
+            canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
-    fn draw_rect(&self, canvas: &mut Pixmap) {
+    fn draw_rect<T: Sketch>(&self, canvas: &mut T) {
         if self.points.len() < 2 {
-            panic!("Rectangls points vector contains less than 2 points");
+            panic!("Rectangle's points vector contains less than 2 points");
         }
-        let left = self.points[0].x;
-        let top = self.points[0].y;
-        let right = self.points[1].x;
-        let bottom = self.points[1].y;
-        let r = Rect::from_ltrb(left, top, right, bottom).unwrap();
-        let pb = PathBuilder::from_rect(r);
-        if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&pb, &fp, FillRule::Winding, Transform::identity(), None);
+        let left = self.points[0].point.x;
+        let top = self.points[0].point.y;
+        let right = self.points[1].point.x;
+        let bottom = self.points[1].point.y;
+        let mut path = Path::rect(left, top, right - left, bottom - top);
+        path.transform = self.transform;
+        if let Some(fp) = *self.fill_texture.clone() {
+            canvas.fill_path(&path, &fp);
         }
-        if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&pb, &sp, &self.stroke, Transform::identity(), None);
+        if let Some(sp) = *self.stroke_texture.clone() {
+            canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
-    fn draw_ellipse(&self, canvas: &mut Pixmap) {
+    fn draw_ellipse<T: Sketch>(&self, canvas: &mut T) {
         if self.points.len() < 2 {
             panic!("Ellipse points vector contains less than 2 points");
         }
-        let cx = self.points[0].x;
-        let cy = self.points[0].y;
-        let w = self.points[1].x;
-        let _h = self.points[1].y;
-        // XXX Fixme to scale to ellipse when tiny_skia updates;
-        let pb = PathBuilder::from_circle(cx, cy, w).unwrap();
-        if let Some(fp) = &self.fill_paint {
-            canvas.fill_path(&pb, &fp, FillRule::Winding, Transform::identity(), None);
+        let cx = self.points[0].point.x;
+        let cy = self.points[0].point.y;
+        let w = self.points[1].point.x;
+        let _h = self.points[1].point.y;
+        let mut pb = Path::circle(cx, cy, w);
+        pb.transform = self.transform;
+        if let Some(fp) = *self.fill_texture.clone() {
+            canvas.fill_path(&pb, &fp);
         }
-        if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&pb, &sp, &self.stroke, Transform::identity(), None);
+        if let Some(sp) = *self.stroke_texture.clone() {
+            canvas.stroke_path(&pb, &sp, &self.stroke);
         }
     }
 
-    fn draw_line(&self, canvas: &mut Pixmap) {
+    fn draw_line<T: Sketch>(&self, canvas: &mut T) {
         if self.points.len() < 2 {
             panic!("Line points vector contains less than 2 points");
         }
-        let x0 = self.points[0].x;
-        let y0 = self.points[0].y;
-        let x1 = self.points[1].x;
-        let y1 = self.points[1].y;
+        let x0 = self.points[0].point.x;
+        let y0 = self.points[0].point.y;
+        let x1 = self.points[1].point.x;
+        let y1 = self.points[1].point.y;
         let mut pb = PathBuilder::new();
         pb.move_to(x0, y0);
         pb.line_to(x1, y1);
-        let path = pb.finish().unwrap();
-        if let Some(sp) = &self.stroke_paint {
-            canvas.stroke_path(&path, &sp, &self.stroke, Transform::identity(), None);
+        pb.set_transform(self.transform);
+        let path = pb.finish();
+        if let Some(sp) = *self.stroke_texture.clone() {
+            canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct ShapeBuilder<'a> {
-    fill_shader: Option<Shader<'a>>,
-    stroke_shader: Option<Shader<'a>>,
+pub struct ShapeBuilder {
+    fill_texture: Option<Texture>,
+    stroke_texture: Option<Texture>,
     stroke_width: f32,
     line_cap: LineCap,
     line_join: LineJoin,
-    stroke_dash: Option<StrokeDash>,
-    points: Box<Vec<Point>>,
+    stroke_dash: Option<Dash>,
+    points: Box<Vec<TaggedPoint>>,
     shape: ShapeType,
+    fillrule: FillRule,
+    transform: Transform,
 }
 
-impl<'a> ShapeBuilder<'a> {
+impl<'a> ShapeBuilder {
     pub fn new() -> Self {
         Self {
-            fill_shader: Some(Shader::SolidColor(Color::WHITE)),
-            stroke_shader: Some(Shader::SolidColor(Color::BLACK)),
+            fill_texture: Some(Texture::solid_color(BLACK)),
+            stroke_texture: Some(Texture::solid_color(BLACK)),
             stroke_width: 1.0,
             line_cap: LineCap::default(),
             line_join: LineJoin::default(),
             stroke_dash: None,
             points: Box::new(vec![]),
             shape: ShapeType::Poly,
+            fillrule: FillRule::Winding,
+            transform: Transform::identity(),
         }
     }
 
-    pub fn fill_color(mut self, color: Color) -> Self {
-        self.fill_shader = Some(Shader::SolidColor(color));
+    pub fn fill_color(mut self, color: RGBA) -> Self {
+        self.fill_texture = Some(Texture::solid_color(color));
+        self
+    }
+
+    pub fn fill_texture(mut self, texture: &Texture) -> Self {
+        self.fill_texture = Some(texture.clone());
         self
     }
 
     pub fn no_fill(mut self) -> Self {
-        self.fill_shader = None;
+        self.fill_texture = None;
         self
     }
 
     pub fn no_stroke(mut self) -> Self {
-        self.stroke_shader = None;
+        self.stroke_texture = None;
         self
     }
 
-    pub fn stroke_color(mut self, color: Color) -> Self {
-        self.stroke_shader = Some(Shader::SolidColor(color));
+    pub fn stroke_color(mut self, color: RGBA) -> Self {
+        self.stroke_texture = Some(Texture::solid_color(color));
+        self
+    }
+
+    pub fn stroke_texture(mut self, texture: &Texture) -> Self {
+        self.stroke_texture = Some(texture.clone());
         self
     }
 
@@ -228,37 +279,50 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    pub fn stroke_dash(mut self, dash: StrokeDash) -> Self {
+    pub fn stroke_dash(mut self, dash: Dash) -> Self {
         self.stroke_dash = Some(dash);
         self
     }
 
     pub fn points(mut self, pts: &[Point]) -> Self {
-        self.points = Box::new(pts.to_vec());
+        let points = pts.to_vec();
+        let tagged = points.iter().map(|p| TaggedPoint::new(*p)).collect();
+        self.points = Box::new(tagged);
+        self
+    }
+
+    pub fn tagged_points(mut self, tps: &[TaggedPoint]) -> Self {
+        self.points = Box::new(tps.to_vec());
         self
     }
 
     pub fn rect_ltrb(mut self, lt: Point, rb: Point) -> Self {
         self.shape = ShapeType::Rect;
-        self.points = Box::new(vec![lt, rb]);
+        self.points = Box::new(vec![TaggedPoint::new(lt), TaggedPoint::new(rb)]);
         self
     }
 
     pub fn rect_xywh(mut self, xy: Point, wh: Point) -> Self {
         self.shape = ShapeType::Rect;
-        self.points = Box::new(vec![xy, pt2(xy.x + wh.x, xy.y + wh.y)]);
+        self.points = Box::new(vec![
+            TaggedPoint::new(xy),
+            TaggedPoint::new(Point::new(xy.x + wh.x, xy.y + wh.y)),
+        ]);
         self
     }
 
     pub fn ellipse(mut self, center: Point, wh: Point) -> Self {
         self.shape = ShapeType::Ellipse;
-        self.points = Box::new(vec![center, wh]);
+        self.points = Box::new(vec![TaggedPoint::new(center), TaggedPoint::new(wh)]);
         self
     }
 
     pub fn circle(mut self, center: Point, radius: f32) -> Self {
         self.shape = ShapeType::Ellipse;
-        self.points = Box::new(vec![center, pt2(radius, radius)]);
+        self.points = Box::new(vec![
+            TaggedPoint::new(center),
+            TaggedPoint::new(Point::new(radius, radius)),
+        ]);
         self
     }
 
@@ -273,32 +337,53 @@ impl<'a> ShapeBuilder<'a> {
     }
 
     pub fn line(mut self, from: Point, to: Point) -> Self {
-        self.points = Box::new(vec![from, to]);
+        self.points = Box::new(vec![TaggedPoint::new(from), TaggedPoint::new(to)]);
         self.shape = ShapeType::Line;
         self
     }
 
-    pub fn build(self) -> Shape<'a> {
-        let mut fill_paint = None;
-        let mut stroke_paint = None;
-        if let Some(fs) = self.fill_shader {
-            let mut fp = Paint::default();
-            fp.shader = fs;
-            fp.anti_alias = true;
-            fill_paint = Some(fp);
+    pub fn fill_rule(mut self, fillrule: FillRule) -> Self {
+        self.fillrule = fillrule;
+        self
+    }
+
+    pub fn transform(mut self, transform: &Transform) -> Self {
+        let t = self.transform.post_transform(transform);
+        self.transform = t;
+        self
+    }
+
+    /// Interpret points as cartiesian coordinates with center at (0, 0).
+    pub fn cartesian(mut self, width: f32, height: f32) -> Self {
+        self.transform = self.transform
+            .post_scale(1.0, -1.0)
+            .post_translate(vec2(width / 2.0, height / 2.0));
+        self
+    }
+
+    pub fn build(self) -> Shape {
+        let mut fill_texture: Box<Option<Texture>> = Box::new(None);
+        let mut stroke_texture: Box<Option<Texture>> = Box::new(None);
+        if let Some(fs) = self.fill_texture {
+            fill_texture = Box::new(Some(fs));
         };
-        if let Some(ss) = self.stroke_shader {
-            let mut sp = Paint::default();
-            sp.shader = ss;
-            sp.anti_alias = true;
-            stroke_paint = Some(sp);
+        if let Some(ss) = self.stroke_texture {
+            stroke_texture = Box::new(Some(ss));
         };
         let mut stroke = Stroke::default();
         stroke.width = self.stroke_width;
         stroke.line_cap = self.line_cap;
         stroke.line_join = self.line_join;
         stroke.width = self.stroke_width;
-        Shape::new(self.points, fill_paint, stroke, stroke_paint, self.shape)
+        Shape::new(
+            self.points,
+            fill_texture,
+            stroke,
+            stroke_texture,
+            self.shape,
+            self.fillrule,
+            self.transform,
+        )
     }
 }
 
@@ -308,18 +393,18 @@ pub fn stroke(weight: f32) -> Stroke {
     stroke
 }
 
-pub fn line(
-    canvas: &mut Pixmap,
+pub fn line<T: Sketch>(
+    canvas: &mut T,
     x0: f32,
     y0: f32,
     x1: f32,
     y1: f32,
     stroke: &Stroke,
-    stroke_paint: &Paint,
+    stroke_texture: &Texture,
 ) {
     let mut pb = PathBuilder::new();
     pb.move_to(x0, y0);
     pb.line_to(x1, y1);
-    let path = pb.finish().unwrap();
-    canvas.stroke_path(&path, &stroke_paint, stroke, Transform::identity(), None);
+    let path = pb.finish();
+    canvas.stroke_path(&path, &stroke_texture, &stroke);
 }

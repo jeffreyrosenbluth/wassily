@@ -8,9 +8,20 @@ edition = "2018"
 
 [dependencies]
 tiny-skia = "0.5"
-noise = "0.7.0"
+raqote = "0.8"
+# noise = "0.7.0"
+# noise = { git = "https://github.com/jeffreyrosenbluth/noise-rs.git", branch = "master" }
+noise = { path = "/Users/jeffreyrosenbluth/Rust/noise-rs"}
 rand = "0.8.3"
 rand_distr = "0.4"
 rand_pcg = "0.3"
 colorous = "1.0"
 palette = "0.5"
+opensimplex_noise_rs = "0.3"
+euclid = "0.20"
+lyon_geom = "0.17"
+image = "0.23"
+cfg-if = "1.0"
+png = "0.16"
+svg = "0.9"
+color-thief = "0.2"
