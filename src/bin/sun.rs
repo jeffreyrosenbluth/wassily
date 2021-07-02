@@ -28,6 +28,7 @@ fn main() {
     stolen.rotate_hue(150.0);
 
     let bg = stolen.colors[2];
+
     canvas.fill(bg);
 
     for i in 1..LINES {
@@ -53,6 +54,7 @@ fn main() {
                 .stroke_weight(8.0)
                 .stroke_color(palette.rand_color())
                 // .stroke_color(palette.colors[i])
+
                 .points(&curve)
                 .build();
             shape.draw(&mut canvas);

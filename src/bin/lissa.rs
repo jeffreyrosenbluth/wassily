@@ -8,7 +8,6 @@ fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
     canvas.fill(RGBA::with_8(50, 50, 50, 175));
-
     let mut s = Stroke::default();
     s.width = 4.0;
 
