@@ -24,7 +24,7 @@ where
         let x_scale = 1.0;
         let y_scale = 1.0;
         let z_scale = 1.0;
-        let noise_factor = 2.0;
+        let noise_factor = 1.0;
         Self {
             width,
             height,

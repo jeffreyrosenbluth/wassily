@@ -5,8 +5,8 @@ use wassily::prelude::*;
 
 use wassily::skia::Canvas;
 
-const WIDTH: f32 = 8191.0;
-const HEIGHT: f32 = 4500.0;
+const WIDTH: f32 = 27.0 * 300.0;
+const HEIGHT: f32 = 20.0 * 300.0;
 
 fn from_xy(h: f32, ps: &[Point]) -> Vec<Point> {
     ps.iter().map(|p| point2(p.x, p.y + h / 2.0)).collect()
@@ -35,21 +35,16 @@ fn gen(i: i32, s: f32, c: f32) -> Point {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = file_path("hl.png");
-    let mut palette = Palette::with_img(path, 1000);
-    // palette.colors.reverse();
-
-    // let mut palette = Palette::steal(path, 16);
-    palette.sort_by_hue();
+    let path = file_path("bamboo.png");
+    let mut palette = Palette::with_img(path, 150);
     palette.colors.reverse();
-    palette.rotate_hue(180.0);
+
+    palette.rotate_hue(75.0);
+
     let n = palette.colors.len();
-    // canvas.background(black(1.0));
     canvas.fill(palette.colors[10]);
 
     let mut rb: Vec<Vec<Point>> = vec![];
-
-    // let s: Vec<f32> = (0.    // let trans = Transform::create_rotation(Angle::radians(-2.0));
 
     let noise = Noise::<_, 2>::new(WIDTH, HEIGHT, Perlin::default())
         .set_noise_scales(1.5, 1.5)
@@ -59,7 +54,7 @@ fn main() {
     for r in 0..700 {
         let mut row = vec![];
         for c in 0..800 {
-            let mut pt = gen(c, 1000.0, -2100.0 + (r as f32) * 6.0);
+            let mut pt = gen(c, 1000.0, -2800.0 + (r as f32) * 6.0);
             pt.x *= 11.0;
             pt.y += 400.0 * noise.noise(pt.x, pt.y);
             row.push(pt);

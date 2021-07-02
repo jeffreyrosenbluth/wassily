@@ -73,6 +73,7 @@ pub fn cos_color(r: CosChannel, g: CosChannel, b: CosChannel, theta: f32) -> RGB
 pub struct Palette {
     pub colors: Vec<RGBA>,
     rng: Pcg64,
+    current: usize,
 }
 
 impl Default for Palette {
@@ -85,11 +86,15 @@ impl Palette {
     /// Generate a palatte from a vector of 'RGBA's
     pub fn new(colors: Vec<RGBA>) -> Self {
         let rng = Pcg64::seed_from_u64(0);
-        Palette { colors, rng }
+        Palette { colors, rng, current: 0 }
     }
 
     pub fn set_seed(&mut self, seed: u64) {
         self.rng = Pcg64::seed_from_u64(seed);
+    }
+
+    pub fn set_index(&mut self, i: usize) {
+        self.current = i % self.colors.len();
     }
 
     /// Generate a palatte from the colors in an image and sort them by
@@ -141,6 +146,12 @@ impl Palette {
             )
         });
         Self::new(palette.collect())
+    }
+
+    pub fn next(&mut self) -> RGBA {
+        let result = self.colors[self.current];
+        self.current = (self.current + 1) % self.colors.len();
+        result
     }
 
     pub fn rotate_hue(&mut self, degrees: f32) {

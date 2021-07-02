@@ -75,6 +75,7 @@ impl SandLine {
         }
     }
 }
+
 pub struct DotLine {
     pub start: Point,
     pub end: Point,
