@@ -10,7 +10,9 @@ const SCALE: f32 = 1.0;
 pub struct SandBox {
     xy: Point,
     wh: Point,
-    color: RGBA,
+    bg_color: RGBA,
+    color1: RGBA,
+    color2: RGBA,
 }
 
 impl SandBox {
@@ -18,42 +20,54 @@ impl SandBox {
         Self {
             xy,
             wh,
-            color: BLACK,
+            bg_color: WHITE,
+            color1: BLACK,
+            color2: BLACK,
         }
     }
 
-    pub fn color(mut self, color: RGBA) -> Self {
-        self.color = color;
+    pub fn set_bg(mut self, color: RGBA) -> Self {
+        self.bg_color = color;
         self
     }
 
-    pub fn draw_vertical<T: Sketch>(&mut self, canvas: &mut T) {
+    pub fn set_color1(mut self, color: RGBA) -> Self {
+        self.color1 = color;
+        self
+    }
+
+    pub fn set_color2(mut self, color: RGBA) -> Self {
+        self.color2 = color;
+        self
+    }
+
+    pub fn draw<T: Sketch>(&mut self, canvas: &mut T) {
         let ns = Noise::<_, 2>::new(self.wh.x, self.wh.y, Perlin::default())
             .set_noise_scales(SCALE, SCALE);
+        canvas.fill_rect(
+            self.xy.x,
+            self.xy.y,
+            self.wh.x,
+            self.wh.y,
+            &Texture::solid_color(self.bg_color),
+        );
         for i in 0..self.wh.x as u32 {
             let from = point2(self.xy.x + i as f32, self.xy.y);
             let to = point2(self.xy.x + i as f32, self.xy.y + self.wh.y);
-            let mut alpha = map_range(ns.noise(from.x, from.y), -1.0, 1.0, 0.2, 0.9);
-            alpha = alpha.clamp(0.2, 0.8);
+            let alpha = map_range(ns.noise(from.x, from.y), -1.0, 1.0, 0.0, 1.0);
             ShapeBuilder::new()
                 .line(from, to)
-                .stroke_color(self.color.set_opacity(alpha))
+                .stroke_color(self.color1.set_opacity(alpha))
                 .build()
                 .draw(canvas);
         }
-    }
-
-    pub fn draw_horizontal<T: Sketch>(&mut self, canvas: &mut T) {
-        let ns = Noise::<_, 2>::new(self.wh.x, self.wh.y, Perlin::default())
-            .set_noise_scales(SCALE, SCALE);
         for i in 0..self.wh.y as u32 {
             let from = point2(self.xy.x, self.xy.y + i as f32);
             let to = point2(self.xy.x + self.wh.x, self.xy.y + i as f32);
-            let mut alpha = map_range(ns.noise(from.x, from.y), -1.0, 1.0, 0.2, 0.9);
-            alpha = alpha.clamp(0.2, 0.8);
+            let alpha = map_range(ns.noise(from.x, from.y), -1.0, 1.0, 0.0, 1.0);
             ShapeBuilder::new()
                 .line(from, to)
-                .stroke_color(self.color.set_opacity(alpha))
+                .stroke_color(self.color2.set_opacity(alpha))
                 .build()
                 .draw(canvas);
         }
@@ -62,20 +76,21 @@ impl SandBox {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    let mut palette = Palette::with_img(file_path("fruit.png"), 144);
+    let mut palette = Palette::with_img(file_path("orange.png"), 2000);
     palette.sort_by_chroma();
-    palette.colors.reverse();
-    canvas.fill(RGBA::rgb8(25, 25, 25));
+    let mut palette1 = palette.clone();
+    palette1.rotate_hue(120.0);
+    let mut palette2 = palette.clone();
+    palette2.rotate_hue(240.0);
+    canvas.fill(RGBA::rgb8(150, 150, 150));
     let mut x = 0.0;
     let mut y = 0.0;
     while x <= WIDTH as f32 - SIZE {
         while y <= HEIGHT as f32 - SIZE {
-            let mut sq = SandBox::new(point2(x, y), point2(SIZE, SIZE)).color(palette.next());
-            if (x + y) as u32 / SIZE as u32 % 2 == 0 {
-                sq.draw_vertical(&mut canvas)
-            } else {
-                sq.draw_horizontal(&mut canvas)
-            }
+            let mut sq = SandBox::new(point2(x, y), point2(SIZE, SIZE))
+                .set_color1(palette1.rand_color())
+                .set_color2(palette2.rand_color());
+            sq.draw(&mut canvas);
             y += SIZE;
         }
         y = 0.0;

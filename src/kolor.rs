@@ -70,6 +70,7 @@ pub fn cos_color(r: CosChannel, g: CosChannel, b: CosChannel, theta: f32) -> RGB
     )
 }
 
+#[derive(Clone, Debug)]
 pub struct Palette {
     pub colors: Vec<RGBA>,
     rng: Pcg64,
@@ -107,8 +108,8 @@ impl Palette {
         let delta = (w as f32 * h as f32 / n as f32).sqrt();
         let mut x = 0.0;
         let mut y = 0.0;
-        while x <= w as f32 {
-            while y <= h as f32 {
+        while x < w as f32 {
+            while y < h as f32 {
                 let p = img.get_pixel(x as u32, y as u32);
                 let r = p.0[0] as f32 / 255.0;
                 let g = p.0[1] as f32 / 255.0;
