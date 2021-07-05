@@ -1,4 +1,4 @@
-use noise::{OpenSimplex, Seedable};
+use noise::OpenSimplex;
 use wassily::prelude::*;
 
 use wassily::skia::Canvas;

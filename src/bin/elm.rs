@@ -10,7 +10,7 @@ fn main() {
     let rings = 21;
     let center = point2(width * 0.5, height * 0.5);
 
-    let ns = Noise::<Fbm<OpenSimplex>, 3>::new(width, height, Fbm::new(0))
+    let ns = Noise::<Fbm, 3>::new(width, height, Fbm::new(0))
         .set_seed(1)
         .set_noise_scales(scale, scale, 1.0)
         .set_noise_factor(16.0);
@@ -86,7 +86,7 @@ fn main() {
 
 fn circle_points<T>(radius: f32, ns: &Noise<T, 3>, n: u32) -> Vec<Point>
 where
-    T: NoiseFn<3>,
+    T: NoiseFn<f64, 3>,
 {
     let mut ps = vec![];
     let delta = TAU / n as f32;
@@ -113,7 +113,7 @@ fn crack_points<T>(
     dtheta: f32,
 ) -> Vec<Point>
 where
-    T: NoiseFn<3>,
+    T: NoiseFn<f64, 3>,
 {
     let delta = radius / n as f32;
     let mut r = radius;

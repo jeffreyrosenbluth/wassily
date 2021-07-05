@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use noise::{Perlin, Seedable};
+use noise::Perlin;
 use wassily::prelude::*;
 
 use wassily::skia::Canvas;
