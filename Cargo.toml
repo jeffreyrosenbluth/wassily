@@ -11,7 +11,8 @@ tiny-skia = "0.5"
 raqote = "0.8"
 # noise = "0.7.0"
 # noise = { git = "https://github.com/jeffreyrosenbluth/noise-rs.git", branch = "master" }
-noise = { path = "/Users/jeffreyrosenbluth/Rust/noise-rs"}
+noise = { git = "https://github.com/Razaekel/noise-rs.git", branch = "develop" }
+# noise = { path = "/Users/jeffreyrosenbluth/Rust/noise-rs"}
 rand = "0.8.3"
 rand_distr = "0.4"
 rand_pcg = "0.3"
@@ -25,3 +26,4 @@ cfg-if = "1.0"
 png = "0.16"
 svg = "0.9"
 color-thief = "0.2"
+num-traits = "0.2"

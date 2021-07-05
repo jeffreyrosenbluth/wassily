@@ -1,11 +1,12 @@
 use crate::prelude::Point;
 use crate::util::TAU;
-use noise::{noise_fns::NoiseFn, MultiFractal, Seedable};
+use noise::{MultiFractal, NoiseFn, Seedable};
+use rand_distr::num_traits::ToPrimitive;
 
 #[derive(Copy, Clone)]
 pub struct Noise<T, const N: usize>
 where
-    T: NoiseFn<N>,
+    T: NoiseFn<f64, N>,
 {
     pub width: f32,
     pub height: f32,
@@ -18,7 +19,7 @@ where
 
 impl<T, const N: usize> Noise<T, N>
 where
-    T: NoiseFn<N>,
+    T: NoiseFn<f64, N>,
 {
     pub fn new(width: f32, height: f32, noise_fn: T) -> Self {
         let x_scale = 1.0;
@@ -50,17 +51,26 @@ where
     fn center(&self) -> Point {
         Point::new(self.width / 2.0, self.height / 2.0)
     }
+
+    fn get_f32(&self, point: [f32; N]) -> f32 {
+        let coords = point.iter().map(|p| p.to_f64());
+        let mut a: [f64; N] = [0.0; N];
+        for (i, c) in coords.enumerate() {
+            a[i] = c.unwrap();
+        }
+        self.noise_fn.get(a) as f32
+    }
 }
 
 impl<T> Noise<T, 2>
 where
-    T: NoiseFn<2>,
+    T: NoiseFn<f64, 2>,
 {
     pub fn noise(&self, x: f32, y: f32) -> f32 {
         let center = self.center();
         // Perhaps refactor to use 'ScalePoint' from noise module
         self.noise_factor
-            * self.noise_fn.get_f32([
+            * self.get_f32([
                 (1.0 / center.x * self.x_scale * (x - center.x)),
                 (1.0 / center.y * self.y_scale * (y - center.y)),
             ])
@@ -81,12 +91,12 @@ where
 
 impl<T> Noise<T, 3>
 where
-    T: NoiseFn<3>,
+    T: NoiseFn<f64, 3>,
 {
     pub fn noise(&self, x: f32, y: f32, z: f32) -> f32 {
         let center = self.center();
         self.noise_factor
-            * self.noise_fn.get_f32([
+            * self.get_f32([
                 (1.0 / center.x * self.x_scale * (x - center.x)),
                 (1.0 / center.y * self.y_scale * (y - center.y)),
                 (self.z_scale * z),
@@ -107,48 +117,44 @@ where
     }
 }
 
-impl<T, const N: usize> Seedable for Noise<T, N>
+impl<T, const N: usize> Noise<T, N>
 where
-    T: NoiseFn<N> + Seedable,
+    T: NoiseFn<f64, N> + Seedable,
 {
-    fn set_seed(self, seed: u32) -> Self {
+    pub fn set_seed(self, seed: u32) -> Self {
         Self {
             noise_fn: self.noise_fn.set_seed(seed),
             ..self
         }
     }
-
-    fn seed(&self) -> u32 {
-        self.noise_fn.seed()
-    }
 }
 
-impl<T, const N: usize> MultiFractal for Noise<T, N>
+impl<T, const N: usize> Noise<T, N>
 where
-    T: NoiseFn<N> + MultiFractal,
+    T: NoiseFn<f64, N> + MultiFractal,
 {
-    fn set_octaves(self, octaves: usize) -> Self {
+    pub fn set_octaves(self, octaves: usize) -> Self {
         Self {
             noise_fn: self.noise_fn.set_octaves(octaves),
             ..self
         }
     }
 
-    fn set_frequency(self, frequency: f64) -> Self {
+    pub fn set_frequency(self, frequency: f64) -> Self {
         Self {
             noise_fn: self.noise_fn.set_frequency(frequency),
             ..self
         }
     }
 
-    fn set_lacunarity(self, lacunarity: f64) -> Self {
+    pub fn set_lacunarity(self, lacunarity: f64) -> Self {
         Self {
             noise_fn: self.noise_fn.set_lacunarity(lacunarity),
             ..self
         }
     }
 
-    fn set_persistence(self, persistence: f64) -> Self {
+    pub fn set_persistence(self, persistence: f64) -> Self {
         Self {
             noise_fn: self.noise_fn.set_persistence(persistence),
             ..self

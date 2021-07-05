@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use noise::OpenSimplex;
-use noise::Seedable;
 use wassily::prelude::*;
 
 use wassily::skia::Canvas;

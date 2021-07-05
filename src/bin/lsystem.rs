@@ -84,7 +84,7 @@ impl State {
 
 struct Lsystem<T>
 where
-    T: noise::NoiseFn<3>,
+    T: noise::NoiseFn<f64, 3>,
 {
     points: Vec<TaggedPoint>,
     direction: f32,
@@ -104,7 +104,7 @@ where
 
 impl<T> Lsystem<T>
 where
-    T: noise::NoiseFn<3>,
+    T: noise::NoiseFn<f64, 3>,
 {
     fn new(
         angle: f32,

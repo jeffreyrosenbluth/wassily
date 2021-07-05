@@ -1,5 +1,5 @@
 use std::vec;
-use noise::{Seedable, OpenSimplex};
+use noise:: OpenSimplex;
 
 use euclid::Angle;
 use euclid::Point2D;
