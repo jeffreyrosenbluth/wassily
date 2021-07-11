@@ -120,7 +120,7 @@ impl DotLine {
     pub fn draw<T: Sketch>(&self, canvas: &mut T) {
         let ns = Noise::<_, 3>::new(1200.0, 1200.0, OpenSimplex::default())
             .set_noise_factor(self.noise_strength)
-            .set_noise_scales(10.0, 10.0, 1.0);
+            .set_scales(1.0);
         let v: Vector = self.end - self.start;
         let n: Vector = vec2(v.y, -v.x).normalize(); // n . v == 0, n is the normal.
         let mut rng = thread_rng();

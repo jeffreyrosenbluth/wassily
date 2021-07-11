@@ -19,7 +19,8 @@ const SCALE: f32 = 15.0; // 0.0019
 fn main() {
     let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
     .set_seed(SEED)
-    .set_noise_scales(SCALE, SCALE, 1.0);
+    .set_scales(SCALE)
+    .set_z_scale(1.0);
     // wk.set_noise_factor(8.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let path = file_path("orange.png");

@@ -14,7 +14,7 @@ const FACTOR: f32 = 2.0;
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
     let ns = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, OpenSimplex::default())
-        .set_noise_scales(SCALE, SCALE)
+        .set_scales(SCALE)
         .set_noise_factor(FACTOR);
     let mut sm = 0.0;
     let mut lg = 0.0;

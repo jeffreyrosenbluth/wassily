@@ -12,7 +12,7 @@ fn main() {
 
     let ns = Noise::<Fbm, 3>::new(width, height, Fbm::new(0))
         .set_seed(1)
-        .set_noise_scales(scale, scale, 1.0)
+        .set_xy_scales(scale)
         .set_noise_factor(16.0);
     let mut rando = Rand::new(1);
     let radius0 = 25.0;

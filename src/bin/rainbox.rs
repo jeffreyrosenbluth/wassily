@@ -47,7 +47,7 @@ fn main() {
     let mut rb: Vec<Vec<Point>> = vec![];
 
     let noise = Noise::<_, 2>::new(WIDTH, HEIGHT, Perlin::default())
-        .set_noise_scales(1.5, 1.5)
+        .set_scales(1.5)
         .set_noise_factor(5.0)
         .set_seed(1);
 

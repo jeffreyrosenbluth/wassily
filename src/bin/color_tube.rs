@@ -21,7 +21,7 @@ const GRID: f32 = 5.0; // 15.0
 fn main() {
     let wk = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
         .set_seed(SEED)
-        .set_noise_scales(SCALE, SCALE, SCALE);
+        .set_scales(SCALE);
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
     let path = file_path("candy.png");

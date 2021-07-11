@@ -48,6 +48,35 @@ where
         }
     }
 
+    pub fn set_x_scale(self, x_scale: f32) -> Self {
+        Self { x_scale, ..self }
+    }
+
+    pub fn set_y_scale(self, y_scale: f32) -> Self {
+        Self { y_scale, ..self }
+    }
+
+    pub fn set_z_scale(self, z_scale: f32) -> Self {
+        Self { z_scale, ..self }
+    }
+
+    pub fn set_xy_scales(self, scale: f32) -> Self {
+        Self {
+            x_scale: scale,
+            y_scale: scale,
+            ..self
+        }
+    }
+
+    pub fn set_scales(self, scale: f32) -> Self {
+        Self {
+            x_scale: scale,
+            y_scale: scale,
+            z_scale: scale,
+            ..self
+        }
+    }
+
     fn center(&self) -> Point {
         Point::new(self.width / 2.0, self.height / 2.0)
     }
@@ -80,6 +109,10 @@ where
         self.noise(x, y) % TAU
     }
 
+    #[deprecated(
+        since = "0.2.0",
+        note = "Please use set_noise_scales or set_x_scale, etc. instead"
+    )]
     pub fn set_noise_scales(self, x_scale: f32, y_scale: f32) -> Self {
         Self {
             x_scale,
@@ -107,6 +140,10 @@ where
         self.noise(x, y, z) % TAU
     }
 
+    #[deprecated(
+        since = "0.2.0",
+        note = "Please use set_noise_scales or set_x_scale, etc. instead"
+    )]
     pub fn set_noise_scales(self, x_scale: f32, y_scale: f32, z_scale: f32) -> Self {
         Self {
             x_scale,

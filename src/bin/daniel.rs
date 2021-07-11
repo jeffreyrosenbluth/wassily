@@ -44,7 +44,8 @@ fn side_points() -> Vec<Point> {
 
 fn segment(p1: Point, p2: Point, p3: Point, p4: Point, n: u32) -> (Vec<Point>, Vec<Point>) {
     let wk = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
-        .set_noise_scales(SCALE, SCALE, 1.0)
+        .set_scales(SCALE)
+        .set_z_scale(1.0)
         .set_seed(10) // 3
         .set_noise_factor(FACTOR);
     let mut alphas: Vec<f32> = vec![];

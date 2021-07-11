@@ -17,7 +17,8 @@ const K: f32 = 3.25;
 fn main() {
     let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_seed(SEED)
-        .set_noise_scales(SCALE, SCALE, SCALE / WIDTH)
+        .set_xy_scales(SCALE)
+        .set_z_scale(SCALE / WIDTH)
         .set_noise_factor(1.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let path = file_path("hl.png");

@@ -45,7 +45,7 @@ impl SandBox {
 
     pub fn draw<T: Sketch>(&mut self, canvas: &mut T) {
         let ns = Noise::<_, 2>::new(self.wh.x, self.wh.y, Perlin::default())
-            .set_noise_scales(SCALE, SCALE);
+            .set_scales(SCALE);
         canvas.fill_rect(
             self.xy.x,
             self.xy.y,

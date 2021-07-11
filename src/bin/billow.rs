@@ -33,7 +33,7 @@ fn main() {
     let turb = Turbulence::new(source).set_power(2.0);
 
     let ks = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, turb)
-        .set_noise_scales(SCALE, SCALE)
+        .set_scales(SCALE)
         .set_noise_factor(FACTOR);
 
     // 0, 48, 73
