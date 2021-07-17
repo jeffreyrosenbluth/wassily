@@ -37,8 +37,8 @@ fn main() {
                 c = BLUES.eval_continuous(n as f64);
             }
 
-            let color = RGBA::with_8(c.r, c.g, c.b, 255);
-            let sc = RGBA::with_8(255 - c.r, 255 - c.g, 255 - c.b, 255);
+            let color = RGBA::rgba8(c.r, c.g, c.b, 255);
+            let sc = RGBA::rgba8(255 - c.r, 255 - c.g, 255 - c.b, 255);
 
             let square = ShapeBuilder::new()
                 // .circle(point2(x as f32, y as f32), 0.525 * GRID)

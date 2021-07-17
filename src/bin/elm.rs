@@ -31,7 +31,7 @@ fn main() {
             .collect();
         ShapeBuilder::new()
             .points(&cps)
-            .fill_color(RGBA::new(0.0, 0.0, 0.0, 0.0))
+            .fill_color(RGBA::rgba(0.0, 0.0, 0.0, 0.0))
             .stroke_texture(&texture)
             .stroke_weight(w)
             .cartesian(width, height)

@@ -22,7 +22,7 @@ fn tint(color: RGBA, k: f32) -> RGBA {
     let rm = pmin(1.0, k * color.r);
     let gm = pmin(1.0, k * color.g);
     let bm = pmin(1.0, k * color.b);
-    RGBA::new(rm, gm, bm, color.a)
+    RGBA::rgba(rm, gm, bm, color.a)
 }
 
 fn main() {
@@ -46,9 +46,9 @@ fn main() {
     let rg = 105;
     let rb = 139;
 
-    let color_left = RGBA::with_8(lr, lg, lb, 255);
+    let color_left = RGBA::rgba8(lr, lg, lb, 255);
     let color_left = tint(color_left, D);
-    let color_right = RGBA::with_8(rr, rg, rb, 255);
+    let color_right = RGBA::rgba8(rr, rg, rb, 255);
 
     Canvas::fill_rect(
         &mut canvas,
@@ -71,7 +71,7 @@ fn main() {
         for y in (0..HEIGHT).step_by(GRID as usize) {
             let mut n = ks.noise(x as f32, y as f32);
             n = n.abs().clamp(0.0, 1.0);
-            let mut c = RGBA::new(1.0, 1.0, 1.0, 1.0);
+            let mut c = RGBA::rgba(1.0, 1.0, 1.0, 1.0);
             c.a = n;
             let square = ShapeBuilder::new()
                 .rect_xywh(point2(x as f32, y as f32), point2(GRID, GRID))

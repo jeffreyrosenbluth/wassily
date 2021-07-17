@@ -17,7 +17,7 @@ fn main() {
         if l < 7 * HEIGHT / 15 {
             alpha = 0
         }
-        let kolor = RGBA::new(
+        let kolor = RGBA::rgba(
             c.r as f32 / 255.0,
             c.g as f32 / 255.0,
             c.b as f32 / 255.0,
@@ -35,7 +35,7 @@ fn main() {
     let rh = 0.2 * HEIGHT as f32;
     let y = -rh + 7.0 / 15.0 * HEIGHT as f32;
 
-    let color = RGBA::new(0.0, 0.0, 0.0, 150.0 / 255.0);
+    let color = RGBA::rgba(0.0, 0.0, 0.0, 150.0 / 255.0);
     let shape = ShapeBuilder::new()
         .rect_xywh(point2(0.0, y), point2(WIDTH as f32, rh))
         .fill_color(color)
@@ -44,7 +44,7 @@ fn main() {
         .build();
     shape.draw(&mut canvas);
 
-    let color = RGBA::new(1.0, 1.0, 1.0, 190.0 / 255.0);
+    let color = RGBA::rgba(1.0, 1.0, 1.0, 190.0 / 255.0);
     let shape = ShapeBuilder::new()
         .circle(point2(0.88 * WIDTH as f32, 0.15 * HEIGHT as f32), 125.0)
         .stroke_weight(20.0)

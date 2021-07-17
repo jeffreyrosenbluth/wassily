@@ -8,15 +8,15 @@ fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let path = file_path("hudson.png");
     let palette = Palette::steal(path, 16);
-    canvas.fill(RGBA::with_8(122, 122, 122, 255));
+    canvas.fill(RGBA::rgba8(122, 122, 122, 255));
 
     let gradient = Gradient::new(
         point2(100.0, 100.0),
         point2(900.0, 900.0),
         0.0,
         vec![
-            GradientStop::new(0.0, RGBA::with_8(50, 127, 150, 200)),
-            GradientStop::new(1.0, RGBA::with_8(220, 140, 75, 255)),
+            GradientStop::new(0.0, RGBA::rgba8(50, 127, 150, 200)),
+            GradientStop::new(1.0, RGBA::rgba8(220, 140, 75, 255)),
         ],
         SpreadMode::Pad,
         Transform::identity(),

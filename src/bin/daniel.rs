@@ -79,7 +79,7 @@ fn main() {
     let loc = vec2(0.5 * width, 0.58 * height);
     let ps = side_points();
 
-    canvas.fill(RGBA::new(1.0, 0.97, 0.86, 1.0));
+    canvas.fill(RGBA::rgba(1.0, 0.97, 0.86, 1.0));
     canvas.fill(RGBA::rgb8(254, 247, 222));
 
     let trans1 = Transform::identity().post_translate(loc);

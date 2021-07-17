@@ -7,7 +7,7 @@ const ORDER: u32 = 6;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    canvas.fill(RGBA::new(0.0, 0.0, 0.0, 1.0));
+    canvas.fill(RGBA::rgba(0.0, 0.0, 0.0, 1.0));
 
     let width = WIDTH as f32;
     let n = 2u32.pow(ORDER);

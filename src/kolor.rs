@@ -11,23 +11,23 @@ use rand_pcg::Pcg64;
 use std::path::Path;
 
 pub fn black(alpha: f32) -> RGBA {
-    RGBA::new(0.0, 0.0, 0.0, alpha)
+    RGBA::rgba(0.0, 0.0, 0.0, alpha)
 }
 
 pub fn white(alpha: f32) -> RGBA {
-    RGBA::new(1.0, 1.0, 1.0, alpha)
+    RGBA::rgba(1.0, 1.0, 1.0, alpha)
 }
 
 pub fn red(alpha: f32) -> RGBA {
-    RGBA::new(1.0, 0.0, 0.0, alpha)
+    RGBA::rgba(1.0, 0.0, 0.0, alpha)
 }
 
 pub fn green(alpha: f32) -> RGBA {
-    RGBA::new(0.0, 1.0, 0.0, alpha)
+    RGBA::rgba(0.0, 1.0, 0.0, alpha)
 }
 
 pub fn blue(alpha: f32) -> RGBA {
-    RGBA::new(0.0, 0.0, 1.0, alpha)
+    RGBA::rgba(0.0, 0.0, 1.0, alpha)
 }
 
 /// Convert a 'RGBA' to a palette Lcha.
@@ -62,7 +62,7 @@ pub fn cos_color(r: CosChannel, g: CosChannel, b: CosChannel, theta: f32) -> RGB
     let red = r.a + r.b * (r.freq * theta + r.phase).cos();
     let green = g.a + g.b * (g.freq * theta + g.phase).cos();
     let blue = b.a + b.b * (b.freq * theta + b.phase).cos();
-    RGBA::new(
+    RGBA::rgba(
         red.clamp(0.0, 1.0),
         green.clamp(0.0, 1.0),
         blue.clamp(0.0, 1.0),
@@ -115,7 +115,7 @@ impl Palette {
                 let g = p.0[1] as f32 / 255.0;
                 let b = p.0[2] as f32 / 255.0;
                 let a = p.0[3] as f32 / 255.0;
-                let c = RGBA::new(r, g, b, a);
+                let c = RGBA::rgba(r, g, b, a);
                 cs.push(c);
                 y += delta;
             }
@@ -139,7 +139,7 @@ impl Palette {
         let color_type = find_color(img.color());
         let palette = get_palette(img.as_bytes(), color_type, 10, max_colors).unwrap();
         let palette = palette.into_iter().map(|c| {
-            RGBA::new(
+            RGBA::rgba(
                 c.r as f32 / 255.0,
                 c.g as f32 / 255.0,
                 c.b as f32 / 255.0,
@@ -165,7 +165,7 @@ impl Palette {
                 l.hue = LabHue::from_degrees(hue);
                 let rgba: Srgba = l.convert_into();
                 let c = rgba.into_components();
-                RGBA::new(c.0, c.1, c.2, c.3)
+                RGBA::rgba(c.0, c.1, c.2, c.3)
             })
             .collect();
     }
@@ -208,7 +208,7 @@ impl Palette {
         let b: f32 = self.rng.gen_range(-128.0..127.0);
         let rgb: Srgb = Lab::new(l, a, b).convert_into();
         let c = rgb.into_components();
-        RGBA::new(c.0, c.1, c.2, 1.0)
+        RGBA::rgba(c.0, c.1, c.2, 1.0)
     }
 
     pub fn rand_laba(&mut self) -> RGBA {
@@ -218,6 +218,6 @@ impl Palette {
         let o: f32 = self.rng.gen_range(0.0..1.0);
         let rgba: Srgba = Laba::new(l, a, b, o).convert_into();
         let c = rgba.into_components();
-        RGBA::new(c.0, c.1, c.2, c.3)
+        RGBA::rgba(c.0, c.1, c.2, c.3)
     }
 }

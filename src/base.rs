@@ -25,7 +25,7 @@ pub struct RGBA {
 }
 
 impl RGBA {
-    pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
+    pub const fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self { r, g, b, a }
     }
 
@@ -34,10 +34,10 @@ impl RGBA {
     }
 
     pub fn rgb8(r: u8, g: u8, b: u8) -> Self {
-        Self::with_8(r, g, b, 255)
+        Self::rgba8(r, g, b, 255)
     }
 
-    pub fn with_8(r: u8, g: u8, b: u8, a: u8) -> Self {
+    pub fn rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
         let r = r as f32 / 255.0;
         let g = g as f32 / 255.0;
         let b = b as f32 / 255.0;

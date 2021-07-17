@@ -319,7 +319,7 @@ fn koch3() -> Lsystem<OpenSimplex> {
         3,
     );
     koch3.thickness = 20.0;
-    koch3.color = RGBA::new(1.0, 1.0, 1.0, 0.5);
+    koch3.color = RGBA::rgba(1.0, 1.0, 1.0, 0.5);
     koch3
 }
 
@@ -348,7 +348,7 @@ fn fern() -> Lsystem<OpenSimplex> {
     );
     fern.thickness = 20.0;
     fern.direction = -PI / 2.0;
-    fern.color = RGBA::new(0.4, 0.8, 0.3, 1.0);
+    fern.color = RGBA::rgba(0.4, 0.8, 0.3, 1.0);
     fern
 }
 
@@ -400,14 +400,14 @@ fn carpet() -> Lsystem<OpenSimplex> {
         HEIGHT,
         4,
     );
-    carpet.color = RGBA::with_8(191, 36, 93, 100);
+    carpet.color = RGBA::rgba8(191, 36, 93, 100);
     carpet.thickness = 15.0;
     carpet.direction = PI / 2.0;
     carpet
 }
 fn main() {
     let mut canvas = Canvas::new(WIDTH, WIDTH);
-    canvas.fill(RGBA::with_8(242, 187, 197, 255));
+    canvas.fill(RGBA::rgba8(242, 187, 197, 255));
     // canvas.fill(RGBA::with_8(242, 232, 233, 255));
 
     let mut lsys = carpet();

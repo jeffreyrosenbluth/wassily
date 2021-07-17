@@ -7,14 +7,14 @@ const HEIGHT: u32 = 3024;
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
-    canvas.fill(RGBA::with_8(50, 50, 50, 175));
+    canvas.fill(RGBA::rgba8(50, 50, 50, 175));
     let mut s = Stroke::default();
     s.width = 4.0;
 
     let rings = 1200;
     for i in 10..rings {
         let alpha = 255 - (150.0 * i as f32 / rings as f32) as u8;
-        let sc = RGBA::with_8(255, 255, 255, alpha);
+        let sc = RGBA::rgba8(255, 255, 255, alpha);
         let delta = std::f32::consts::TAU / rings as f32;
         let t = i as f32 * delta;
         let w = WIDTH as f32 / 2.0 - 200.0;

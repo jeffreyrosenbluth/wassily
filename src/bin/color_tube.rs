@@ -6,8 +6,8 @@ use wassily::prelude::*;
 // use wassily::skia::Canvas;
 use wassily::raqote::Canvas;
 
-const WIDTH: u32 = 8000; // 8191
-const HEIGHT: u32 = 4500; // 6144
+const WIDTH: u32 = 1200; // 8191
+const HEIGHT: u32 = 900; // 6144
 const XSTEP: f32 = 7.0; // 7.0
 const YSTEP: f32 = 80.0; // 80.0
 const LENGTH: usize = 800; // 800
@@ -65,5 +65,5 @@ fn main() {
             shape.draw(&mut canvas);
         }
     }
-    canvas.save("ct.png");
+    canvas.save("ctube.png");
 }

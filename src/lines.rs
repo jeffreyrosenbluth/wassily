@@ -126,7 +126,7 @@ impl DotLine {
         let mut rng = thread_rng();
         let normal = Normal::new(0.0, self.stdev).unwrap();
         let length = v.length();
-        let c = RGBA::new(self.color.r, self.color.g, self.color.b, 1.0);
+        let c = RGBA::rgba(self.color.r, self.color.g, self.color.b, 1.0);
         for t in 0..length as u32 {
             let t = t as f32 / length;
             let p = point2(self.start.x + t * v.x, self.start.y + t * v.y);

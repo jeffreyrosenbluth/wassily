@@ -26,13 +26,13 @@ fn rose(n: f32, d: f32) -> Vec<Point> {
 fn main() {
     // let mut pixmap = Pixmap::new(WIDTH, HEIGHT).unwrap();
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    canvas.fill(RGBA::new(0.0, 0.0, 0.0, 0.75));
+    canvas.fill(RGBA::rgba(0.0, 0.0, 0.0, 0.75));
 
     let d = D + 0.01;
     let ps0 = rose(N, d);
     let shape = ShapeBuilder::new()
         .no_fill()
-        .stroke_color(RGBA::with_8(255, 255, 255, 100))
+        .stroke_color(RGBA::rgba8(255, 255, 255, 100))
         .stroke_weight(0.2)
         .points(&ps0)
         .build();
