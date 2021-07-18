@@ -44,7 +44,7 @@ fn main() {
 
     let dots = stipple(width, height, 600_000);
     for d in dots {
-        pixel(d.x, d.y, BLACK.set_opacity(0.5), &mut canvas);
+        canvas.pixel(d.x, d.y, BLACK.set_opacity(0.5));
     }
 
     let loc = vec2(0.5 * width, 0.6 * height);

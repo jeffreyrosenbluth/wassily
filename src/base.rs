@@ -10,12 +10,12 @@ pub trait Sketch {
         let rect = Path::rect(x, y, width, height);
         self.fill_path(&rect, texture);
     }
+    fn pixel(&mut self, x: f32, y: f32, color: RGBA) {
+        self.fill_rect(x, y, 1.0, 1.0, &Texture::solid_color(color));
+    }
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
 }
 
-pub fn pixel<T: Sketch>(x: f32, y: f32, color: RGBA, canvas: &mut T) {
-    canvas.fill_rect(x, y, 1.0, 1.0, &Texture::solid_color(color));
-}
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct RGBA {
     pub r: f32,

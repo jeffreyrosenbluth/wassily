@@ -1,14 +1,15 @@
 use image::GenericImageView;
 use wassily::prelude::*;
 use wassily::skia::Canvas;
+use std::env;
 
-const FILE: &'static str = "pills.png";
 const EDGE: f32 = 500.0;
 const ALPHA: f32 = 0.05; //0.03
 const N: u32 = 100_000;
 
 fn main() {
-    let img = image::open(file_path(FILE)).expect("Cannot open file");
+    let file = env::args().nth(1).expect("Must proved image filename");
+    let img = image::open(file).expect("Cannot open file");
     let w = img.width() as f32;
     let h = img.height() as f32;
     let mut canvas = Canvas::new(img.width(), img.height());

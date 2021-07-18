@@ -26,7 +26,7 @@ fn main() {
                 .post_translate(vec2(i as f32 / SKIP * EDGE, j as f32 / SKIP * EDGE));
             let stips = dots.iter().map(|p| transform.transform_point(*p));
             for s in stips {
-                pixel(s.x, s.y, q, &mut canvas)
+                canvas.pixel(s.x, s.y, q)
             }
             j += SKIP as u32;
         }
