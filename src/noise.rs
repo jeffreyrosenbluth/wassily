@@ -111,7 +111,7 @@ where
 
     #[deprecated(
         since = "0.2.0",
-        note = "Please use set_noise_scales or set_x_scale, etc. instead"
+        note = "Please use set_scales or set_x_scale, etc. instead"
     )]
     pub fn set_noise_scales(self, x_scale: f32, y_scale: f32) -> Self {
         Self {
@@ -142,7 +142,7 @@ where
 
     #[deprecated(
         since = "0.2.0",
-        note = "Please use set_noise_scales or set_x_scale, etc. instead"
+        note = "Please use set_scales or set_x_scale, etc. instead"
     )]
     pub fn set_noise_scales(self, x_scale: f32, y_scale: f32, z_scale: f32) -> Self {
         Self {

@@ -14,7 +14,7 @@ fn main() {
     let path = file_path(FILE);
     let mut palette = Palette::steal(path, NUM_COLORS);
     println!("-----------------------------------");
-    println!("Primary Hue: {:3.1}",lcha(palette.colors[0]).hue.to_positive_degrees());
+    println!("Primary Hue: {:3.1}",palette.colors[0].lcha().hue.to_positive_degrees());
     println!("-----------------------------------");
     palette.rotate_hue(ANGLE);
     for i in 0..n {

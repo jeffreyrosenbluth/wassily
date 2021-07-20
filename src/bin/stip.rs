@@ -18,7 +18,7 @@ fn main() {
         while j < img.height() {
             let p = img.get_pixel(i, j);
             let q = RGBA::rgb8(p[0], p[1], p[2]);
-            let mut c = lcha(q);
+            let mut c = q.lcha();
             let chroma = c.chroma;
             c.chroma = 181.0;
             let dots = stipple(EDGE, EDGE, (chroma * 400.0) as u32);

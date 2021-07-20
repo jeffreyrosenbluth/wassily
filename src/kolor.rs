@@ -7,41 +7,56 @@ use palette::{
     Alpha, ConvertInto, Lab, LabHue, Laba, Lcha, Srgb, Srgba,
 };
 use rand::prelude::*;
+use rand_distr::Normal;
 use rand_pcg::Pcg64;
 use std::path::Path;
 
-pub fn black(alpha: f32) -> RGBA {
-    RGBA::rgba(0.0, 0.0, 0.0, alpha)
-}
+impl RGBA {
+    pub fn jiggle(self, std_dev: f32) -> Self {
+        let mut rng = Pcg64::seed_from_u64(0);
+        let normal = Normal::new(0.0, std_dev).unwrap();
+        Self::rgba(
+            (self.r + normal.sample(&mut rng)).clamp(0.0, 1.0),
+            (self.g + normal.sample(&mut rng)).clamp(0.0, 1.0),
+            (self.b + normal.sample(&mut rng)).clamp(0.0, 1.0),
+            self.a,
+        )
+    }
 
-pub fn white(alpha: f32) -> RGBA {
-    RGBA::rgba(1.0, 1.0, 1.0, alpha)
-}
+    pub fn black(alpha: f32) -> Self {
+        Self::rgba(0.0, 0.0, 0.0, alpha)
+    }
 
-pub fn red(alpha: f32) -> RGBA {
-    RGBA::rgba(1.0, 0.0, 0.0, alpha)
-}
+    pub fn white(alpha: f32) -> Self {
+        Self::rgba(1.0, 1.0, 1.0, alpha)
+    }
 
-pub fn green(alpha: f32) -> RGBA {
-    RGBA::rgba(0.0, 1.0, 0.0, alpha)
-}
+    pub fn red(alpha: f32) -> Self {
+        Self::rgba(1.0, 0.0, 0.0, alpha)
+    }
 
-pub fn blue(alpha: f32) -> RGBA {
-    RGBA::rgba(0.0, 0.0, 1.0, alpha)
-}
+    pub fn green(alpha: f32) -> Self {
+        Self::rgba(0.0, 1.0, 0.0, alpha)
+    }
 
-/// Convert a 'RGBA' to a palette Lcha.
-pub fn lcha(c: RGBA) -> Lcha<D65> {
-    let r = c.r;
-    let g = c.g;
-    let b = c.b;
-    let a = c.a;
-    let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
-    srgb.into()
+    pub fn blue(alpha: f32) -> Self {
+        Self::rgba(0.0, 0.0, 1.0, alpha)
+    }
+
+    /// Convert a 'RGBA' to a palette Lcha.
+    pub fn lcha(self) -> Lcha<D65> {
+        let r = self.r;
+        let g = self.g;
+        let b = self.b;
+        let a = self.a;
+        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
+        srgb.into()
+    }
 }
 
 /// Each color channel's (red, green, and blue) value is a function of some
 /// angle (theta). c(theta) = a + b * cos(freq * theta + phase).
+#[derive(Debug, Clone, Copy)]
 pub struct CosChannel {
     pub a: f32,
     pub b: f32,
@@ -50,24 +65,38 @@ pub struct CosChannel {
 }
 
 impl CosChannel {
-    pub fn new(phase: f32) -> Self {
-        let a = 0.5;
-        let b = 0.5;
+    pub fn new(a: f32, b: f32, phase: f32) -> Self {
         let freq = 1.0;
         Self { a, b, freq, phase }
     }
 }
 
-pub fn cos_color(r: CosChannel, g: CosChannel, b: CosChannel, theta: f32) -> RGBA {
-    let red = r.a + r.b * (r.freq * theta + r.phase).cos();
-    let green = g.a + g.b * (g.freq * theta + g.phase).cos();
-    let blue = b.a + b.b * (b.freq * theta + b.phase).cos();
-    RGBA::rgba(
-        red.clamp(0.0, 1.0),
-        green.clamp(0.0, 1.0),
-        blue.clamp(0.0, 1.0),
-        1.0,
-    )
+#[derive(Debug, Clone, Copy)]
+pub struct CosColor {
+    r: CosChannel,
+    g: CosChannel,
+    b: CosChannel,
+}
+
+impl CosColor {
+    pub fn new(r: CosChannel, g: CosChannel, b: CosChannel) -> Self {
+        Self { r, g, b }
+    }
+
+    pub fn cos_color(&self, theta: f32) -> RGBA {
+        let r = self.r;
+        let g = self.g;
+        let b = self.b;
+        let red = r.a + r.b * (r.freq * theta + r.phase).cos();
+        let green = g.a + g.b * (g.freq * theta + g.phase).cos();
+        let blue = b.a + b.b * (b.freq * theta + b.phase).cos();
+        RGBA::rgba(
+            red.clamp(0.0, 1.0),
+            green.clamp(0.0, 1.0),
+            blue.clamp(0.0, 1.0),
+            1.0,
+        )
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -87,7 +116,11 @@ impl Palette {
     /// Generate a palatte from a vector of 'RGBA's
     pub fn new(colors: Vec<RGBA>) -> Self {
         let rng = Pcg64::seed_from_u64(0);
-        Palette { colors, rng, current: 0 }
+        Palette {
+            colors,
+            rng,
+            current: 0,
+        }
     }
 
     pub fn set_seed(&mut self, seed: u64) {
@@ -160,7 +193,7 @@ impl Palette {
             .colors
             .iter()
             .map(|c| {
-                let mut l = lcha(*c);
+                let mut l = c.lcha();
                 let hue = (l.hue.to_degrees() + degrees) % 360.0;
                 l.hue = LabHue::from_degrees(hue);
                 let rgba: Srgba = l.convert_into();
@@ -172,28 +205,28 @@ impl Palette {
 
     pub fn sort_by_hue(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha = lcha(*c);
+            let lcha = c.lcha();
             (1000.0 * lcha.hue.to_radians()) as u32
         })
     }
 
     pub fn sort_by_chroma(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha = lcha(*c);
+            let lcha = c.lcha();
             (1000.0 * lcha.chroma) as u32
         })
     }
 
     pub fn sort_by_lightness(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha = lcha(*c);
+            let lcha = c.lcha();
             (1000.0 * lcha.l) as u32
         })
     }
 
     pub fn sort_by_alpha(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha = lcha(*c);
+            let lcha = c.lcha();
             (1000.0 * lcha.alpha) as u32
         })
     }
