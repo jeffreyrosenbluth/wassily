@@ -105,7 +105,7 @@ impl<'a> Shape {
         pb.set_fillrule(self.fillrule);
         let head = self.points[0].point;
         pb.move_to(head.x, head.y);
-        let tail = self.points[1..].chunks(2);
+        let tail = self.points[1..].chunks_exact(2);
         for t in tail {
             let control = t[0].point;
             let p = t[1].point;
@@ -129,7 +129,7 @@ impl<'a> Shape {
         pb.set_fillrule(self.fillrule);
         let head = self.points[0].point;
         pb.move_to(head.x, head.y);
-        let tail = self.points[1..].chunks(3);
+        let tail = self.points[1..].chunks_exact(3);
         for t in tail {
             let control1 = t[0].point;
             let control2 = t[1].point;
