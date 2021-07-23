@@ -1,5 +1,3 @@
-use std::usize;
-
 use wassily::prelude::*;
 use wassily::skia::Canvas;
 

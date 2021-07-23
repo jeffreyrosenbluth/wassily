@@ -1,5 +1,5 @@
 use crate::base::*;
-use crate::prelude::{Point, vec2, BLACK};
+use crate::prelude::{vec2, Point, BLACK};
 
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {
@@ -104,11 +104,11 @@ impl<'a> Shape {
         let mut pb = PathBuilder::new();
         pb.set_fillrule(self.fillrule);
         let head = self.points[0].point;
-        let tail = &mut self.points[1..].to_vec();
         pb.move_to(head.x, head.y);
-        while tail.len() >= 2 {
-            let control = tail.pop().unwrap().point;
-            let p = tail.pop().unwrap().point;
+        let tail = self.points[1..].chunks(2);
+        for t in tail {
+            let control = t[0].point;
+            let p = t[1].point;
             pb.quad_to(control.x, control.y, p.x, p.y);
         }
         if self.fill_texture.is_some() {
@@ -128,12 +128,12 @@ impl<'a> Shape {
         let mut pb = PathBuilder::new();
         pb.set_fillrule(self.fillrule);
         let head = self.points[0].point;
-        let tail = &mut self.points[1..].to_vec();
         pb.move_to(head.x, head.y);
-        while tail.len() >= 3 {
-            let control1 = tail.pop().unwrap().point;
-            let control2 = tail.pop().unwrap().point;
-            let p = tail.pop().unwrap().point;
+        let tail = self.points[1..].chunks(3);
+        for t in tail {
+            let control1 = t[0].point;
+            let control2 = t[1].point;
+            let p = t[2].point;
             pb.cubic_to(control1.x, control1.y, control2.x, control2.y, p.x, p.y);
         }
         if self.fill_texture.is_some() {
@@ -355,7 +355,8 @@ impl<'a> ShapeBuilder {
 
     /// Interpret points as cartiesian coordinates with center at (0, 0).
     pub fn cartesian(mut self, width: f32, height: f32) -> Self {
-        self.transform = self.transform
+        self.transform = self
+            .transform
             .post_scale(1.0, -1.0)
             .post_translate(vec2(width / 2.0, height / 2.0));
         self
