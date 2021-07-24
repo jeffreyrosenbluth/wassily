@@ -236,6 +236,7 @@ where
             // .line_join(LineJoin::Bevel)
             .line_cap(LineCap::Square)
             .fill_rule(FillRule::EvenOdd)
+            // .cubic()
             .transform(&transform)
             .build();
 
@@ -316,7 +317,7 @@ fn koch3() -> Lsystem<OpenSimplex> {
         ns,
         WIDTH,
         HEIGHT,
-        3,
+        4,
     );
     koch3.thickness = 20.0;
     koch3.color = RGBA::rgba(1.0, 1.0, 1.0, 0.5);
@@ -407,8 +408,7 @@ fn carpet() -> Lsystem<OpenSimplex> {
 }
 fn main() {
     let mut canvas = Canvas::new(WIDTH, WIDTH);
-    canvas.fill(RGBA::rgba8(242, 187, 197, 255));
-    // canvas.fill(RGBA::with_8(242, 232, 233, 255));
+    canvas.fill(WHITE);
 
     let mut lsys = carpet();
     lsys.run(&mut canvas);

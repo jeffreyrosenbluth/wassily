@@ -2,6 +2,7 @@ use crate::prelude::{point2, Point};
 use rand::{Rng, SeedableRng};
 use rand_distr::uniform::SampleUniform;
 use rand_pcg::Pcg64;
+use num_traits::AsPrimitive;
 
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
@@ -48,11 +49,11 @@ pub fn halton(index: u32, base: u32) -> f32 {
     r
 }
 
-pub fn stipple(width: f32, height: f32, n: u32) -> Vec<Point> {
+pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
     let xs = (100..n + 99).map(|i| halton(i, 2));
     let ys = (100..n + 99).map(|i| halton(i, 3));
     xs.zip(ys)
-        .map(|p| point2(p.0 * width, p.1 * height))
+        .map(|p| point2(p.0 * width.as_(), p.1 * height.as_()))
         .collect()
 }
 

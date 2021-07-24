@@ -2,6 +2,7 @@ use crate::prelude::Point;
 use crate::util::TAU;
 use noise::{MultiFractal, NoiseFn, Seedable};
 use rand_distr::num_traits::ToPrimitive;
+use num_traits::AsPrimitive;
 
 #[derive(Copy, Clone)]
 pub struct Noise<T, const N: usize>
@@ -21,11 +22,13 @@ impl<T, const N: usize> Noise<T, N>
 where
     T: NoiseFn<f64, N>,
 {
-    pub fn new(width: f32, height: f32, noise_fn: T) -> Self {
+    pub fn new<U: AsPrimitive<f32>>(width: U, height: U, noise_fn: T) -> Self {
         let x_scale = 1.0;
         let y_scale = 1.0;
         let z_scale = 1.0;
         let noise_factor = 1.0;
+        let width = width.as_();
+        let height = height.as_();
         Self {
             width,
             height,

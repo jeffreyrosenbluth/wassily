@@ -1,5 +1,6 @@
 use crate::base::*;
 use crate::prelude::{vec2, Point, BLACK};
+use num_traits::AsPrimitive;
 
 #[derive(Debug, Clone)]
 pub(crate) enum ShapeType {
@@ -354,11 +355,11 @@ impl<'a> ShapeBuilder {
     }
 
     /// Interpret points as cartiesian coordinates with center at (0, 0).
-    pub fn cartesian(mut self, width: f32, height: f32) -> Self {
+    pub fn cartesian<T: AsPrimitive<f32>>(mut self, width: T, height: T) -> Self {
         self.transform = self
             .transform
             .post_scale(1.0, -1.0)
-            .post_translate(vec2(width / 2.0, height / 2.0));
+            .post_translate(vec2(width.as_() / 2.0, height.as_() / 2.0));
         self
     }
 
