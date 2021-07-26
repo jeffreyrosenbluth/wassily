@@ -27,7 +27,7 @@ fn main() {
         let ln = ShapeBuilder::new()
             .stroke_color(kolor)
             .stroke_weight(1.5)
-            .line(point2(0.0, h), point2(WIDTH as f32, h))
+            .line(point2(0, h), point2(WIDTH, h))
             .build();
         ln.draw(&mut canvas);
     }
@@ -37,7 +37,7 @@ fn main() {
 
     let color = RGBA::rgba(0.0, 0.0, 0.0, 150.0 / 255.0);
     let shape = ShapeBuilder::new()
-        .rect_xywh(point2(0.0, y), point2(WIDTH as f32, rh))
+        .rect_xywh(point2(0, y), point2(WIDTH, rh))
         .fill_color(color)
         .stroke_color(color)
         .stroke_weight(1.5)

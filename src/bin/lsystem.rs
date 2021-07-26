@@ -247,7 +247,7 @@ where
 // Dragon
 #[allow(dead_code)]
 fn dragon() -> Lsystem<OpenSimplex> {
-    let ns = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+    let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_noise_factor(0.)
         .set_scales(10.0);
     let mut rules = HashMap::new();
@@ -274,7 +274,7 @@ fn dragon() -> Lsystem<OpenSimplex> {
 // Koch Lake
 #[allow(dead_code)]
 fn lake() -> Lsystem<OpenSimplex> {
-    let ns = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+    let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_noise_factor(0.)
         .set_scales(10.0);
     let mut rules = HashMap::new();
@@ -301,7 +301,7 @@ fn lake() -> Lsystem<OpenSimplex> {
 // Koch 3
 #[allow(dead_code)]
 fn koch3() -> Lsystem<OpenSimplex> {
-    let ns = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+    let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_noise_factor(0.)
         .set_scales(10.0);
     let mut rules = HashMap::new();
@@ -327,7 +327,7 @@ fn koch3() -> Lsystem<OpenSimplex> {
 // Fern
 #[allow(dead_code)]
 fn fern() -> Lsystem<OpenSimplex> {
-    let ns = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+    let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_noise_factor(0.0)
         .set_scales(20.0);
     let mut rules = HashMap::new();
@@ -356,7 +356,7 @@ fn fern() -> Lsystem<OpenSimplex> {
 // Sierpinski
 #[allow(dead_code)]
 fn sier() -> Lsystem<OpenSimplex> {
-    let ns = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+    let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_noise_factor(0.0)
         .set_scales(20.0);
     let mut rules = HashMap::new();
@@ -383,7 +383,7 @@ fn sier() -> Lsystem<OpenSimplex> {
 // Carpet
 #[allow(dead_code)]
 fn carpet() -> Lsystem<OpenSimplex> {
-    let ns = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+    let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_noise_factor(0.0)
         .set_scales(20.0);
     let mut rules = HashMap::new();

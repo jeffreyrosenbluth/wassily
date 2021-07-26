@@ -4,17 +4,18 @@ use crate::base::{self, Sketch, RGBA};
 use svg::node::element as vg;
 use svg::node::element::path::Data;
 use svg::Document;
+use num_traits::AsPrimitive;
 
 // The usize is for gradient ids'
 pub struct Canvas(Document, usize);
 
 impl Canvas {
-    pub fn new(width: u32, height: u32) -> Self {
+    pub fn new<T: AsPrimitive<u32>>(width: T, height: T) -> Self {
         let doc = Document::new();
         let doc = doc
-            .set("width", width)
-            .set("height", height)
-            .set("viewbox", (0, 0, width, height));
+            .set("width", width.as_())
+            .set("height", height.as_())
+            .set("viewbox", (0, 0, width.as_(), height.as_()));
         Canvas(doc, 0)
     }
 }

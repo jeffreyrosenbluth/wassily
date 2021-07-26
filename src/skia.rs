@@ -2,13 +2,14 @@ use crate::base::{self, Sketch, Texture, TextureKind, RGBA};
 use skia::StrokeDash;
 use tiny_skia as skia;
 use tiny_skia::Pixmap;
+use num_traits::AsPrimitive;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Canvas(Pixmap);
 
 impl Canvas {
-    pub fn new(width: u32, height: u32) -> Self {
-        let pixmap = Pixmap::new(width, height).expect("Pixmap::new failed");
+    pub fn new<T: AsPrimitive<u32>>(width: T, height: T) -> Self {
+        let pixmap = Pixmap::new(width.as_(), height.as_()).expect("Pixmap::new failed");
         Canvas(pixmap)
     }
 

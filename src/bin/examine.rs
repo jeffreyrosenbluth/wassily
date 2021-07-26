@@ -6,8 +6,7 @@ const HEIGHT: f32 = 0.80 * WIDTH;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = file_path("hudson.png");
-    let palette = Palette::steal(path, 16);
+    let palette = Palette::steal("hudson.png", 16);
     canvas.fill(RGBA::rgba8(122, 122, 122, 255));
 
     let gradient = Gradient::new(

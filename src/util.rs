@@ -1,6 +1,6 @@
 use crate::prelude::{point2, Point};
 use rand::{Rng, SeedableRng};
-use rand_distr::uniform::SampleUniform;
+use rand_distr::{Distribution, Normal, uniform::SampleUniform};
 use rand_pcg::Pcg64;
 use num_traits::AsPrimitive;
 
@@ -19,6 +19,16 @@ impl Rand {
 
     pub fn rand_range<U: SampleUniform + PartialOrd>(&mut self, low: U, high: U) -> U {
         self.rng.gen_range(low..high)
+    }
+
+    pub fn rand_normal(&mut self, mean: f32, std_dev: f32) -> f32 {
+        let normal = Normal::new(mean, std_dev).unwrap();
+        normal.sample(&mut self.rng)
+
+    }
+
+    pub fn rand_bool(&mut self, p: f32) -> bool {
+        self.rng.gen_bool(p as f64)
     }
 }
 

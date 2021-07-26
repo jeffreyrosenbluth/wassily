@@ -22,11 +22,11 @@ fn main() {
     let mut rng = rand::thread_rng();
     let normal = Normal::new(0.0, 300.0).unwrap();
 
-    let mut palette = Palette::with_img(file_path("blues.png"), 1300);
-    palette.rotate_hue(135.0);
+    let mut palette = Palette::with_img("blues.png", 1300);
+    palette.rotate_hue(180.0);
 
     for i in (0..WIDTH).step_by(SKIP) {
-        let mut ps = vec![point2(i as f32, 0.0)];
+        let mut ps = vec![point2(i, 0.0)];
         ps.push(point2(
             i as f32 + normal.sample(&mut rng),
             400.0 + ns.noise(i as f32, 400.0).abs(),
@@ -35,24 +35,24 @@ fn main() {
             i as f32 + normal.sample(&mut rng),
             800.0 - ns.noise(i as f32, 800.0).abs(),
         ));
-        ps.push(point2(i as f32, HEIGHT as f32));
+        ps.push(point2(i, HEIGHT as f32));
 
         ShapeBuilder::new()
             .points(&ps)
             .cubic()
             .no_fill()
-            .stroke_weight(35.0)
+            .stroke_weight(25.0)
             .line_cap(LineCap::Round)
-            .stroke_color(palette.rand_color().set_opacity(0.6))
+            .stroke_color(palette.rand_color().set_opacity(0.7))
             .build()
             .draw(&mut canvas);
         ShapeBuilder::new()
             .points(&ps)
             .cubic()
             .no_fill()
-            .stroke_weight(3.0)
+            .stroke_weight(15.0)
             .line_cap(LineCap::Round)
-            .stroke_color(BLACK)
+            .stroke_color(WHITE)
             .build()
             .draw(&mut canvas);
     }

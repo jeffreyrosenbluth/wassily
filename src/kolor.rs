@@ -133,7 +133,7 @@ impl Palette {
 
     /// Generate a palatte from the colors in an image and sort them by
     /// there euclidean distance from Black;
-    pub fn with_img(path: &Path, n: usize) -> Self {
+    pub fn with_img<T: AsRef<Path>>(path: T, n: usize) -> Self {
         let img = image::open(path).expect("Could not find image file");
         let mut cs = vec![];
         let w = img.width();
@@ -160,7 +160,7 @@ impl Palette {
         Self::new(cs)
     }
 
-    pub fn steal(path: &Path, max_colors: u8) -> Self {
+    pub fn steal<T: AsRef<Path>>(path: T, max_colors: u8) -> Self {
         fn find_color(t: image::ColorType) -> ColorFormat {
             match t {
                 image::ColorType::Rgb8 => ColorFormat::Rgb,

@@ -11,8 +11,7 @@ fn main() {
     let mut canvas = Canvas::new(WIDTH, WIDTH);
     let n = (0.5 + (NUM_COLORS as f32).sqrt()) as usize;
     let swatch_width = width / (NUM_COLORS as f32).sqrt();
-    let path = file_path(FILE);
-    let mut palette = Palette::steal(path, NUM_COLORS);
+    let mut palette = Palette::steal(FILE, NUM_COLORS);
     println!("-----------------------------------");
     println!("Primary Hue: {:3.1}",palette.colors[0].lcha().hue.to_positive_degrees());
     println!("-----------------------------------");

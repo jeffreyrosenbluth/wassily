@@ -10,3 +10,4 @@ pub mod util;
 pub mod lines;
 pub mod rectangles;
 pub mod color_names;
+pub mod subdivision;

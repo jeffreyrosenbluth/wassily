@@ -23,8 +23,7 @@ fn main() {
     .set_z_scale(1.0);
     // wk.set_noise_factor(8.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = file_path("orange.png");
-    let mut palette = Palette::with_img(path, COLORS);
+    let mut palette = Palette::with_img("oragne.png", COLORS);
 
     let bg = palette.colors[10];
     canvas.fill(bg);

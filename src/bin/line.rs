@@ -26,8 +26,7 @@ fn main() {
 
     canvas.fill(RGBA::rgb(0.855, 0.808, 0.761));
 
-    let name = file_path("orange.png");
-    let mut palette = Palette::with_img(name, path.len() + 1);
+    let mut palette = Palette::with_img("orange.png", path.len() + 1);
     let seed: u64 = random();
     palette.set_seed(seed);
     palette.sort_by_chroma();

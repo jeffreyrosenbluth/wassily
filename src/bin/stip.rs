@@ -7,7 +7,7 @@ const SKIP: f32 = 50.0;
 const EDGE: f32 = 200.0;
 
 fn main() {
-    let img = image::open(file_path(FILE)).expect("Cannot open file");
+    let img = image::open(FILE).expect("Cannot open file");
     let w = img.width() as f32 / SKIP * EDGE as f32;
     let h = img.height() as f32 / SKIP * EDGE as f32;
     let mut canvas = Canvas::new(w as u32, h as u32);

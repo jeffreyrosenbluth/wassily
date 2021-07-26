@@ -65,7 +65,7 @@ fn main() {
 
     let dots = stipple(width, height, 100_000);
     let pix_size = 64.0;
-    let mut palette = Palette::with_img(file_path("sea.png"), 1000);
+    let mut palette = Palette::with_img("sea.png", 1000);
     palette.rotate_hue(300.0);
     for d in dots.clone() {
         let d2 = (d.x - center.x).powi(2) + (d.y - center.y).powi(2);

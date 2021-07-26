@@ -32,20 +32,20 @@ impl SandLine {
         }
     }
 
-        pub fn grains(mut self, grains: u32) -> Self {
-            self.grains = grains;
-            self
-        }
+    pub fn grains(mut self, grains: u32) -> Self {
+        self.grains = grains;
+        self
+    }
 
-        pub fn thickness(mut self, thickness: f32) -> Self {
-            self.thickness = thickness;
-            self
-        }
+    pub fn thickness(mut self, thickness: f32) -> Self {
+        self.thickness = thickness;
+        self
+    }
 
-        pub fn color(mut self, color: RGBA) -> Self {
-            self.color = color;
-            self
-        }
+    pub fn color(mut self, color: RGBA) -> Self {
+        self.color = color;
+        self
+    }
 
     pub fn draw<T: Sketch>(&mut self, canvas: &mut T) {
         let v: Vector = self.end - self.start;

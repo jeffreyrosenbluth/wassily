@@ -21,7 +21,7 @@ fn main() {
         .set_z_scale(SCALE / WIDTH)
         .set_noise_factor(1.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let path = file_path("hl.png");
+    let path = "hl.png";
     let mut palette = Palette::with_img(path, LINES);
     palette.rotate_hue(150.0);
     // palette.sort_by_chroma();

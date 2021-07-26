@@ -19,13 +19,12 @@ const SCALE: f32 = 2.; // 0.0019
 const GRID: f32 = 5.0; // 15.0
 
 fn main() {
-    let wk = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+    let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_seed(SEED)
         .set_scales(SCALE);
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
-    let path = file_path("candy.png");
-    let mut palette = Palette::with_img(path, COLORS);
+    let mut palette = Palette::with_img("candy.png", COLORS);
 
     let _bg = palette.colors[(0.99 * COLORS as f32) as usize];
     canvas.fill(WHITE);

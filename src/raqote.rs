@@ -1,12 +1,13 @@
 use crate::base::{self, Sketch, Texture, TextureKind};
 use base::RGBA;
+use num_traits::AsPrimitive;
 use raqote::{self, AntialiasMode, DrawOptions, DrawTarget, SolidSource, Source};
 
 pub struct Canvas(DrawTarget);
 
 impl Canvas {
-    pub fn new(width: u32, height: u32) -> Self {
-        let dt = DrawTarget::new(width as i32, height as i32);
+    pub fn new<T: AsPrimitive<i32>>(width: T, height: T) -> Self {
+        let dt = DrawTarget::new(width.as_(), height.as_());
         Canvas(dt)
     }
 }
@@ -24,12 +25,7 @@ impl Sketch for Canvas {
         self.0.fill(&raqote_path, &source, &draw_options);
     }
 
-    fn stroke_path(
-        &mut self,
-        path: &base::Path,
-        texture: &Texture,
-        stroke: &base::Stroke,
-    ) {
+    fn stroke_path(&mut self, path: &base::Path, texture: &Texture, stroke: &base::Stroke) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         let stroke = stroke.into();
@@ -39,8 +35,7 @@ impl Sketch for Canvas {
             false => AntialiasMode::None,
         };
 
-        self.0
-            .stroke(&raqote_path, &source, &stroke, &draw_options);
+        self.0.stroke(&raqote_path, &source, &stroke, &draw_options);
     }
 
     fn fill(&mut self, color: base::RGBA) {
@@ -55,8 +50,7 @@ impl Sketch for Canvas {
             false => AntialiasMode::None,
         };
         draw_options.blend_mode = texture.mode.into();
-        self.0
-            .fill_rect(x, y, width, height, &src, &draw_options);
+        self.0.fill_rect(x, y, width, height, &src, &draw_options);
     }
 
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {

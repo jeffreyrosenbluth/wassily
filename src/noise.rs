@@ -1,8 +1,7 @@
 use crate::prelude::Point;
 use crate::util::TAU;
 use noise::{MultiFractal, NoiseFn, Seedable};
-use rand_distr::num_traits::ToPrimitive;
-use num_traits::AsPrimitive;
+use num_traits::{AsPrimitive, ToPrimitive};
 
 #[derive(Copy, Clone)]
 pub struct Noise<T, const N: usize>

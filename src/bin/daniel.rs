@@ -43,7 +43,7 @@ fn side_points() -> Vec<Point> {
 }
 
 fn segment(p1: Point, p2: Point, p3: Point, p4: Point, n: u32) -> (Vec<Point>, Vec<Point>) {
-    let wk = Noise::<_, 3>::new(WIDTH as f32, HEIGHT as f32, OpenSimplex::default())
+    let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
         .set_scales(SCALE)
         .set_z_scale(1.0)
         .set_seed(10) // 3

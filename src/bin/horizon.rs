@@ -7,7 +7,7 @@ const HEIGHT: u32 = 5400;
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
     let dots = stipple(WIDTH as f32, HEIGHT as f32, 600_000);
-    let mut palette = Palette::with_img(file_path("matches.png"), 1000);
+    let mut palette = Palette::with_img("matches.png", 1000);
     palette.rotate_hue(150.0);
     palette.sort_by_chroma();
     palette.colors.reverse();
