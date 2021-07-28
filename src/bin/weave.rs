@@ -17,8 +17,8 @@ fn main() {
     }
 
     let ns: Noise<_, 2> = Noise::new(WIDTH, HEIGHT, Perlin::default())
-        .set_scales(22.0)
-        .set_noise_factor(300.0);
+        .scales(22.0)
+        .factor(300.0);
     let mut rng = rand::thread_rng();
     let normal = Normal::new(0.0, 300.0).unwrap();
 
@@ -29,11 +29,11 @@ fn main() {
         let mut ps = vec![point2(i, 0.0)];
         ps.push(point2(
             i as f32 + normal.sample(&mut rng),
-            400.0 + ns.noise(i as f32, 400.0).abs(),
+            400.0 + ns.get(i as f32, 400.0).abs(),
         ));
         ps.push(point2(
             i as f32 + normal.sample(&mut rng),
-            800.0 - ns.noise(i as f32, 800.0).abs(),
+            800.0 - ns.get(i as f32, 800.0).abs(),
         ));
         ps.push(point2(i, HEIGHT as f32));
 

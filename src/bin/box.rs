@@ -18,9 +18,9 @@ const SCALE: f32 = 15.0; // 0.0019
 
 fn main() {
     let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-    .set_seed(SEED)
-    .set_scales(SCALE)
-    .set_z_scale(1.0);
+    .seed(SEED)
+    .scales(SCALE)
+    .z_scale(1.0);
     // wk.set_noise_factor(8.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let mut palette = Palette::with_img("oragne.png", COLORS);
@@ -36,7 +36,7 @@ fn main() {
                 break;
             }
             up.push(l1);
-            let angle = wk.noise(l1.x, l1.y, i as f32);
+            let angle = wk.get(l1.x, l1.y, i as f32);
             l1.x += X + XSTEP * angle.cos();
             l1.y += YSTEP * angle.sin();
         }

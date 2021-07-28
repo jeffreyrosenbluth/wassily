@@ -141,8 +141,8 @@ where
         let n = self.points.len() - 1;
         let x = self.points[n].point.x + dx;
         let y = self.points[n].point.y + dy;
-        let x1 = x + self.ns.noise(x, y, 0.0);
-        let y1 = y + self.ns.noise(x, y, 0.1);
+        let x1 = x + self.ns.get(x, y, 0.0);
+        let y1 = y + self.ns.get(x, y, 0.1);
         point2(x1, y1)
     }
 
@@ -248,8 +248,8 @@ where
 #[allow(dead_code)]
 fn dragon() -> Lsystem<OpenSimplex> {
     let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_noise_factor(0.)
-        .set_scales(10.0);
+        .factor(0.)
+        .scales(10.0);
     let mut rules = HashMap::new();
     let axiom = vec!['F'];
     add_rule('F', "F+G", &mut rules);
@@ -275,8 +275,8 @@ fn dragon() -> Lsystem<OpenSimplex> {
 #[allow(dead_code)]
 fn lake() -> Lsystem<OpenSimplex> {
     let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_noise_factor(0.)
-        .set_scales(10.0);
+        .factor(0.)
+        .scales(10.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "F+F+F+F".chars().collect();
     add_rule('F', "F+f-FF+F+FF+Ff+FF-f+FF-F-FF-Ff-FFF", &mut rules);
@@ -302,8 +302,8 @@ fn lake() -> Lsystem<OpenSimplex> {
 #[allow(dead_code)]
 fn koch3() -> Lsystem<OpenSimplex> {
     let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_noise_factor(0.)
-        .set_scales(10.0);
+        .factor(0.)
+        .scales(10.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "F-F-F".chars().collect();
     add_rule('F', "FF-F+F-F-FF", &mut rules);
@@ -328,8 +328,8 @@ fn koch3() -> Lsystem<OpenSimplex> {
 #[allow(dead_code)]
 fn fern() -> Lsystem<OpenSimplex> {
     let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_noise_factor(0.0)
-        .set_scales(20.0);
+        .factor(0.0)
+        .scales(20.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "X".chars().collect();
     add_rule('F', "FF", &mut rules);
@@ -357,8 +357,8 @@ fn fern() -> Lsystem<OpenSimplex> {
 #[allow(dead_code)]
 fn sier() -> Lsystem<OpenSimplex> {
     let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_noise_factor(0.0)
-        .set_scales(20.0);
+        .factor(0.0)
+        .scales(20.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "F+XF+F+XF".chars().collect();
     add_rule('X', "XF-F+F-XF+F+XF-F+F-X", &mut rules);
@@ -384,8 +384,8 @@ fn sier() -> Lsystem<OpenSimplex> {
 #[allow(dead_code)]
 fn carpet() -> Lsystem<OpenSimplex> {
     let ns = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_noise_factor(0.0)
-        .set_scales(20.0);
+        .factor(0.0)
+        .scales(20.0);
     let mut rules = HashMap::new();
     let axiom: Vec<char> = "F-F-F-F".chars().collect();
     add_rule('F', "F[F]-F+F[--F]+F-F", &mut rules);

@@ -1,14 +1,35 @@
+//! The `noise` module is a wrapper around the noise crate that provides a
+//! convenien API for using coherent noise.
+//! # Example
+//!
+//! ```rust
+//! use noise::Fbm;
+//! use wassily::prelude::Noise;
+//!
+//! let ns = Noise::<_, 2>::new(800, 600, Fbm::default())
+//!     .seed(1)
+//!     .octaves(4)
+//!     .frequency(3.0)
+//!     .lacunarity(4.0)
+//!     .persistence(1.0);
+//! let z = ns.get(400.0, 300.0);
+//! ```
+
 use crate::prelude::Point;
 use crate::util::TAU;
 use noise::{MultiFractal, NoiseFn, Seedable};
 use num_traits::{AsPrimitive, ToPrimitive};
 
+/// the `Noise` struct fixes the output type as f64 and sets the scaling 
+/// parameters for the noise function.
 #[derive(Copy, Clone)]
 pub struct Noise<T, const N: usize>
 where
     T: NoiseFn<f64, N>,
 {
+    /// The width of the noise domain.
     pub width: f32,
+    /// The height of the noise domain.
     pub height: f32,
     noise_fn: T,
     x_scale: f32,
@@ -39,30 +60,36 @@ where
         }
     }
 
-    pub fn set_noise_fn(self, noise_fn: T) -> Self {
+    /// The noise function from the noise crate.
+    pub fn noise_fn(self, noise_fn: T) -> Self {
         Self { noise_fn, ..self }
     }
 
-    pub fn set_noise_factor(self, noise_factor: f32) -> Self {
+    /// Multiplier for the noise value.
+    pub fn factor(self, noise_factor: f32) -> Self {
         Self {
             noise_factor,
             ..self
         }
     }
 
-    pub fn set_x_scale(self, x_scale: f32) -> Self {
+    /// Used to scale the x-coordinate: `x = x_scale * x / width`.
+    pub fn x_scale(self, x_scale: f32) -> Self {
         Self { x_scale, ..self }
     }
 
-    pub fn set_y_scale(self, y_scale: f32) -> Self {
+    /// Used to  the y-coordinate: `y = y_scale * y / height`.
+    pub fn y_scale(self, y_scale: f32) -> Self {
         Self { y_scale, ..self }
     }
 
-    pub fn set_z_scale(self, z_scale: f32) -> Self {
+    /// Used ot scale the z-coordingate: z = z_scale * z.
+    pub fn z_scale(self, z_scale: f32) -> Self {
         Self { z_scale, ..self }
     }
 
-    pub fn set_xy_scales(self, scale: f32) -> Self {
+    /// Set both the x and y scales to the same value.
+    pub fn xy_scales(self, scale: f32) -> Self {
         Self {
             x_scale: scale,
             y_scale: scale,
@@ -70,7 +97,8 @@ where
         }
     }
 
-    pub fn set_scales(self, scale: f32) -> Self {
+    /// Set all scales to the same value.
+    pub fn scales(self, scale: f32) -> Self {
         Self {
             x_scale: scale,
             y_scale: scale,
@@ -79,10 +107,12 @@ where
         }
     }
 
+    // Helper function to find the center of the domain.
     fn center(&self) -> Point {
         Point::new(self.width / 2.0, self.height / 2.0)
     }
 
+    // helper function to convert inputs and outputs to f32.
     fn get_f32(&self, point: [f32; N]) -> f32 {
         let coords = point.iter().map(|p| p.to_f64());
         let mut a: [f64; N] = [0.0; N];
@@ -97,7 +127,8 @@ impl<T> Noise<T, 2>
 where
     T: NoiseFn<f64, 2>,
 {
-    pub fn noise(&self, x: f32, y: f32) -> f32 {
+    /// The value of the noise function at the specified coordinates, 2d.
+    pub fn get(&self, x: f32, y: f32) -> f32 {
         let center = self.center();
         // Perhaps refactor to use 'ScalePoint' from noise module
         self.noise_factor
@@ -107,20 +138,9 @@ where
             ])
     }
 
+    /// The noise value expressed in radians.
     pub fn angle(&self, x: f32, y: f32) -> f32 {
-        self.noise(x, y) % TAU
-    }
-
-    #[deprecated(
-        since = "0.2.0",
-        note = "Please use set_scales or set_x_scale, etc. instead"
-    )]
-    pub fn set_noise_scales(self, x_scale: f32, y_scale: f32) -> Self {
-        Self {
-            x_scale,
-            y_scale,
-            ..self
-        }
+        self.get(x, y) % TAU
     }
 }
 
@@ -128,7 +148,8 @@ impl<T> Noise<T, 3>
 where
     T: NoiseFn<f64, 3>,
 {
-    pub fn noise(&self, x: f32, y: f32, z: f32) -> f32 {
+    /// The value of the noise function at the specified coordinates, 3d.
+    pub fn get(&self, x: f32, y: f32, z: f32) -> f32 {
         let center = self.center();
         self.noise_factor
             * self.get_f32([
@@ -138,21 +159,9 @@ where
             ])
     }
 
+    /// The noise value expressed in radians.
     pub fn angle(&self, x: f32, y: f32, z: f32) -> f32 {
-        self.noise(x, y, z) % TAU
-    }
-
-    #[deprecated(
-        since = "0.2.0",
-        note = "Please use set_scales or set_x_scale, etc. instead"
-    )]
-    pub fn set_noise_scales(self, x_scale: f32, y_scale: f32, z_scale: f32) -> Self {
-        Self {
-            x_scale,
-            y_scale,
-            z_scale,
-            ..self
-        }
+        self.get(x, y, z) % TAU
     }
 }
 
@@ -160,7 +169,8 @@ impl<T, const N: usize> Noise<T, N>
 where
     T: NoiseFn<f64, N> + Seedable,
 {
-    pub fn set_seed(self, seed: u32) -> Self {
+    /// Set the seed for noise functions that are `Seedable`.
+    pub fn seed(self, seed: u32) -> Self {
         Self {
             noise_fn: self.noise_fn.set_seed(seed),
             ..self
@@ -172,28 +182,32 @@ impl<T, const N: usize> Noise<T, N>
 where
     T: NoiseFn<f64, N> + MultiFractal,
 {
-    pub fn set_octaves(self, octaves: usize) -> Self {
+    /// Set number of octaves.
+    pub fn octaves(self, octaves: usize) -> Self {
         Self {
             noise_fn: self.noise_fn.set_octaves(octaves),
             ..self
         }
     }
 
-    pub fn set_frequency(self, frequency: f64) -> Self {
+    /// Set frequency.
+    pub fn frequency(self, frequency: f64) -> Self {
         Self {
             noise_fn: self.noise_fn.set_frequency(frequency),
             ..self
         }
     }
 
-    pub fn set_lacunarity(self, lacunarity: f64) -> Self {
+    /// Set Lacunarity.
+    pub fn lacunarity(self, lacunarity: f64) -> Self {
         Self {
             noise_fn: self.noise_fn.set_lacunarity(lacunarity),
             ..self
         }
     }
 
-    pub fn set_persistence(self, persistence: f64) -> Self {
+    /// Set persistence.
+    pub fn persistence(self, persistence: f64) -> Self {
         Self {
             noise_fn: self.noise_fn.set_persistence(persistence),
             ..self

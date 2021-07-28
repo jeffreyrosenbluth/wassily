@@ -44,10 +44,10 @@ fn side_points() -> Vec<Point> {
 
 fn segment(p1: Point, p2: Point, p3: Point, p4: Point, n: u32) -> (Vec<Point>, Vec<Point>) {
     let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_scales(SCALE)
-        .set_z_scale(1.0)
-        .set_seed(10) // 3
-        .set_noise_factor(FACTOR);
+        .scales(SCALE)
+        .z_scale(1.0)
+        .seed(10) // 3
+        .factor(FACTOR);
     let mut alphas: Vec<f32> = vec![];
     for _i in 0..n - 1 {
         alphas.push(random());
@@ -58,13 +58,13 @@ fn segment(p1: Point, p2: Point, p3: Point, p4: Point, n: u32) -> (Vec<Point>, V
     for a in alphas {
         let px = p1.x + a * (p2.x - p1.x);
         let py = p1.y + a * (p2.y - p1.y);
-        let dx = wk.noise(px, py, 0.0);
-        let dy = wk.noise(px, py, 10.0);
+        let dx = wk.get(px, py, 0.0);
+        let dy = wk.get(px, py, 10.0);
         ps.push(point2(px + dx, py + dy));
         let qx = p3.x + a * (p4.x - p3.x);
         let qy = p3.y + a * (p4.y - p3.y);
-        let dx = wk.noise(qx, qy, 0.0);
-        let dy = wk.noise(qx, qy, 10.0);
+        let dx = wk.get(qx, qy, 0.0);
+        let dy = wk.get(qx, qy, 10.0);
         qs.push(point2(qx + dx, qy + dy));
     }
     // ps.push(p2);

@@ -11,9 +11,9 @@ fn main() {
     let center = point2(width * 0.5, height * 0.5);
 
     let ns = Noise::<Fbm, 3>::new(width, height, Fbm::new(0))
-        .set_seed(1)
-        .set_xy_scales(scale)
-        .set_noise_factor(16.0);
+        .seed(1)
+        .xy_scales(scale)
+        .factor(16.0);
     let mut rando = Rand::new(1);
     let radius0 = 25.0;
     let ring_color = RGBA::rgb8(249, 73, 35);
@@ -94,7 +94,7 @@ where
     while theta < TAU {
         let mut x = radius * theta.cos();
         let mut y = radius * theta.sin();
-        let mut dr = ns.noise(x, y, radius);
+        let mut dr = ns.get(x, y, radius);
         dr = map_range(dr, -1.0, 1.0, 0.0, 5.0);
         x = (radius + dr) * theta.cos();
         y = (radius + dr) * theta.sin();
@@ -122,13 +122,13 @@ where
     while r < 1320.0 {
         let x = center.x + r * theta.cos();
         let y = center.y + r * theta.sin();
-        let dx = 5.0 * ns.noise(x, y, 0.0);
-        let dy = 5.0 * ns.noise(x, y, 1.1);
+        let dx = 5.0 * ns.get(x, y, 0.0);
+        let dy = 5.0 * ns.get(x, y, 1.1);
         out.push(point2(x + dx, y + dy));
         let x = center.x + r * (theta + dtheta).cos();
         let y = center.y + r * (theta + dtheta).sin();
-        let dx = 5.0 * ns.noise(x, y, 0.0);
-        let dy = 5.0 * ns.noise(x, y, 1.1);
+        let dx = 5.0 * ns.get(x, y, 0.0);
+        let dy = 5.0 * ns.get(x, y, 1.1);
         back.push(point2(x + dx, y + dy));
         r += delta;
     }

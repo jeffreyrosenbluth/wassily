@@ -16,10 +16,10 @@ const K: f32 = 3.25;
 
 fn main() {
     let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_seed(SEED)
-        .set_xy_scales(SCALE)
-        .set_z_scale(SCALE / WIDTH)
-        .set_noise_factor(1.0);
+        .seed(SEED)
+        .xy_scales(SCALE)
+        .z_scale(SCALE / WIDTH)
+        .factor(1.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let path = "hl.png";
     let mut palette = Palette::with_img(path, LINES);
@@ -44,7 +44,7 @@ fn main() {
                 break;
             }
             curve.push(l1);
-            let angle = K * PI * wk.noise(l1.x, l1.y, i as f32);
+            let angle = K * PI * wk.get(l1.x, l1.y, i as f32);
             l1.x += XSTEP * angle.cos();
             l1.y += YSTEP * angle.sin();
         }

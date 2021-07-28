@@ -14,15 +14,15 @@ const FACTOR: f32 = 2.0;
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
     let ns = Noise::<_, 2>::new(WIDTH as f32, WIDTH as f32, OpenSimplex::default())
-        .set_scales(SCALE)
-        .set_noise_factor(FACTOR);
+        .scales(SCALE)
+        .factor(FACTOR);
     let mut sm = 0.0;
     let mut lg = 0.0;
     let mut c: colorous::Color;
 
     for x in (0..WIDTH).step_by(GRID as usize) {
         for y in (0..HEIGHT).step_by(GRID as usize) {
-            let mut n = ns.noise(x as f32, y as f32);
+            let mut n = ns.get(x as f32, y as f32);
             if n > lg {
                 lg = n
             };

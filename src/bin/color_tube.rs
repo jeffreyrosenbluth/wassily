@@ -20,8 +20,8 @@ const GRID: f32 = 5.0; // 15.0
 
 fn main() {
     let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
-        .set_seed(SEED)
-        .set_scales(SCALE);
+        .seed(SEED)
+        .scales(SCALE);
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
     let mut palette = Palette::with_img("candy.png", COLORS);
@@ -38,7 +38,7 @@ fn main() {
                 break;
             }
             up.push(l1);
-            let angle = wk.noise(l1.x, l1.y, 0.0);
+            let angle = wk.get(l1.x, l1.y, 0.0);
             l1.x += X + XSTEP * angle.cos();
             l1.y += YSTEP * angle.sin();
         }
@@ -48,7 +48,7 @@ fn main() {
                 break;
             }
             dn.push(l2);
-            let angle = wk.noise(l2.x, l2.y, 1.0);
+            let angle = wk.get(l2.x, l2.y, 1.0);
             l2.x += X + XSTEP * angle.cos();
             l2.y += YSTEP * angle.sin();
         }

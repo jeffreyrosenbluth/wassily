@@ -46,16 +46,16 @@ fn main() {
     let mut rb: Vec<Vec<Point>> = vec![];
 
     let noise = Noise::<_, 2>::new(WIDTH, HEIGHT, Perlin::default())
-        .set_scales(1.5)
-        .set_noise_factor(5.0)
-        .set_seed(1);
+        .scales(1.5)
+        .factor(5.0)
+        .seed(1);
 
     for r in 0..700 {
         let mut row = vec![];
         for c in 0..800 {
             let mut pt = gen(c, 1000.0, -2800.0 + (r as f32) * 6.0);
             pt.x *= 11.0;
-            pt.y += 400.0 * noise.noise(pt.x, pt.y);
+            pt.y += 400.0 * noise.get(pt.x, pt.y);
             row.push(pt);
         }
         // rb.push(clamp(WIDTH, HEIGHT, &from_xy(HEIGHT, &transform(trans, &scale(&s, &row)))));
