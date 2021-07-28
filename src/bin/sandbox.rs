@@ -76,12 +76,6 @@ impl SandBox {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-enum Orientation {
-    Horizontal,
-    Vertical,
-}
-
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 struct Domino {
     x: i32,

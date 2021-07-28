@@ -8,7 +8,7 @@ pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
 
 pub struct Rand {
-    rng: Pcg64,
+    pub rng: Pcg64,
 }
 
 impl Rand {
@@ -65,6 +65,13 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
     xs.zip(ys)
         .map(|p| point2(p.0 * width.as_(), p.1 * height.as_()))
         .collect()
+}
+
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub enum Orientation {
+    Horizontal,
+    Vertical,
 }
 
 #[cfg(test)]
