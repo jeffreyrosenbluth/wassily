@@ -1,6 +1,7 @@
-use crate::base::RGBA;
+use crate::{base::RGBA, prelude::Point};
 use color_thief::{get_palette, ColorFormat};
-use image::GenericImageView;
+use image::{DynamicImage, GenericImageView};
+use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
     white_point::D65,
@@ -116,6 +117,9 @@ impl Palette {
     /// Generate a palatte from a vector of 'RGBA's
     pub fn new(colors: Vec<RGBA>) -> Self {
         let rng = Pcg64::seed_from_u64(0);
+        let mut colors = colors;
+        colors.sort_by_cached_key(|c| (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32);
+        colors.dedup_by_key(|c| c.as_8());
         Palette {
             colors,
             rng,
@@ -157,6 +161,7 @@ impl Palette {
         }
         cs.truncate(n);
         cs.sort_by_cached_key(|c| (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32);
+        cs.dedup_by_key(|c| c.as_8());
         Self::new(cs)
     }
 
@@ -253,4 +258,15 @@ impl Palette {
         let c = rgba.into_components();
         RGBA::rgba(c.0, c.1, c.2, c.3)
     }
+}
+
+pub fn get_color<T: AsPrimitive<f32>>(img: &DynamicImage, width: T, height: T, p: Point) -> RGBA {
+    let x = p.x * img.width() as f32 / width.as_();
+    let y = p.y * img.height() as f32 / height.as_();
+    let p = img.get_pixel(x as u32, y as u32);
+    let r = p.0[0] as f32 / 255.0;
+    let g = p.0[1] as f32 / 255.0;
+    let b = p.0[2] as f32 / 255.0;
+    let a = p.0[3] as f32 / 255.0;
+    RGBA::rgba(r, g, b, a)
 }

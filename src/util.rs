@@ -1,5 +1,4 @@
-use crate::prelude::{point2, Point, RGBA};
-use image::{DynamicImage, GenericImageView};
+use crate::prelude::{point2, Point};
 use num_traits::AsPrimitive;
 use rand::{Rng, SeedableRng};
 use rand_distr::{uniform::SampleUniform, Distribution, Normal};
@@ -71,17 +70,6 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
 pub enum Orientation {
     Horizontal,
     Vertical,
-}
-
-pub fn get_color<T: AsPrimitive<f32>>(img: &DynamicImage, width: T, height: T, p: Point) -> RGBA {
-    let x = p.x * img.width() as f32 / width.as_();
-    let y = p.y * img.height() as f32 / height.as_();
-    let p = img.get_pixel(x as u32, y as u32);
-    let r = p.0[0] as f32 / 255.0;
-    let g = p.0[1] as f32 / 255.0;
-    let b = p.0[2] as f32 / 255.0;
-    let a = p.0[3] as f32 / 255.0;
-    RGBA::rgba(r, g, b, a)
 }
 
 #[cfg(test)]
