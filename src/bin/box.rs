@@ -23,9 +23,9 @@ fn main() {
     .z_scale(1.0);
     // wk.set_noise_factor(8.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let mut palette = Palette::with_img("oragne.png", COLORS);
+    let mut palette = Palette::with_img("oragne.png", Some(COLORS));
 
-    let bg = palette.colors[10];
+    let bg = palette[10];
     canvas.fill(bg);
 
     for i in 1..LINES {

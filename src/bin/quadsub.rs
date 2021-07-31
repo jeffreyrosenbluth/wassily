@@ -1,4 +1,3 @@
-use rand::prelude::SliceRandom;
 use wassily::prelude::*;
 use wassily::skia::Canvas;
 
@@ -16,7 +15,7 @@ fn main() {
     );
     let mut qs = vec![quad];
     let mut prng = Rand::new(87654321);
-    let n = 12;
+    let n = 10;
     for _ in 0..n {
         qs = subdivide_vec(
             &qs,
@@ -30,10 +29,10 @@ fn main() {
             },
         );
     }
-    let mut palette = Palette::with_img("sea.png", 2usize.pow(n+1) + 300);
-    palette.jiggle(0, 0.10);
+    let mut palette = Palette::with_img("sunset.png", Some(2usize.pow(n+1)));
+    palette.jiggle(0, 0.05);
     palette.sort_by_hue();
-    palette.rotate_hue(90.0);
+    // palette.rotate_hue(90.0);
     let mut iter = palette.into_iter().cycle();
     qs.sort();
     // qs.shuffle(&mut prng.rng);

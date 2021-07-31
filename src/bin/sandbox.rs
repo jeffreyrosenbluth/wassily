@@ -152,7 +152,7 @@ fn mk_dominos(x: u32, y: u32) -> HashSet<Domino> {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
-    let mut palette = Palette::with_img("fruit.png", 2000);
+    let mut palette = Palette::with_img("fruit.png", Some(2000));
     palette.sort_by_chroma();
     let mut palette1 = palette.clone();
     palette1.rotate_hue(0.0);

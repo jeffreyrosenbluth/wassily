@@ -35,13 +35,13 @@ fn gen(i: i32, s: f32, c: f32) -> Point {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    let mut palette = Palette::with_img("bamboo.png", 150);
+    let mut palette = Palette::with_img("bamboo.png", Some(150));
     palette.colors.reverse();
 
     palette.rotate_hue(75.0);
 
     let n = palette.colors.len();
-    canvas.fill(palette.colors[10]);
+    canvas.fill(palette[10]);
 
     let mut rb: Vec<Vec<Point>> = vec![];
 

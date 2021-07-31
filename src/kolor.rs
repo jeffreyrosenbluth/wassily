@@ -10,7 +10,7 @@ use palette::{
 use rand::prelude::*;
 use rand_distr::Normal;
 use rand_pcg::Pcg64;
-use std::{ops::Index, path::Path, usize};
+use std::{ops::Index, ops::IndexMut, path::Path, usize};
 
 pub struct Jiggle {
     rng: Pcg64,
@@ -63,6 +63,16 @@ impl RGBA {
         let a = self.a;
         let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
         srgb.into()
+    }
+}
+
+impl From<image::Rgba<u8>> for RGBA {
+    fn from(p: image::Rgba<u8>) -> Self {
+        let r = p.0[0] as f32 / 255.0;
+        let g = p.0[1] as f32 / 255.0;
+        let b = p.0[2] as f32 / 255.0;
+        let a = p.0[3] as f32 / 255.0;
+        RGBA::rgba(r, g, b, a)
     }
 }
 
@@ -146,33 +156,36 @@ impl Palette {
         self.current = i % self.colors.len();
     }
 
-    /// Generate a palatte from the colors in an image and sort them by
-    /// there euclidean distance from Black;
-    pub fn with_img<T: AsRef<Path>>(path: T, n: usize) -> Self {
+    /// Generate a palatte from the colors in an image. If `n` is None
+    /// use each unique color in the image otherwise choose n colors.
+    pub fn with_img<T: AsRef<Path>>(path: T, n: Option<usize>) -> Self {
         let img = image::open(path).expect("Could not find image file");
-        let mut cs = vec![];
+        let mut cs: Vec<RGBA> = vec![];
         let w = img.width();
         let h = img.height();
-        let delta = (w as f32 * h as f32 / n as f32).sqrt();
-        let mut x = 0.0;
-        let mut y = 0.0;
-        while x < w as f32 {
-            while y < h as f32 {
-                let p = img.get_pixel(x as u32, y as u32);
-                let r = p.0[0] as f32 / 255.0;
-                let g = p.0[1] as f32 / 255.0;
-                let b = p.0[2] as f32 / 255.0;
-                let a = p.0[3] as f32 / 255.0;
-                let c = RGBA::rgba(r, g, b, a);
-                cs.push(c);
-                y += delta;
+        if let Some(n) = n {
+            let delta = (w as f32 * h as f32 / n as f32).sqrt();
+            let mut x = 0.0;
+            let mut y = 0.0;
+            while x < w as f32 {
+                while y < h as f32 {
+                    let p = img.get_pixel(x as u32, y as u32);
+                    cs.push(p.into());
+                    y += delta;
+                }
+                x += delta;
+                y = 0.0;
             }
-            x += delta;
-            y = 0.0;
+        } else {
+            for (_, _, p) in img.pixels() {
+                cs.push(p.into());
+            }
         }
-        cs.truncate(n);
-        cs.sort_by_cached_key(|c| (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32);
+        cs.sort_by_cached_key(|c| c.as_8());
         cs.dedup_by_key(|c| c.as_8());
+        if let Some(n) = n {
+            cs.truncate(n)
+        }
         Self::new(cs)
     }
 
@@ -269,6 +282,10 @@ impl Palette {
         let cs: Vec<RGBA> = self.colors.iter().map(|c| j.jiggle(*c)).collect();
         self.colors = cs;
     }
+
+    pub fn len(&self) -> usize {
+        self.colors.len()
+    }
 }
 
 impl Index<usize> for Palette {
@@ -276,6 +293,12 @@ impl Index<usize> for Palette {
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.colors[index]
+    }
+}
+
+impl IndexMut<usize> for Palette {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.colors[index]
     }
 }
 

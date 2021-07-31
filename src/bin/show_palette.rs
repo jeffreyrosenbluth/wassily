@@ -13,7 +13,7 @@ fn main() {
     let swatch_width = width / (NUM_COLORS as f32).sqrt();
     let mut palette = Palette::steal(FILE, NUM_COLORS);
     println!("-----------------------------------");
-    println!("Primary Hue: {:3.1}",palette.colors[0].lcha().hue.to_positive_degrees());
+    println!("Primary Hue: {:3.1}",palette[0].lcha().hue.to_positive_degrees());
     println!("-----------------------------------");
     palette.rotate_hue(ANGLE);
     for i in 0..n {
@@ -21,7 +21,7 @@ fn main() {
             if palette.colors.len() <= (i * n + j) {
                 break;
             }
-            let c = palette.colors[(i * n + j)];
+            let c = palette[(i * n + j)];
             let c8 = c.as_8();
             let texture = Texture::solid_color(c);
             println!("({:2}, {:2}) : [{}, {}, {}]", i, j, c8.0, c8.1, c8.2);

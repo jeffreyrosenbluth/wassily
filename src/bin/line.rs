@@ -26,7 +26,7 @@ fn main() {
 
     canvas.fill(RGBA::rgb(0.855, 0.808, 0.761));
 
-    let mut palette = Palette::with_img("orange.png", path.len() + 1);
+    let mut palette = Palette::with_img("orange.png", Some(path.len() + 1));
     let seed: u64 = random();
     palette.set_seed(seed);
     palette.sort_by_chroma();
@@ -36,7 +36,7 @@ fn main() {
         }
         let p2 = path[i + 1];
         let q: f32 = random();
-        let mut c = palette.colors[i];
+        let mut c = palette[i];
         if q < 0.4 { c = WHITE}
         let mut sand = SandLine::new(*p, p2)
             .thickness(1000.0)

@@ -22,7 +22,7 @@ fn main() {
     let mut rng = rand::thread_rng();
     let normal = Normal::new(0.0, 300.0).unwrap();
 
-    let mut palette = Palette::with_img("blues.png", 1300);
+    let mut palette = Palette::with_img("blues.png", Some(1300));
     palette.rotate_hue(180.0);
 
     for i in (0..WIDTH).step_by(SKIP) {

@@ -24,7 +24,7 @@ fn main() {
         .scales(SCALE);
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
-    let mut palette = Palette::with_img("candy.png", COLORS);
+    let mut palette = Palette::with_img("candy.png", Some(COLORS));
 
     let _bg = palette.colors[(0.99 * COLORS as f32) as usize];
     canvas.fill(WHITE);

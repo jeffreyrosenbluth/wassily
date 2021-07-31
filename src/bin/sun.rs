@@ -22,7 +22,7 @@ fn main() {
         .factor(1.0);
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let path = "hl.png";
-    let mut palette = Palette::with_img(path, LINES);
+    let mut palette = Palette::with_img(path, Some(LINES));
     palette.rotate_hue(150.0);
     // palette.sort_by_chroma();
     let mut stolen = Palette::steal(path, 16);
@@ -54,7 +54,7 @@ fn main() {
                 .no_fill()
                 .stroke_weight(8.0)
                 .stroke_color(palette.rand_color())
-                // .stroke_color(palette.colors[i])
+                // .stroke_color(palettes[i])
 
                 .points(&curve)
                 .build();
