@@ -10,20 +10,31 @@ use palette::{
 use rand::prelude::*;
 use rand_distr::Normal;
 use rand_pcg::Pcg64;
-use std::path::Path;
+use std::{ops::Index, path::Path, usize};
 
-impl RGBA {
-    pub fn jiggle(self, std_dev: f32) -> Self {
-        let mut rng = Pcg64::seed_from_u64(0);
+pub struct Jiggle {
+    rng: Pcg64,
+    normal: Normal<f32>,
+}
+
+impl Jiggle {
+    pub fn new(seed: u64, std_dev: f32) -> Self {
+        let rng = Pcg64::seed_from_u64(seed);
         let normal = Normal::new(0.0, std_dev).unwrap();
-        Self::rgba(
-            (self.r + normal.sample(&mut rng)).clamp(0.0, 1.0),
-            (self.g + normal.sample(&mut rng)).clamp(0.0, 1.0),
-            (self.b + normal.sample(&mut rng)).clamp(0.0, 1.0),
-            self.a,
-        )
+        Self { rng, normal }
     }
 
+    pub fn jiggle(&mut self, color: RGBA) -> RGBA {
+        RGBA::rgba(
+            (color.r + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
+            (color.g + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
+            (color.b + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
+            color.a,
+        )
+    }
+}
+
+impl RGBA {
     pub fn black(alpha: f32) -> Self {
         Self::rgba(0.0, 0.0, 0.0, alpha)
     }
@@ -104,7 +115,7 @@ impl CosColor {
 pub struct Palette {
     pub colors: Vec<RGBA>,
     rng: Pcg64,
-    current: usize,
+    pub current: usize,
 }
 
 impl Default for Palette {
@@ -187,12 +198,6 @@ impl Palette {
         Self::new(palette.collect())
     }
 
-    pub fn next(&mut self) -> RGBA {
-        let result = self.colors[self.current];
-        self.current = (self.current + 1) % self.colors.len();
-        result
-    }
-
     pub fn rotate_hue(&mut self, degrees: f32) {
         self.colors = self
             .colors
@@ -257,6 +262,30 @@ impl Palette {
         let rgba: Srgba = Laba::new(l, a, b, o).convert_into();
         let c = rgba.into_components();
         RGBA::rgba(c.0, c.1, c.2, c.3)
+    }
+
+    pub fn jiggle(&mut self, seed: u64, std_dev: f32) {
+        let mut j = Jiggle::new(seed, std_dev);
+        let cs: Vec<RGBA> = self.colors.iter().map(|c| j.jiggle(*c)).collect();
+        self.colors = cs;
+    }
+}
+
+impl Index<usize> for Palette {
+    type Output = RGBA;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.colors[index]
+    }
+}
+
+impl IntoIterator for Palette {
+    type Item = RGBA;
+
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.colors.into_iter()
     }
 }
 

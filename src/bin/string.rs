@@ -20,7 +20,7 @@ fn main() {
         .build()
         .draw(&mut canvas);
 
-    let texture = Texture::solid_color(INDIANRED.jiggle(0.2)).mode(BlendMode::Lighten);
+    let texture = Texture::solid_color(INDIANRED).mode(BlendMode::Lighten);
 
     ShapeBuilder::new()
         .points(&ps[N..])
