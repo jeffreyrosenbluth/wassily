@@ -1,8 +1,9 @@
-use crate::prelude::{point2, Point};
-use rand::{Rng, SeedableRng};
-use rand_distr::{Distribution, Normal, uniform::SampleUniform};
-use rand_pcg::Pcg64;
+use crate::prelude::{point2, Point, RGBA};
+use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
+use rand::{Rng, SeedableRng};
+use rand_distr::{uniform::SampleUniform, Distribution, Normal};
+use rand_pcg::Pcg64;
 
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
@@ -24,7 +25,6 @@ impl Rand {
     pub fn rand_normal(&mut self, mean: f32, std_dev: f32) -> f32 {
         let normal = Normal::new(mean, std_dev).unwrap();
         normal.sample(&mut self.rng)
-
     }
 
     pub fn rand_bool(&mut self, p: f32) -> bool {
@@ -67,11 +67,21 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
         .collect()
 }
 
-
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Orientation {
     Horizontal,
     Vertical,
+}
+
+pub fn get_color<T: AsPrimitive<f32>>(img: &DynamicImage, width: T, height: T, p: Point) -> RGBA {
+    let x = p.x * img.width() as f32 / width.as_();
+    let y = p.y * img.height() as f32 / height.as_();
+    let p = img.get_pixel(x as u32, y as u32);
+    let r = p.0[0] as f32 / 255.0;
+    let g = p.0[1] as f32 / 255.0;
+    let b = p.0[2] as f32 / 255.0;
+    let a = p.0[3] as f32 / 255.0;
+    RGBA::rgba(r, g, b, a)
 }
 
 #[cfg(test)]

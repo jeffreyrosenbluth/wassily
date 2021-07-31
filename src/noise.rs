@@ -1,5 +1,10 @@
-//! The `noise` module is a wrapper around the noise crate that provides a
-//! convenien API for using coherent noise.
+//! The `noise` module is a wrapper around the *excellent* [noise] crate that provides a
+//! convenient API for using coherent noise in 2d artworks.
+//! Noise remembers the width and height of the canvas and uses the natural
+//! scaling of `x_scale / width` and `y_scale / height`. It also handles converting
+//! input and output variables to `f32` which is consistent with most rendering
+//! backends.
+//!
 //! # Example
 //!
 //! ```rust
@@ -7,11 +12,13 @@
 //! use wassily::prelude::Noise;
 //!
 //! let ns = Noise::<_, 2>::new(800, 600, Fbm::default())
-//!     .seed(1)
-//!     .octaves(4)
-//!     .frequency(3.0)
-//!     .lacunarity(4.0)
-//!     .persistence(1.0);
+//!     .scales(4.0) // Set the x and y scales to 4.0.
+//!     .factor(5.0) // Set the noise factor to 5.0.
+//!     .seed(1) // For Seedable noise functions you can set the seed.
+//!     .octaves(4) // For Multifractal noise functions you can set octaves.
+//!     .frequency(3.0) // For Multifractal noise functions you can set frequency.
+//!     .lacunarity(4.0) // For Multifractal noise functions you can set lacunarity.
+//!     .prersistence(1.0) // For Multifractal noise functions you can set persistence.
 //! let z = ns.get(400.0, 300.0);
 //! ```
 
@@ -20,7 +27,8 @@ use crate::util::TAU;
 use noise::{MultiFractal, NoiseFn, Seedable};
 use num_traits::{AsPrimitive, ToPrimitive};
 
-/// the `Noise` struct fixes the output type as f64 and sets the scaling 
+/// the `Noise` struct fixes the output type as `f64` as at the time of this
+/// writing all of the noise functions are `f64` and sets the scaling
 /// parameters for the noise function.
 #[derive(Copy, Clone)]
 pub struct Noise<T, const N: usize>
@@ -60,7 +68,7 @@ where
         }
     }
 
-    /// The noise function from the noise crate.
+    /// Set the noise function from the [noise] crate.
     pub fn noise_fn(self, noise_fn: T) -> Self {
         Self { noise_fn, ..self }
     }

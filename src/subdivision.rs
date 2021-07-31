@@ -1,4 +1,24 @@
 //! Quadrilateral subdivision.
+//! # Example
+//! ```rust
+//! use wassily::prelude::*;
+//!
+//! let quad = Quad::new(
+//!     point2(0, 0),
+//!     point2(0, HEIGHT),
+//!     point2(WIDTH, HEIGHT),
+//!     point2(WIDTH, 0),
+//! );
+//! let mut qs = vec![quad];
+//! let n = 8;
+//! for _ in 0..n {
+//!     qs = subdivide_vec(
+//!         &qs,
+//!         |q| q.best_dir(), // Choose the longer orientaion to subdivide along.
+//!         || (.25, .5),
+//!     );
+//! }
+//! ```
 
 use crate::prelude::{Orientation, Point};
 
@@ -116,7 +136,7 @@ impl Ord for Quad {
     }
 }
 
-/// Subdived each quadrilateral in a `Vec`.
+/// Subdivide each quadrilateral in a `Vec`.
 pub fn subdivide_vec(
     quads: &[Quad],
     mut dir: impl FnMut(&Quad) -> Orientation,

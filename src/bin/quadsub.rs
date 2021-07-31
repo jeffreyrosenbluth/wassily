@@ -16,7 +16,7 @@ fn main() {
     );
     let mut qs = vec![quad];
     let mut prng = Rand::new(87654321);
-    let n = 12;
+    let n = 18;
     for _ in 0..n {
         qs = subdivide_vec(
             &qs,
@@ -26,19 +26,20 @@ fn main() {
                 let a = a.clamp(0.0, 1.0);
                 let b = prng.rand_normal(0.5, 0.1);
                 let b = b.clamp(0.0, 1.0);
-                (a, b)
+                (0.5, 0.5)
             },
         );
     }
-    let mut palette = Palette::with_img("fruit.png", 2usize.pow(n) + 300);
-    palette.set_index(200);
-    // qs.shuffle(&mut prng.rng);
+    let mut palette = Palette::with_img("tile.png", 2usize.pow(n) + 300);
+    palette.sort_by_hue();
+    palette.set_index(100);
     qs.sort();
+    // qs.shuffle(&mut prng.rng);
     for q in qs {
         let c = palette.next();
         ShapeBuilder::new()
             .points(&q.to_vec())
-            .cubic()
+            // .cubic()
             .fill_color(c)
             .stroke_color(c)
             .build()
