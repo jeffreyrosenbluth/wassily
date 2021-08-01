@@ -66,11 +66,7 @@ impl RGBA {
 
 impl From<image::Rgba<u8>> for RGBA {
     fn from(p: image::Rgba<u8>) -> Self {
-        let r = p.0[0] as f32 / 255.0;
-        let g = p.0[1] as f32 / 255.0;
-        let b = p.0[2] as f32 / 255.0;
-        let a = p.0[3] as f32 / 255.0;
-        RGBA::rgba(r, g, b, a)
+        RGBA::rgba8(p.0[0], p.0[1], p.0[2], p.0[3])
     }
 }
 
@@ -136,9 +132,7 @@ impl Palette {
     /// Generate a palatte from a vector of 'RGBA's
     pub fn new(colors: Vec<RGBA>) -> Self {
         let rng = Pcg64::seed_from_u64(0);
-        let mut colors = colors;
-        colors.sort_by_cached_key(|c| c.as_tuple());
-        colors.dedup_by_key(|c| c.as_tuple());
+        let colors = colors;
         Palette {
             colors,
             rng,
@@ -174,15 +168,13 @@ impl Palette {
                 x += delta;
                 y = 0.0;
             }
+            cs.truncate(n)
         } else {
             for (_, _, p) in img.pixels() {
                 cs.push(p.into());
             }
-        }
-        cs.sort_by_cached_key(|c| c.as_tuple());
-        cs.dedup_by_key(|c| c.as_tuple());
-        if let Some(n) = n {
-            cs.truncate(n)
+            cs.sort_by_cached_key(|c| c.as_tuple());
+            cs.dedup_by_key(|c| c.as_tuple());
         }
         Self::new(cs)
     }
