@@ -51,8 +51,8 @@ impl Sketch for Canvas {
     }
 
     fn fill(&mut self, color: RGBA) {
-        let c = skia::Color::from_rgba(color.r, color.g, color.b, color.a);
-        self.0.fill(c.unwrap());
+        let c = skia::Color::from_rgba8(color.r, color.g, color.b, color.a);
+        self.0.fill(c);
     }
 
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {
@@ -87,21 +87,13 @@ impl From<&base::Path> for skia::Path {
 
 impl From<&base::RGBA> for skia::Color {
     fn from(c: &base::RGBA) -> Self {
-        let r = c.r;
-        let g = c.g;
-        let b = c.b;
-        let a = c.a;
-        skia::Color::from_rgba(r, g, b, a).unwrap()
+        skia::Color::from_rgba8(c.r, c.g, c.b, c.a)
     }
 }
 
 impl From<base::RGBA> for skia::Color {
     fn from(c: base::RGBA) -> Self {
-        let r = c.r;
-        let g = c.g;
-        let b = c.b;
-        let a = c.a;
-        skia::Color::from_rgba(r, g, b, a).unwrap()
+        skia::Color::from_rgba8(c.r, c.g, c.b, c.a)
     }
 }
 

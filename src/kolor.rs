@@ -25,11 +25,12 @@ impl Jiggle {
     }
 
     pub fn jiggle(&mut self, color: RGBA) -> RGBA {
+        let (r, g, b, a) = color.as_f32s();
         RGBA::rgba(
-            (color.r + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
-            (color.g + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
-            (color.b + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
-            color.a,
+            (r + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
+            (g + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
+            (b + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
+            a,
         )
     }
 }
@@ -57,10 +58,7 @@ impl RGBA {
 
     /// Convert a 'RGBA' to a palette Lcha.
     pub fn lcha(self) -> Lcha<D65> {
-        let r = self.r;
-        let g = self.g;
-        let b = self.b;
-        let a = self.a;
+        let (r, g, b, a) = self.as_f32s();
         let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
         srgb.into()
     }
@@ -139,8 +137,8 @@ impl Palette {
     pub fn new(colors: Vec<RGBA>) -> Self {
         let rng = Pcg64::seed_from_u64(0);
         let mut colors = colors;
-        colors.sort_by_cached_key(|c| (1000.0 * (c.r * c.r + c.g * c.g + c.b * c.b)) as u32);
-        colors.dedup_by_key(|c| c.as_8());
+        colors.sort_by_cached_key(|c| c.as_tuple());
+        colors.dedup_by_key(|c| c.as_tuple());
         Palette {
             colors,
             rng,
@@ -181,8 +179,8 @@ impl Palette {
                 cs.push(p.into());
             }
         }
-        cs.sort_by_cached_key(|c| c.as_8());
-        cs.dedup_by_key(|c| c.as_8());
+        cs.sort_by_cached_key(|c| c.as_tuple());
+        cs.dedup_by_key(|c| c.as_tuple());
         if let Some(n) = n {
             cs.truncate(n)
         }

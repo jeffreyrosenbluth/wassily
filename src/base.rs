@@ -16,45 +16,52 @@ pub trait Sketch {
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Debug)]
 pub struct RGBA {
-    pub r: f32,
-    pub g: f32,
-    pub b: f32,
-    pub a: f32,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: u8,
 }
 
 impl RGBA {
-    pub const fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
+    pub fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
+        let r = (255.0 * r.clamp(0.0, 1.0)) as u8;
+        let g = (255.0 * g.clamp(0.0, 1.0)) as u8;
+        let b = (255.0 * b.clamp(0.0, 1.0)) as u8;
+        let a = (255.0 * a.clamp(0.0, 1.0)) as u8;
+        Self {r, g, b, a}
+    }
+
+    pub fn rgb(r: f32, g: f32, b: f32) -> Self {
+        let r = (255.0 * r.clamp(0.0, 1.0)) as u8;
+        let g = (255.0 * g.clamp(0.0, 1.0)) as u8;
+        let b = (255.0 * b.clamp(0.0, 1.0)) as u8;
+        Self { r, g, b, a: 255 }
+    }
+
+    pub const fn rgb8(r: u8, g: u8, b: u8) -> Self {
+        Self {r, g, b, a: 255}
+    }
+
+    pub const fn rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self { r, g, b, a }
     }
 
-    pub const fn rgb(r: f32, g: f32, b: f32) -> Self {
-        Self { r, g, b, a: 1.0 }
+    pub fn as_tuple(&self) -> (u8, u8, u8, u8) {
+        (self.r, self.g, self.b, self.a)
     }
 
-    pub fn rgb8(r: u8, g: u8, b: u8) -> Self {
-        Self::rgba8(r, g, b, 255)
-    }
-
-    pub fn rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
-        let r = r as f32 / 255.0;
-        let g = g as f32 / 255.0;
-        let b = b as f32 / 255.0;
-        let a = a as f32 / 255.0;
-        Self { r, g, b, a }
-    }
-
-    pub fn as_8(&self) -> (u8, u8, u8, u8) {
-        let r = (self.r * 255.0) as u8;
-        let g = (self.g * 255.0) as u8;
-        let b = (self.b * 255.0) as u8;
-        let a = (self.a * 255.0) as u8;
+    pub fn as_f32s(&self) -> (f32, f32, f32, f32) {
+        let r = self.r as f32 / 255.0;
+        let g = self.g as f32 / 255.0;
+        let b = self.b as f32 / 255.0;
+        let a = self.a as f32 / 255.0;
         (r, g, b, a)
     }
 
     pub fn set_opacity(self, opacity: f32) -> Self {
-        Self { a: opacity, ..self }
+        Self { a: (opacity * 255.0) as u8, ..self }
     }
 }
 
@@ -62,7 +69,7 @@ impl Display for RGBA {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "[{:.2}, {:.2}, {:.2}, {:.2}]",
+            "[{:}, {:}, {:}, {:}]",
             self.r, self.g, self.b, self.a
         )
     }

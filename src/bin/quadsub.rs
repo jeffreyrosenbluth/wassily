@@ -29,7 +29,7 @@ fn main() {
             },
         );
     }
-    let mut palette = Palette::with_img("sunset.png", Some(2usize.pow(n+1)));
+    let mut palette = Palette::with_img("orange.png", Some(2usize.pow(n+1)));
     palette.jiggle(0, 0.05);
     palette.sort_by_hue();
     // palette.rotate_hue(90.0);
