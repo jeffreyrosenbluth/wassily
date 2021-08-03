@@ -82,6 +82,20 @@ impl From<image::Rgba<u8>> for RGBA {
         RGBA::rgba8(p.0[0], p.0[1], p.0[2], p.0[3])
     }
 }
+
+impl From<Srgba> for RGBA {
+    fn from(rgb: Srgba) -> Self {
+        let c = rgb.into_components();
+        RGBA::rgba(c.0, c.1, c.2, c.3)
+    }
+}
+
+impl From<Srgb> for RGBA {
+    fn from(rgb: Srgb) -> Self {
+        let c = rgb.into_components();
+        RGBA::rgba(c.0, c.1, c.2, 1.0)
+    }
+}
 /// A Palette of colors and functions to manage them.
 #[derive(Clone, Debug)]
 pub struct Palette {
@@ -176,8 +190,7 @@ impl Palette {
                 let hue = (l.hue.to_degrees() + degrees) % 360.0;
                 l.hue = LabHue::from_degrees(hue);
                 let rgba: Srgba = l.into_color();
-                let c = rgba.into_components();
-                RGBA::rgba(c.0, c.1, c.2, c.3)
+                rgba.into()
             })
             .collect();
     }
@@ -225,8 +238,7 @@ impl Palette {
         let a: f32 = self.rng.gen_range(-128.0..127.0);
         let b: f32 = self.rng.gen_range(-128.0..127.0);
         let rgb: Srgb = Lab::new(l, a, b).into_color();
-        let c = rgb.into_components();
-        RGBA::rgba(c.0, c.1, c.2, 1.0)
+        rgb.into()
     }
 
     /// Generate a random color and random opacity independent of the `Palette` colors.
@@ -236,8 +248,7 @@ impl Palette {
         let b: f32 = self.rng.gen_range(-128.0..127.0);
         let o: f32 = self.rng.gen_range(0.0..1.0);
         let rgba: Srgba = Laba::new(l, a, b, o).into_color();
-        let c = rgba.into_components();
-        RGBA::rgba(c.0, c.1, c.2, c.3)
+        rgba.into()
     }
 
     /// Perturb the colors in the palette using a normal distrtibution with

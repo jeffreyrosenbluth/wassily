@@ -35,7 +35,7 @@ fn main() {
     // // let mut iter = palette.into_iter().cycle();
     // qs.sort();
     // qs.shuffle(&mut prng.rng);
-    let img = image::open("fireweed.png").unwrap();
+    let img = image::open("spiral.png").unwrap();
     for q in qs {
         let (q1, _) = q.subdivide(|q| q.best_dir(), || (0.75, 0.75));
         let (_, q2) = q.subdivide(|q| q.best_dir(), || (0.25, 0.25));
@@ -43,7 +43,6 @@ fn main() {
         ShapeBuilder::new()
             .points(&q1.to_vec())
             .fill_color(c)
-            // .stroke_color(c)
             .no_stroke()
             .build()
             .draw(&mut canvas);
@@ -51,7 +50,6 @@ fn main() {
         ShapeBuilder::new()
             .points(&q2.to_vec())
             .fill_color(d)
-            // .stroke_color(d)
             .no_stroke()
             .build()
             .draw(&mut canvas);
