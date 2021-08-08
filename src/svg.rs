@@ -110,7 +110,7 @@ impl From<&base::Path> for vg::Path {
 
 impl RGBA {
     fn to_svg(&self) -> (String, f32) {
-        let (r, g, b, a) = self.as_8();
+        let (r, g, b, a) = self.as_tuple();
         (format!("rgb({},{},{})", r, g, b), a as f32 / 255.0)
     }
 }

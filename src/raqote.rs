@@ -60,21 +60,13 @@ impl Sketch for Canvas {
 
 impl From<RGBA> for SolidSource {
     fn from(c: RGBA) -> Self {
-        let r = c.r * 255.0;
-        let g = c.g * 255.0;
-        let b = c.b * 255.0;
-        let a = c.a * 255.0;
-        SolidSource::from_unpremultiplied_argb(a as u8, r as u8, g as u8, b as u8)
+        SolidSource::from_unpremultiplied_argb(c.a, c.r, c.g, c.b)
     }
 }
 
 impl From<&RGBA> for SolidSource {
     fn from(c: &RGBA) -> Self {
-        let r = c.r * 255.0;
-        let g = c.g * 255.0;
-        let b = c.b * 255.0;
-        let a = c.a * 255.0;
-        SolidSource::from_unpremultiplied_argb(a as u8, r as u8, g as u8, b as u8)
+        SolidSource::from_unpremultiplied_argb(c.a, c.r, c.g, c.b)
     }
 }
 
@@ -117,13 +109,13 @@ impl From<&base::Texture> for raqote::Source<'_> {
                     .stops
                     .iter()
                     .map(|s| {
-                        let r = s.color.r * 255.0;
-                        let g = s.color.g * 255.0;
-                        let b = s.color.b * 255.0;
-                        let a = s.color.a * 255.0;
+                        let r = s.color.r;
+                        let g = s.color.g;
+                        let b = s.color.b;
+                        let a = s.color.a;
                         raqote::GradientStop {
                             position: s.position,
-                            color: raqote::Color::new(a as u8, r as u8, g as u8, b as u8),
+                            color: raqote::Color::new(a, r, g, b),
                         }
                     })
                     .collect();
@@ -136,13 +128,13 @@ impl From<&base::Texture> for raqote::Source<'_> {
                     .stops
                     .iter()
                     .map(|s| {
-                        let r = s.color.r * 255.0;
-                        let g = s.color.g * 255.0;
-                        let b = s.color.b * 255.0;
-                        let a = s.color.a * 255.0;
+                        let r = s.color.r;
+                        let g = s.color.g;
+                        let b = s.color.b;
+                        let a = s.color.a;
                         raqote::GradientStop {
                             position: s.position,
-                            color: raqote::Color::new(a as u8, r as u8, g as u8, b as u8),
+                            color: raqote::Color::new(a, r, g, b),
                         }
                     })
                     .collect();
