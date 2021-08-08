@@ -1,10 +1,10 @@
 use rand::prelude::*;
 use wassily::prelude::*;
-use wassily::raqote::Canvas;
+use wassily::skia::Canvas;
 
-const WIDTH: u32 = 18000;
-const HEIGHT: u32 = 54 * 300;
-const ORDER: u32 = 4;
+const WIDTH: u32 = 96 * 300;
+const HEIGHT: u32 = 58 * 300;
+const ORDER: u32 = 5;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
@@ -44,7 +44,7 @@ fn main() {
             .grains(1024);
         sand.draw(&mut canvas);
     }
-    canvas.save("hilbert_sand_2.png");
+    canvas.save("hilbert_sand.png");
 }
 
 fn hilbert(k: u32, order: u32) -> Point {

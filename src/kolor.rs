@@ -75,6 +75,16 @@ impl RGBA {
         let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
         srgb.into_color()
     }
+
+    pub fn spread(self) -> Self {
+        let mut lcha = self.lcha();
+        let l1 = lcha.l / 50.0 - 1.0;
+        let l2 = l1.abs().sqrt() * l1.signum();
+        let l3 = 50.0 * (l2 + 1.0);
+        lcha.l = l3;
+        let c: Srgba = lcha.into_color();
+        c.into()
+    }
 }
 
 impl From<image::Rgba<u8>> for RGBA {
@@ -178,6 +188,10 @@ impl Palette {
         let palette = get_palette(img.as_bytes(), color_type, 10, max_colors).unwrap();
         let palette = palette.into_iter().map(|c| RGBA::rgba8(c.r, c.g, c.b, 255));
         Self::new(palette.collect())
+    }
+
+    pub fn spread(&mut self) {
+        self.colors = self.colors.iter().map(|c| c.spread()).collect();
     }
 
     /// Rotate the [palette::LabHue] of each color.

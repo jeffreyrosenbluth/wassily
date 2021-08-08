@@ -1,4 +1,4 @@
-//! Quadrilateral subdivision.
+//! Quadrilateral and Triangle subdivision.
 //! # Example
 //! ```rust
 //! use wassily::prelude::*;
@@ -80,7 +80,7 @@ impl Quad {
         }
     }
 
-    /// Convert the `Quad` to a list of points in counter clockwise order
+    /// Convert the `Quad` to a list of points in clockwise order
     /// starting from the bottom left.
     pub fn to_vec(&self) -> Vec<Point> {
         vec![self.bl, self.tl, self.tr, self.br]
@@ -137,7 +137,7 @@ impl Ord for Quad {
 }
 
 /// Subdivide each quadrilateral in a `Vec`.
-pub fn subdivide_vec(
+pub fn quad_divide_vec(
     quads: &[Quad],
     mut dir: impl FnMut(&Quad) -> Orientation,
     mut ab: impl FnMut() -> (f32, f32),
@@ -149,4 +149,131 @@ pub fn subdivide_vec(
         sub.push(q.1);
     }
     sub
+}
+
+#[derive(Debug, Clone, Copy)]
+/// A Triangle
+pub struct Tri {
+    /// Bottom Left.
+    pub bl: Point,
+    /// Top.
+    pub top: Point,
+    /// Bottom Right.
+    pub br: Point,
+}
+
+impl Tri {
+    pub fn new(bl: Point, top: Point, br: Point) -> Self {
+        Self { bl, top, br }
+    }
+
+    /// Split the triangle from the bottom left vertex into tow triangles.
+    pub fn split_bl(&self, a: f32) -> (Self, Self) {
+        let u = self.top - self.br;
+        let p = self.br + u * a;
+        (
+            Self::new(self.bl, self.top, p),
+            Self::new(self.bl, p, self.br),
+        )
+    }
+
+    /// Split the triangle from the top vertex into tow triangles.
+    pub fn split_top(&self, a: f32) -> (Self, Self) {
+        let u = self.br - self.bl;
+        let p = self.bl + u * a;
+        (
+            Self::new(self.bl, self.top, p),
+            Self::new(p, self.top, self.br),
+        )
+    }
+
+    /// Split the triangle from the bottom right vertex into tow triangles.
+    pub fn split_br(&self, a: f32) -> (Self, Self) {
+        let u = self.top - self.bl;
+        let p = self.bl + u * a;
+        (
+            Self::new(self.bl, p, self.br),
+            Self::new(p, self.top, self.br),
+        )
+    }
+
+    /// Split the triangle into 2 new triangles providing a function
+    /// to determine which vertex to split from. And another
+    /// function to chosse the split point.
+    pub fn subdivide(
+        &self,
+        mut dir: impl FnMut(&Tri) -> Vertex,
+        mut a: impl FnMut() -> f32,
+    ) -> (Self, Self) {
+        let vert = dir(self);
+        let p = a();
+        match vert {
+            Vertex::Bl => self.split_bl(p),
+            Vertex::Top => self.split_top(p),
+            Vertex::Br => self.split_br(p),
+        }
+    }
+
+    /// Convert the `Tri` to a list of points in clockwise order
+    /// starting from the bottom left.
+    pub fn to_vec(&self) -> Vec<Point> {
+        vec![self.bl, self.top, self.br]
+    }
+
+    /// Find the vertex opposite the longest side of the triangle.
+    pub fn best_dir(&self) -> Vertex {
+        let bl = (self.top - self.br).length();
+        let top = (self.br - self.bl).length();
+        let br = (self.top - self.bl).length();
+        let v = vec![(bl, Vertex::Bl), (top, Vertex::Top), (br, Vertex::Br)];
+        let m = v
+            .into_iter()
+            .max_by(|a, b| a.0.partial_cmp(&b.0).unwrap())
+            .unwrap();
+        m.1
+    }
+}
+
+impl PartialEq for Tri {
+    fn eq(&self, other: &Self) -> bool {
+        self.bl.x == other.bl.x && self.bl.y == other.bl.y
+    }
+}
+
+impl Eq for Tri {}
+
+impl PartialOrd for Tri {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.bl.x.partial_cmp(&other.bl.x)
+    }
+}
+
+impl Ord for Tri {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+pub fn tri_divide_vec(
+    tris: &[Tri],
+    mut dir: impl FnMut(&Tri) -> Vertex,
+    mut a: impl FnMut() -> f32,
+) -> Vec<Tri> {
+    let mut sub = vec![];
+    for tri in tris {
+        let t = tri.subdivide(&mut dir, &mut a);
+        sub.push(t.0);
+        sub.push(t.1);
+    }
+    sub
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Vertex {
+    /// bottom left
+    Bl,
+    /// Top.
+    Top,
+    /// Bottom right.
+    Br,
 }
