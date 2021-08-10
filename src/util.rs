@@ -1,4 +1,4 @@
-use crate::prelude::{point2, Point};
+use crate::prelude::{Point, Sketch, point2};
 use num_traits::AsPrimitive;
 use rand::{Rng, SeedableRng};
 use rand_distr::{uniform::SampleUniform, Distribution, Normal};
@@ -6,6 +6,19 @@ use rand_pcg::Pcg64;
 
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
+
+pub fn save<S: Sketch>(name: &str, dir: &str, ext: & str, data: impl std::fmt::Debug, canvas: &mut S) {
+    use chrono::prelude::Utc;
+    use std::fs::File;
+    use std::io::Write;
+    use std::path::Path;
+    let ts = Utc::now().timestamp();
+    let sketch_name = format!("{}_{}.{}", name, ts, ext);
+    let data_name = format!("{}_{}.txt", name, ts);
+    let mut output = File::create(Path::new(dir).join(data_name)).unwrap();
+    write!(output, "{:#?}", data).unwrap();
+    canvas.save(Path::new(dir).join(&sketch_name));
+}
 
 pub struct Rand {
     pub rng: Pcg64,
