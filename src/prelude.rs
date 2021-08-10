@@ -24,3 +24,34 @@ where
 {
     euclid::point2(x.as_(), y.as_())
 }
+
+pub struct Dims {
+    width: u32,
+    height: u32,
+}
+
+impl Dims {
+    pub fn new(width: u32, height: u32) -> Self {
+        Self { width, height }
+    }
+
+    pub fn with_aspect(width: u32, numerator: u32, denominator: u32) -> Self {
+        Self {width, height: width * numerator / denominator}
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn width_f32(&self) -> f32 {
+        self.width as f32
+    }
+
+    pub fn height_f32(&self) -> f32 {
+        self.height as f32
+    }
+}

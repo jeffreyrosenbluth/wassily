@@ -9,10 +9,7 @@ edition = "2018"
 [dependencies]
 tiny-skia = "0.5"
 raqote = "0.8"
-# noise = "0.7.0"
-# noise = { git = "https://github.com/jeffreyrosenbluth/noise-rs.git", branch = "master" }
 noise = { git = "https://github.com/Razaekel/noise-rs.git", branch = "develop" }
-# noise = { path = "/Users/jeffreyrosenbluth/Rust/noise-rs"}
 rand = "0.8.3"
 rand_distr = "0.4"
 rand_pcg = "0.3"
