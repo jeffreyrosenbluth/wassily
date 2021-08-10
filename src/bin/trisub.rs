@@ -4,6 +4,18 @@ use wassily::skia::Canvas;
 const WIDTH: u32 = 8100;
 const HEIGHT: u32 = 6075;
 
+#[derive(Debug, Clone, Copy)]
+struct Data<P: AsRef<std::path::Path>> {
+    width: u32,
+    height: u32,
+    n: i32,
+    seed: u64,
+    mean: f32,
+    std: f32,
+    image: P,
+    output: P,
+}
+
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
     canvas.fill(WHITE);
@@ -18,8 +30,8 @@ fn main() {
         point2(WIDTH, 0),
     );
     let mut qs = vec![tri1, tri2];
-    let mut prng = Rand::new(87654321);
-    let n = 10;
+    let mut prng = Rand::new(764321);
+    let n = 11;
     for _ in 0..n {
         qs = tri_divide_vec(
             &qs,
