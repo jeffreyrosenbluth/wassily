@@ -1,23 +1,26 @@
 use std::vec;
+use noise:: OpenSimplex;
 
 use euclid::Angle;
 use euclid::Point2D;
 use euclid::UnknownUnit;
+use rand::prelude::*;
 use wassily::prelude::*;
 use wassily::skia::Canvas;
 
-const WIDTH: u32 = 1200;
-const HEIGHT: u32 = 1200;
-const THICK: f32 = 60.0;
-const GRAINS: u32 = 128;
+const WIDTH: u32 = 7200;
+const HEIGHT: u32 = 7200;
+const SCALE: f32 = 3.0;
+const FACTOR: f32 = 200.0;
+const SEGMENTS: u32 = 1000;
 
 fn side_points() -> Vec<Point> {
     let sin30: f32 = (PI / 6.0).sin();
     let cos30: f32 = (PI / 6.0).cos();
     let cos60: f32 = sin30;
     let sin60: f32 = cos30;
-    let e = 410.0;
-    let w = 90.0;
+    let e = 410.0 * 6.0;
+    let w = 90.0 * 6.0;
 
     let e3 = e + 3.0 * w;
     let e4 = e + 4.0 * w;
@@ -29,103 +32,86 @@ fn side_points() -> Vec<Point> {
     let p5: Point2D<_, UnknownUnit> = point2(p4.x - w * cos60, p4.y + w * sin60);
     let p6: Point2D<_, UnknownUnit> = point2(p5.x - e3 * cos60, p5.y - e3 * sin60);
 
-    vec![p1, p2, p3, p4, p5, p6]
+    let (q1, q2) = segment(p2, p3, p5, p6, SEGMENTS);
+    let mut ps = vec![p1];
+    ps.extend(q1);
+    ps.push(p4);
+    ps.extend(q2);
+    ps
+
+    // vec![p1, p2, p3, p4, p5, p6]
 }
 
-fn trans_vec(transform: Transform, ps: &Vec<Point>) -> Vec<Point> {
-    ps.iter().map(|p| transform.transform_point(*p)).collect()
+fn segment(p1: Point, p2: Point, p3: Point, p4: Point, n: u32) -> (Vec<Point>, Vec<Point>) {
+    let wk = Noise::<_, 3>::new(WIDTH, HEIGHT, OpenSimplex::default())
+        .scales(SCALE)
+        .z_scale(1.0)
+        .seed(10) // 3
+        .factor(FACTOR);
+    let mut alphas: Vec<f32> = vec![];
+    for _i in 0..n - 1 {
+        alphas.push(random());
+    }
+    alphas.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let mut ps = vec![p1];
+    let mut qs = vec![p3];
+    for a in alphas {
+        let px = p1.x + a * (p2.x - p1.x);
+        let py = p1.y + a * (p2.y - p1.y);
+        let dx = wk.get(px, py, 0.0);
+        let dy = wk.get(px, py, 10.0);
+        ps.push(point2(px + dx, py + dy));
+        let qx = p3.x + a * (p4.x - p3.x);
+        let qy = p3.y + a * (p4.y - p3.y);
+        let dx = wk.get(qx, qy, 0.0);
+        let dy = wk.get(qx, qy, 10.0);
+        qs.push(point2(qx + dx, qy + dy));
+    }
+    // ps.push(p2);
+    // qs.push(p4);
+    (ps, qs)
 }
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
     let (width, height) = (WIDTH as f32, HEIGHT as f32);
 
-    canvas.fill(WHITE);
-
-    let dots = stipple(width, height, 600_000);
-    for d in dots {
-        canvas.pixel(d.x, d.y, BLACK.set_opacity(0.5));
-    }
-
-    let loc = vec2(0.5 * width, 0.6 * height);
+    let loc = vec2(0.5 * width, 0.58 * height);
     let ps = side_points();
 
-    let mut palette = Palette::new(vec![]);
-    palette.set_seed(226349872075752273);
-
+    canvas.fill(RGBA::rgba(1.0, 0.97, 0.86, 1.0));
+    canvas.fill(RGBA::rgb8(254, 247, 222));
 
     let trans1 = Transform::identity().post_translate(loc);
-    let ps1 = trans_vec(trans1, &ps);
-    let c = palette.rand_lab();
     let side1 = ShapeBuilder::new()
         .points(&ps)
-        .fill_color(WHITE)
+        .fill_color(RGBA::rgb8(244, 182, 110))
         .no_stroke()
         .transform(&trans1)
         .build();
     side1.draw(&mut canvas);
-    for (i, p) in ps1.iter().enumerate() {
-        let p2 = if i <= ps1.len() - 2 {
-            ps1[i + 1]
-        } else {
-            ps1[0]
-        };
-        let mut sand = SandLine::new(*p, p2)
-            .thickness(THICK)
-            .color(c)
-            .grains(GRAINS);
-        sand.draw(&mut canvas);
-    }
 
     let trans2 = Transform::identity()
         .post_translate(loc)
         .pre_rotate(Angle::radians(TAU / 3.0));
-    let ps2 = trans_vec(trans2, &ps);
-    let c = palette.rand_lab();
     let side2 = ShapeBuilder::new()
         .points(&ps)
-        .fill_color(WHITE)
+        .fill_color(RGBA::rgb8(188, 87, 97))
         .no_stroke()
         .transform(&trans2)
         .build();
     side2.draw(&mut canvas);
-    for (i, p) in ps2.iter().enumerate() {
-        let p2 = if i <= ps2.len() - 2 {
-            ps2[i + 1]
-        } else {
-            ps2[0]
-        };
-        let mut sand = SandLine::new(*p, p2)
-            .thickness(THICK)
-            .color(c)
-            .grains(GRAINS);
-        sand.draw(&mut canvas);
-    }
 
     let trans3 = Transform::identity()
         .post_translate(loc)
         .pre_rotate(Angle::radians(2.0 * TAU / 3.0));
-    let ps3 = trans_vec(trans3, &ps);
-    let c = palette.rand_lab();
     let side3 = ShapeBuilder::new()
         .points(&ps)
-        .fill_color(WHITE)
+        .fill_color(RGBA::rgb8(123, 44, 45))
         .no_stroke()
         .transform(&trans3)
         .build();
     side3.draw(&mut canvas);
-    for (i, p) in ps3.iter().enumerate() {
-        let p2 = if i <= ps3.len() - 2 {
-            ps3[i + 1]
-        } else {
-            ps3[0]
-        };
-        let mut sand = SandLine::new(*p, p2)
-            .thickness(THICK)
-            .color(c)
-            .grains(GRAINS);
-        sand.draw(&mut canvas);
-    }
 
     canvas.save("penrose.png");
 }

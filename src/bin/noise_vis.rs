@@ -1,7 +1,5 @@
-#[allow(unused_imports)]
-use noise::{BasicMulti, Fbm, OpenSimplex, Perlin, SuperSimplex};
-
 use colorous::*;
+use noise::OpenSimplex;
 use wassily::prelude::*;
 use wassily::raqote::Canvas;
 

@@ -35,7 +35,17 @@ fn gen(i: i32, s: f32, c: f32) -> Point {
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
-    canvas.fill(WHITE);
+    let mut palette = Palette::with_img("redrock2.png", Some(680));
+    palette.jiggle(0, 0.05);
+    palette.spread();
+    palette.sort_by_lightness();
+    // palette.colors.extend_from_slice(&[WHITE; 5]);
+    palette.colors.reverse();
+    palette.colors.extend_from_slice(&[BLACK; 20]);
+    
+    let n = palette.colors.len();
+    // canvas.fill(RGBA::rgb8(125, 50, 0));
+    canvas.fill(SNOW);
 
     let mut rb: Vec<Vec<Point>> = vec![];
 
@@ -65,12 +75,12 @@ fn main() {
         back.reverse();
         path.extend(back);
         let band = ShapeBuilder::new()
-            .no_fill()
-            .stroke_color(RGBA::rgb8(100, 100, 100))
+            .fill_color(palette.colors[i % n].set_opacity(0.75))
+            .stroke_color(RGBA::rgb8(125, 50, 0))
             .points(&path)
             .build();
 
         band.draw(&mut canvas);
     }
-    canvas.save("whites.png");
+    canvas.save("waves.png");
 }
