@@ -37,7 +37,7 @@ impl Dims {
     }
 
     pub fn with_aspect(width: u32, numerator: u32, denominator: u32) -> Self {
-        Self {width, height: width * numerator / denominator}
+        Self {width, height: width * denominator / numerator}
     }
 
     pub fn width(&self) -> u32 {
