@@ -25,6 +25,7 @@ where
     euclid::point2(x.as_(), y.as_())
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Dims {
     width: u32,
     height: u32,
