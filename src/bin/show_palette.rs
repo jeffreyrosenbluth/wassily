@@ -2,9 +2,9 @@ use wassily::prelude::*;
 use wassily::skia::Canvas;
 
 const WIDTH: u32 = 1200;
-const NUM_COLORS: u8 = 16;
-const FILE: &'static str = "hl.png";
-const ANGLE: f32 = 180.0;
+const NUM_COLORS: u8 = 32;
+const FILE: &'static str = "fruit.png";
+const ANGLE: f32 = 0.0;
 
 fn main() {
     let width = WIDTH as f32;
