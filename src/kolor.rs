@@ -85,6 +85,17 @@ impl RGBA {
         let c: Srgba = lcha.into_color();
         c.into()
     }
+
+    pub fn lerp(color1: &Self, color2: &Self, t: f32) -> Self {
+        let s = t.clamp(0.0, 1.0);
+        let c1 = color1.as_f32s();
+        let c2 = color2.as_f32s();
+        let r = c1.0 + s * (c2.0 - c1.0);
+        let g = c1.1 + s * (c2.1 - c1.1);
+        let b = c1.2 + s * (c2.2 - c1.2);
+        let a = c1.3 + s * (c2.3 - c1.3);
+        RGBA::rgba(r, g, b, a)
+    }
 }
 
 impl From<image::Rgba<u8>> for RGBA {
