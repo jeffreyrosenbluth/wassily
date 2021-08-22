@@ -54,6 +54,11 @@ impl RGBA {
         Self::rgba(1.0, 1.0, 1.0, alpha)
     }
 
+    /// Gray, set r, g, and b to the same value 0..255.
+    pub fn gray(n: u8) -> Self {
+        Self {r: n, g: n, b: n, a: 255}
+    }
+
     /// Red with opacity alpha [0.0, 1.0].
     pub fn red(alpha: f32) -> Self {
         Self::rgba(1.0, 0.0, 0.0, alpha)
