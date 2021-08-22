@@ -59,21 +59,6 @@ impl RGBA {
         Self {r: n, g: n, b: n, a: 255}
     }
 
-    /// Red with opacity alpha [0.0, 1.0].
-    pub fn red(alpha: f32) -> Self {
-        Self::rgba(1.0, 0.0, 0.0, alpha)
-    }
-
-    /// Green with opacity alpha [0.0, 1.0].
-    pub fn green(alpha: f32) -> Self {
-        Self::rgba(0.0, 1.0, 0.0, alpha)
-    }
-
-    /// Blue with opacity alpha [0.0, 1.0].
-    pub fn blue(alpha: f32) -> Self {
-        Self::rgba(0.0, 0.0, 1.0, alpha)
-    }
-
     /// Convert a `RGBA` to a [palette::Lcha].
     pub fn lcha(self) -> Lcha<D65> {
         let (r, g, b, a) = self.as_f32s();
