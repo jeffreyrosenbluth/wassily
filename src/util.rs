@@ -1,5 +1,5 @@
 use crate::prelude::{Point, Sketch, point2};
-use num_traits::AsPrimitive;
+use num_traits::{AsPrimitive, FromPrimitive};
 use rand::{Rng, SeedableRng};
 use rand_distr::{uniform::SampleUniform, Distribution, Normal};
 use rand_pcg::Pcg64;
@@ -41,6 +41,11 @@ impl Rand {
 
     pub fn rand_bool(&mut self, p: f32) -> bool {
         self.rng.gen_bool(p as f64)
+    }
+
+    pub fn rand_rademacher<T: FromPrimitive>(&mut self) -> T {
+        let b = self.rng.gen_bool(0.5);
+        if b { T::from_i8(1).unwrap() } else { T::from_i8(-1i8).unwrap() }
     }
 }
 
