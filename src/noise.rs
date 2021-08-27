@@ -23,7 +23,7 @@
 //! ```
 
 use crate::prelude::Point;
-use crate::util::TAU;
+use crate::util::{TAU, Rand};
 use noise::{MultiFractal, NoiseFn, Seedable};
 use num_traits::{AsPrimitive, ToPrimitive};
 
@@ -220,5 +220,123 @@ where
             noise_fn: self.noise_fn.set_persistence(persistence),
             ..self
         }
+    }
+}
+
+// Gabor Noise
+const PI: f64 = std::f64::consts::PI;
+
+fn gabor(k: f64, r: f64, f0: f64, omega: f64, x: f64, y: f64) -> f64 {
+    let guass = k * (-PI / (r * r) * ((x * x) + (y * y))).exp();
+    let sin = (2.0 * PI * f0 * (x * omega.cos() + y * omega.sin())).sin();
+    guass * sin
+}
+
+pub struct Gabor {
+    k: f64,
+    r: f64,
+    f0: f64,
+    omega0: Option<f64>,
+    kernel_radius: f64,
+    impulse_density: f64,
+    scale: f64,
+}
+
+impl Default for Gabor {
+    fn default() -> Self {
+        Self::new(1.0, 64.0, 0.01, None, 64.0)
+    }
+}
+
+impl Gabor {
+    pub fn new(k: f64, r: f64, f0: f64, omega0: Option<f64>, impulses_per_kernel: f64) -> Self {
+        let kernel_radius = (-(0.05f64).ln() / PI).sqrt() * r;
+        let impulse_density = impulses_per_kernel / (PI * kernel_radius * kernel_radius);
+        let integral_gabor_filter_squared =
+            0.25 * k * k * r * r * (1.0 + (-2.0 * PI * f0 * f0 * r * r).exp());
+        let scale = 3.0 * (impulse_density * integral_gabor_filter_squared).sqrt();
+        Self {
+            k,
+            r,
+            f0,
+            omega0,
+            kernel_radius,
+            impulse_density,
+            scale,
+        }
+    }
+
+    pub fn k(self, k: f64) -> Self {
+        Self {k, ..self}
+    }
+
+    pub fn r(self, r: f64) -> Self {
+        let kernel_radius = (-(0.05f64).ln() / PI).sqrt() * r;
+        Self {r, kernel_radius, ..self}
+    }
+
+    pub fn a(self, a: f64) -> Self {
+        let r = 1.0 / a;
+        let kernel_radius = (-(0.05f64).ln() / PI).sqrt() * r;
+        Self {r, kernel_radius, ..self}
+    }
+
+    pub fn omega0(self, omega0: Option<f64>) -> Self {
+        Self {omega0, ..self}
+    }
+
+    pub fn get(&self, x: f64, y: f64) -> f64 {
+        let x = x / self.kernel_radius;
+        let y = y / self.kernel_radius;
+        let int_x = x.floor();
+        let int_y = y.floor();
+        let frac_x = x - int_x;
+        let frac_y = y - int_y;
+        let i = int_x as i32;
+        let j = int_y as i32;
+        let mut ns = 0.0;
+        for di in -1..=1 {
+            for dj in -1..=1 {
+                ns += self.cell(i + di, j + dj, frac_x - di as f64, frac_y - dj as f64);
+            }
+        }
+        ns / self.scale
+    }
+
+    fn cell(&self, i: i32, j: i32, x: f64, y: f64) -> f64 {
+        let mut rnd = Rand::new((i << 32 + j) as u64);
+        let impulses_per_cell = self.impulse_density * self.kernel_radius * self.kernel_radius;
+        let mut noise = 0.0;
+        for _ in 0..impulses_per_cell as u32 {
+            let xi = rnd.rand_range(0.0, 1.0);
+            let yi = rnd.rand_range(0.0, 1.0);
+            let wi: f64 = rnd.rand_rademacher();
+            let omega0i: f64;
+            if let Some(o) = self.omega0 {
+                omega0i = o;
+            } else {
+                omega0i = rnd.rand_range(0.0, 2.0 * PI);
+            }
+            let xix = x - xi;
+            let yiy = y - yi;
+            if xix * xix + yiy * yiy < 1.0 {
+                noise += wi
+                    * gabor(
+                        self.k,
+                        self.r,
+                        self.f0,
+                        omega0i,
+                        xix * self.kernel_radius,
+                        yiy * self.kernel_radius,
+                    );
+            }
+        }
+        noise
+    }
+}
+
+impl NoiseFn<f64, 2> for Gabor {
+    fn get(&self, point: [f64; 2]) -> f64 {
+        self.get(point[0], point[1])
     }
 }
