@@ -23,7 +23,7 @@
 //! ```
 
 use crate::prelude::Point;
-use crate::util::{TAU, Rand};
+use crate::util::{Rand, TAU};
 use noise::{MultiFractal, NoiseFn, Seedable};
 use num_traits::{AsPrimitive, ToPrimitive};
 
@@ -232,6 +232,13 @@ fn gabor(k: f64, r: f64, f0: f64, omega: f64, x: f64, y: f64) -> f64 {
     guass * sin
 }
 
+fn morton(x: u32, y: u32) -> u32 {
+    let mut z = 0;
+    for i in 0..32 {
+        z |= ((x & (1 << i)) << i) | ((y & (1 << i)) << (i + 1));
+    }
+    return z;
+}
 pub struct Gabor {
     k: f64,
     r: f64,
@@ -267,22 +274,34 @@ impl Gabor {
     }
 
     pub fn k(self, k: f64) -> Self {
-        Self {k, ..self}
+        Self { k, ..self }
     }
 
     pub fn r(self, r: f64) -> Self {
         let kernel_radius = (-(0.05f64).ln() / PI).sqrt() * r;
-        Self {r, kernel_radius, ..self}
+        Self {
+            r,
+            kernel_radius,
+            ..self
+        }
     }
 
     pub fn a(self, a: f64) -> Self {
         let r = 1.0 / a;
         let kernel_radius = (-(0.05f64).ln() / PI).sqrt() * r;
-        Self {r, kernel_radius, ..self}
+        Self {
+            r,
+            kernel_radius,
+            ..self
+        }
+    }
+
+    pub fn f0(self, f0: f64) -> Self {
+        Self { f0, ..self }
     }
 
     pub fn omega0(self, omega0: Option<f64>) -> Self {
-        Self {omega0, ..self}
+        Self { omega0, ..self }
     }
 
     pub fn get(&self, x: f64, y: f64) -> f64 {
@@ -304,7 +323,7 @@ impl Gabor {
     }
 
     fn cell(&self, i: i32, j: i32, x: f64, y: f64) -> f64 {
-        let mut rnd = Rand::new((i << 32 + j) as u64);
+        let mut rnd = Rand::new(morton(i as u32, j as u32) as u64);
         let impulses_per_cell = self.impulse_density * self.kernel_radius * self.kernel_radius;
         let mut noise = 0.0;
         for _ in 0..impulses_per_cell as u32 {
