@@ -235,11 +235,12 @@ where
 // Vincent Tavernier, Fabrice Neyret, Romain Vergne, Joëlle Thollot. Making Gabor Noise Fast and
 // Normalized. Eurographics 2019 - 40th Annual Conference of the European Association for Computer
 // Graphics, May 2019, Gênes, Italy. pp.37-40, ff10.2312/egs.20191009ff. ffhal-02104389f
-const PI: f64 = std::f64::consts::PI;
+const PI64: f64 = std::f64::consts::PI;
+const TAU64: f64 = std::f64::consts::TAU;
 
 fn gabor(k: f64, r: f64, f0: f64, omega: f64, x: f64, y: f64) -> f64 {
-    let guass = k * (-PI / (r * r) * ((x * x) + (y * y))).exp();
-    let sin = (2.0 * PI * f0 * (x * omega.cos() + y * omega.sin())).sin();
+    let guass = k * (-PI64 / (r * r) * ((x * x) + (y * y))).exp();
+    let sin = (TAU64 * f0 * (x * omega.cos() + y * omega.sin())).sin();
     guass * sin
 }
 
@@ -269,11 +270,11 @@ impl Default for Gabor {
 
 impl Gabor {
     pub fn new(k: f64, r: f64, f0: f64, omega0: Option<f64>, impulses_per_kernel: f64) -> Self {
-        let kernel_radius = (-(0.05f64).ln() / PI).sqrt() * r;
-        let impulse_density = impulses_per_kernel / (PI * kernel_radius * kernel_radius);
+        let kernel_radius = (-(0.05f64).ln() / PI64).sqrt() * r;
+        let impulse_density = impulses_per_kernel / (PI64 * kernel_radius * kernel_radius);
         let integral_gabor_filter_squared =
-            0.25 * k * k * r * r * (1.0 + (-2.0 * PI * f0 * f0 * r * r).exp());
-        let impulses_per_cell = (impulses_per_kernel / PI) as u32;
+            0.25 * k * k * r * r * (1.0 + (-TAU64 * f0 * f0 * r * r).exp());
+        let impulses_per_cell = (impulses_per_kernel / PI64) as u32;
         let scale = 3.0 * (impulse_density * integral_gabor_filter_squared).sqrt();
         Self {
             k,
@@ -291,7 +292,7 @@ impl Gabor {
     }
 
     pub fn r(self, r: f64) -> Self {
-        let kernel_radius = (-(0.05f64).ln() / PI).sqrt() * r;
+        let kernel_radius = (-(0.05f64).ln() / PI64).sqrt() * r;
         Self {
             r,
             kernel_radius,
@@ -301,7 +302,7 @@ impl Gabor {
 
     pub fn a(self, a: f64) -> Self {
         let r = 1.0 / a;
-        let kernel_radius = (-(0.05f64).ln() / PI).sqrt() * r;
+        let kernel_radius = (-(0.05f64).ln() / PI64).sqrt() * r;
         Self {
             r,
             kernel_radius,
@@ -324,12 +325,14 @@ impl Gabor {
         let int_y = y.trunc();
         let frac_x = x - int_x;
         let frac_y = y - int_y;
+        let int_x = int_x as i32;
+        let int_y = int_y as i32;
         let mut ns = 0.0;
         for di in -1..=1 {
             for dj in -1..=1 {
                 ns += self.cell(
-                    int_x as i32 + di,
-                    int_y as i32 + dj,
+                    int_x + di,
+                    int_y + dj,
                     frac_x - di as f64,
                     frac_y - dj as f64,
                 );
@@ -349,7 +352,7 @@ impl Gabor {
             if let Some(o) = self.omega0 {
                 omega0i = o;
             } else {
-                omega0i = rnd.rand_range(0.0, 2.0 * PI);
+                omega0i = rnd.rand_range(0.0, TAU64);
             }
             let xix = x - xi;
             let yiy = y - yi;
