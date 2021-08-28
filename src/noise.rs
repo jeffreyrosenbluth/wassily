@@ -224,6 +224,17 @@ where
 }
 
 // Gabor Noise
+//
+// Lagae, Ares & Lefebvre, Sylvain & Drettakis, George & Dutré, Philip. (2009). 
+// Procedural Noise using Sparse Gabor Convolution. 
+// ACM Transactions on Graphics. 28. 10.1145/1576246.1531360. 
+//
+// Lagae A, Lefebvre S, Dutré P. Improving Gabor noise. IEEE Trans Vis Comput Graph. 
+// 2011 Aug;17(8):1096-107. doi: 10.1109/TVCG.2010.238. PMID: 21041873.
+//
+// Vincent Tavernier, Fabrice Neyret, Romain Vergne, Joëlle Thollot. Making Gabor Noise Fast and
+// Normalized. Eurographics 2019 - 40th Annual Conference of the European Association for Computer
+// Graphics, May 2019, Gênes, Italy. pp.37-40, ff10.2312/egs.20191009ff. ffhal-02104389f
 const PI: f64 = std::f64::consts::PI;
 
 fn gabor(k: f64, r: f64, f0: f64, omega: f64, x: f64, y: f64) -> f64 {
@@ -232,6 +243,7 @@ fn gabor(k: f64, r: f64, f0: f64, omega: f64, x: f64, y: f64) -> f64 {
     guass * sin
 }
 
+// z-curve ordering.
 fn morton(x: u32, y: u32) -> u32 {
     let mut z = 0;
     for i in 0..32 {
@@ -307,16 +319,19 @@ impl Gabor {
     pub fn get(&self, x: f64, y: f64) -> f64 {
         let x = x / self.kernel_radius;
         let y = y / self.kernel_radius;
-        let int_x = x.floor();
-        let int_y = y.floor();
+        let int_x = x.trunc();
+        let int_y = y.trunc();
         let frac_x = x - int_x;
         let frac_y = y - int_y;
-        let i = int_x as i32;
-        let j = int_y as i32;
         let mut ns = 0.0;
         for di in -1..=1 {
             for dj in -1..=1 {
-                ns += self.cell(i + di, j + dj, frac_x - di as f64, frac_y - dj as f64);
+                ns += self.cell(
+                    int_x as i32 + di,
+                    int_y as i32 + dj,
+                    frac_x - di as f64,
+                    frac_y - dj as f64,
+                );
             }
         }
         ns / self.scale
