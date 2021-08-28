@@ -225,11 +225,11 @@ where
 
 // Gabor Noise
 //
-// Lagae, Ares & Lefebvre, Sylvain & Drettakis, George & Dutré, Philip. (2009). 
-// Procedural Noise using Sparse Gabor Convolution. 
-// ACM Transactions on Graphics. 28. 10.1145/1576246.1531360. 
+// Lagae, Ares & Lefebvre, Sylvain & Drettakis, George & Dutré, Philip. (2009).
+// Procedural Noise using Sparse Gabor Convolution.
+// ACM Transactions on Graphics. 28. 10.1145/1576246.1531360.
 //
-// Lagae A, Lefebvre S, Dutré P. Improving Gabor noise. IEEE Trans Vis Comput Graph. 
+// Lagae A, Lefebvre S, Dutré P. Improving Gabor noise. IEEE Trans Vis Comput Graph.
 // 2011 Aug;17(8):1096-107. doi: 10.1109/TVCG.2010.238. PMID: 21041873.
 //
 // Vincent Tavernier, Fabrice Neyret, Romain Vergne, Joëlle Thollot. Making Gabor Noise Fast and
@@ -257,7 +257,7 @@ pub struct Gabor {
     f0: f64,
     omega0: Option<f64>,
     kernel_radius: f64,
-    impulse_density: f64,
+    impulses_per_cell: u32,
     scale: f64,
 }
 
@@ -273,6 +273,7 @@ impl Gabor {
         let impulse_density = impulses_per_kernel / (PI * kernel_radius * kernel_radius);
         let integral_gabor_filter_squared =
             0.25 * k * k * r * r * (1.0 + (-2.0 * PI * f0 * f0 * r * r).exp());
+        let impulses_per_cell = (impulses_per_kernel / PI) as u32;
         let scale = 3.0 * (impulse_density * integral_gabor_filter_squared).sqrt();
         Self {
             k,
@@ -280,7 +281,7 @@ impl Gabor {
             f0,
             omega0,
             kernel_radius,
-            impulse_density,
+            impulses_per_cell,
             scale,
         }
     }
@@ -339,9 +340,8 @@ impl Gabor {
 
     fn cell(&self, i: i32, j: i32, x: f64, y: f64) -> f64 {
         let mut rnd = Rand::new(morton(i as u32, j as u32) as u64);
-        let impulses_per_cell = self.impulse_density * self.kernel_radius * self.kernel_radius;
         let mut noise = 0.0;
-        for _ in 0..impulses_per_cell as u32 {
+        for _ in 0..self.impulses_per_cell {
             let xi = rnd.rand_range(0.0, 1.0);
             let yi = rnd.rand_range(0.0, 1.0);
             let wi: f64 = rnd.rand_rademacher();
