@@ -99,8 +99,8 @@ impl Gabor {
     pub fn get(&self, x: f64, y: f64) -> f64 {
         let x = x / self.kernel_radius;
         let y = y / self.kernel_radius;
-        let int_x = x.trunc();
-        let int_y = y.trunc();
+        let int_x = x.floor();
+        let int_y = y.floor();
         let frac_x = x - int_x;
         let frac_y = y - int_y;
         let int_x = int_x as i32;
