@@ -33,7 +33,7 @@ impl Sketch for Canvas {
     fn stroke_path(&mut self, path: &base::Path, texture: &base::Texture, stroke: &base::Stroke) {
         let skia_path: skia::Path = path.into();
         let mut paint: skia::Paint = texture.into();
-        paint.anti_alias = true;
+        paint.anti_alias = texture.anti_alias;
         paint.blend_mode = texture.mode.into();
         let stroke = stroke.into();
         let transform = to_transform(path.transform);
@@ -43,7 +43,7 @@ impl Sketch for Canvas {
 
     fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &base::Texture) {
         let mut paint: skia::Paint = texture.into();
-        paint.anti_alias = true;
+        paint.anti_alias = texture.anti_alias;
         paint.blend_mode = texture.mode.into();
         let rect: skia::Rect = skia::Rect::from_xywh(x, y, width, height).unwrap();
         self.0
