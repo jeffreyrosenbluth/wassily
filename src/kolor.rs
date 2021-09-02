@@ -56,12 +56,17 @@ impl RGBA {
 
     /// Gray, set r, g, and b to the same value 0..255.
     pub fn gray(n: u8) -> Self {
-        Self {r: n, g: n, b: n, a: 255}
+        Self {
+            r: n,
+            g: n,
+            b: n,
+            a: 255,
+        }
     }
 
-    pub fn grayscale(&self) -> Self {
-        let (r, g, b, a) = self.as_f32s();
-        RGBA::rgba(0.2989 * r, 0.5870 * g, 0.1140 * b, a)
+    pub fn grayscale(&self) -> u8 {
+        let (r, g, b, _) = self.as_tuple();
+        (0.2989 * r as f32 + 0.5870 * g as f32 + 0.1140 * b as f32).clamp(0.0, 255.0) as u8
     }
 
     /// Convert a `RGBA` to a [palette::Lcha].
