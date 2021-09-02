@@ -38,8 +38,8 @@ pub trait  D2 {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Dims {
-    width: u32,
-    height: u32,
+    pub width: u32,
+    pub height: u32,
 }
 
 impl Dims {
