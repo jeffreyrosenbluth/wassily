@@ -13,7 +13,7 @@ pub trait Sketch {
     fn pixel(&mut self, x: f32, y: f32, color: RGBA) {
         let mut tex = Texture::solid_color(color);
         tex.anti_alias = false;
-        self.fill_rect(x, y, 1.0, 1.0, &Texture::solid_color(color));
+        self.fill_rect(x, y, 1.0, 1.0, &tex);
     }
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
 }
