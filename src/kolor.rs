@@ -59,6 +59,11 @@ impl RGBA {
         Self {r: n, g: n, b: n, a: 255}
     }
 
+    pub fn grayscale(&self) -> Self {
+        let (r, g, b, a) = self.as_f32s();
+        RGBA::rgba(0.2989 * r, 0.5870 * g, 0.1140 * b, a)
+    }
+
     /// Convert a `RGBA` to a [palette::Lcha].
     pub fn lcha(self) -> Lcha<D65> {
         let (r, g, b, a) = self.as_f32s();
