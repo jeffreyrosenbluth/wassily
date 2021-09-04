@@ -86,7 +86,7 @@ impl RGBA {
         c.into()
     }
 
-    pub fn lerp(color1: &Self, color2: &Self, t: f32) -> Self {
+    pub fn lerp(color1: Self, color2: Self, t: f32) -> Self {
         let s = t.clamp(0.0, 1.0);
         let c1 = color1.as_f32s();
         let c2 = color2.as_f32s();
@@ -95,6 +95,18 @@ impl RGBA {
         let b = c1.2 + s * (c2.2 - c1.2);
         let a = c1.3 + s * (c2.3 - c1.3);
         RGBA::rgba(r, g, b, a)
+    }
+
+    pub fn tint(self, t: f32) -> Self {
+        Self::lerp(self, RGBA::rgb8(255, 255, 255), t)
+    }
+
+    pub fn tone(self, t: f32) -> Self {
+        Self::lerp(self, RGBA::rgb8(128, 128, 128), t)
+    }
+
+    pub fn shade(self, t: f32) -> Self {
+        Self::lerp(self, RGBA::rgb8(0, 0, 0), t)
     }
 }
 
