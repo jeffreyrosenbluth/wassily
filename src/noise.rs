@@ -147,11 +147,6 @@ where
                 (1.0 / center.y * self.y_scale * (y - center.y)),
             ])
     }
-
-    /// The noise value expressed in radians.
-    pub fn angle(&self, x: f32, y: f32) -> f32 {
-        self.get(x, y) % TAU
-    }
 }
 
 impl<T> Noise<T, 3>

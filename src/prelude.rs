@@ -10,6 +10,7 @@ pub use crate::rectangles::*;
 pub use crate::shape::*;
 pub use crate::subdivision::*;
 pub use crate::util::*;
+pub use crate::warp::*;
 pub use euclid::vec2;
 
 pub type IntRect = euclid::default::Box2D<i32>;
