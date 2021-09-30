@@ -10,7 +10,7 @@ pub enum Coord {
 }
 pub enum Final<'a> {
     More(Box<Warp<'a>>),
-    Func(fn(f32, f32) -> RGBA),
+    Func(Box<dyn Fn(f32, f32) -> RGBA>),
     Img(&'a DynamicImage, f32, f32),
 }
 

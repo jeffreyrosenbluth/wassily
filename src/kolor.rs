@@ -1,6 +1,6 @@
 //! Utilities to manage colors and palettes.
 
-use crate::{base::RGBA, prelude::Point};
+use crate::{base::RGBA, prelude::{PI, Point}};
 use color_thief::{get_palette, ColorFormat};
 use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
@@ -345,6 +345,12 @@ impl CosChannel {
     }
 }
 
+impl Default for CosChannel {
+    fn default() -> Self {
+        Self { a: 0.5, b: 0.5, freq: 1.0, phase: 0.0 }
+    }
+}
+
 /// [Procedural Color Palettess](https://iquilezles.org/www/articles/palettes/palettes.htm).
 #[derive(Debug, Clone, Copy)]
 pub struct CosColor {
@@ -372,6 +378,90 @@ impl CosColor {
             blue.clamp(0.0, 1.0),
             1.0,
         )
+    }
+
+    pub fn rainbow() -> Self {
+        let r = CosChannel::default();
+        let mut g = CosChannel::default();
+        let mut b = CosChannel::default();
+        g.phase = 0.33 * 2.0 * PI;
+        b.phase = 0.66 * 2.0 * PI;
+        Self {r, g, b}
+    }
+
+    pub fn berry() -> Self {
+        let mut r = CosChannel::default();
+        let mut g = CosChannel::default();
+        let mut b = CosChannel::default();
+        r.phase = 0.3 * 2.0 * PI;
+        g.phase = 0.2 * 2.0 * PI;
+        b.phase = 0.2 * 2.0 * PI;
+        Self {r, g, b}
+    }
+
+    pub fn rain_forest() -> Self {
+        let mut r = CosChannel::default();
+        let mut g = CosChannel::default();
+        let mut b = CosChannel::default();
+        r.phase = 0.8 * 2.0 * PI;
+        g.phase = 0.9 * 2.0 * PI;
+        b.freq = 0.5;
+        b.phase = 0.3 * 2.0 * PI;
+        Self {r, g, b}
+    }
+
+    pub fn pink_gold() -> Self {
+        let r = CosChannel::default();
+        let mut g = CosChannel::default();
+        let mut b = CosChannel::default();
+        g.freq = 0.7;
+        g.phase = 0.15 * 2.0 * PI;
+        b.freq = 0.4;
+        b.phase = 0.2 * 2.0 * PI;
+        Self {r, g, b}
+    }
+
+    pub fn fuschia() -> Self {
+        let mut r = CosChannel::default();
+        let mut g = CosChannel::default();
+        let mut b = CosChannel::default();
+        r.freq = 1.0;
+        r.phase = 0.5 * 2.0 * PI;
+        g.freq = 1.0;
+        g.phase = 0.2 * 2.0 * PI;
+        b.freq = 0.0;
+        b.phase = 0.25 * 2.0 * PI;
+        Self {r, g, b}
+    }
+
+    pub fn watermelon() -> Self {
+        let mut r = CosChannel::default();
+        let mut g = CosChannel::default();
+        let mut b = CosChannel::default();
+        r.a = 0.8;
+        r.b = 0.2;
+        r.freq = 2.0;
+        r.phase = 0.0;
+        g.a = 0.5;
+        g.b = 0.4;
+        g.freq = 1.0;
+        g.phase = 0.25 * 2.0 * PI;
+        b.a = 0.4;
+        b.b = 0.2;
+        b.freq = 1.0;
+        b.phase = 0.25 * 2.0 * PI;
+        Self {r, g, b}
+    }
+}
+
+impl Default for CosColor {
+    fn default() -> Self {
+        let r = CosChannel::default();
+        let mut g = CosChannel::default();
+        let mut b = CosChannel::default();
+        g.phase = 0.2 * PI;
+        b.phase = 0.4 * PI;
+        Self {r, g, b}
     }
 }
 

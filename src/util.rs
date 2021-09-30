@@ -1,4 +1,4 @@
-use crate::prelude::{Point, Sketch, point2};
+use crate::prelude::{point2, Point, Sketch};
 use num_traits::{AsPrimitive, FromPrimitive};
 use rand::{Rng, SeedableRng};
 use rand_distr::{uniform::SampleUniform, Distribution, Normal};
@@ -7,7 +7,13 @@ use rand_pcg::Pcg64;
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
 
-pub fn save<S: Sketch>(name: &str, dir: &str, ext: & str, data: impl std::fmt::Debug, canvas: &mut S) {
+pub fn save<S: Sketch>(
+    name: &str,
+    dir: &str,
+    ext: &str,
+    data: Option<impl std::fmt::Debug>,
+    canvas: &mut S,
+) {
     use chrono::prelude::Utc;
     use std::fs::File;
     use std::io::Write;
@@ -15,8 +21,10 @@ pub fn save<S: Sketch>(name: &str, dir: &str, ext: & str, data: impl std::fmt::D
     let ts = Utc::now().timestamp();
     let sketch_name = format!("{}_{}.{}", name, ts, ext);
     let data_name = format!("{}_{}.txt", name, ts);
-    let mut output = File::create(Path::new(dir).join(data_name)).unwrap();
-    write!(output, "{:#?}", data).unwrap();
+    if let Some(descr) = data {
+        let mut output = File::create(Path::new(dir).join(data_name)).unwrap();
+        write!(output, "{:#?}", descr).unwrap();
+    }
     canvas.save(Path::new(dir).join(&sketch_name));
 }
 
@@ -45,7 +53,11 @@ impl Rand {
 
     pub fn rand_rademacher<T: FromPrimitive>(&mut self) -> T {
         let b = self.rng.gen_bool(0.5);
-        if b { T::from_i8(1).unwrap() } else { T::from_i8(-1i8).unwrap() }
+        if b {
+            T::from_i8(1).unwrap()
+        } else {
+            T::from_i8(-1i8).unwrap()
+        }
     }
 }
 
