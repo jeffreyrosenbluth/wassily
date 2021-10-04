@@ -467,8 +467,8 @@ impl Default for CosColor {
 
 /// Get a color from an image by mapping the canvas coordinates to image coordinates.
 pub fn get_color<T: AsPrimitive<f32>>(img: &DynamicImage, width: T, height: T, p: Point) -> RGBA {
-    let x = ((p.x * img.width() as f32 / width.as_()) as u32).clamp(0, img.width() - 1);
-    let y = ((p.y * img.height() as f32 / height.as_()) as u32).clamp(0, img.height() - 1);
+    let x = ((p.x * img.width() as f32 / width.as_()) as u32).rem_euclid(img.width());
+    let y = ((p.y * img.height() as f32 / height.as_()) as u32).rem_euclid(img.height());
     let p = img.get_pixel(x, y);
     p.into()
 }
