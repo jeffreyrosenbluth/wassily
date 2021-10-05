@@ -26,49 +26,22 @@ where
 {
     euclid::point2(x.as_(), y.as_())
 }
-pub trait  D2 {
-    fn width(&self) -> u32;
-    fn height(&self) -> u32;
-    fn width_f32(&self) -> f32 {
-        self.width() as f32
-    }
-    fn height_f32(&self) -> f32 {
-        self.height() as f32
-    }
-}
 
 #[derive(Debug, Clone, Copy)]
 pub struct Dims {
     pub width: u32,
     pub height: u32,
+    pub width_f32: f32,
+    pub height_f32: f32,
 }
 
 impl Dims {
     pub fn new(width: u32, height: u32) -> Self {
-        Self { width, height }
+        Self { width, height, width_f32: width as f32, height_f32: height as f32 }
     }
 
     pub fn with_aspect(width: u32, numerator: u32, denominator: u32) -> Self {
-        Self {width, height: width * denominator / numerator}
+        Self::new(width, width * denominator / numerator)
     }
 }
-
-impl D2 for Dims {
-    fn width(&self) -> u32 {
-        self.width
-    }
-
-    fn height(&self) -> u32 {
-        self.height
-    }
-
-    fn width_f32(&self) -> f32 {
-        self.width as f32
-    }
-
-    fn height_f32(&self) -> f32 {
-        self.height as f32
-    }
-}
-
 

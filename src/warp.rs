@@ -1,8 +1,9 @@
 use crate::base::RGBA;
 use crate::prelude::{get_color, point2};
 use image::DynamicImage;
+use std::rc::Rc;
 
-type DomWarp = Box<dyn Fn(f32, f32) -> f32>;
+type DomWarp = Rc<dyn Fn(f32, f32) -> f32>;
 
 pub enum Coord {
     Polar,
