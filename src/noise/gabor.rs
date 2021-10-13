@@ -30,6 +30,8 @@ fn morton(x: u32, y: u32) -> u32 {
     }
     return z;
 }
+
+#[derive(Debug, Clone, Copy)]
 pub struct Gabor {
     k: f64,
     r: f64,

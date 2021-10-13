@@ -7,25 +7,27 @@ use rand_pcg::Pcg64;
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
 
-pub fn save<S: Sketch>(
+pub fn save<S: Sketch, T: std::fmt::Debug>(
     name: &str,
     dir: &str,
     ext: &str,
-    data: Option<impl std::fmt::Debug>,
+    data: Option<T>,
     canvas: &mut S,
 ) {
     use chrono::prelude::Utc;
-    use std::fs::File;
+    use std::fs::{File, create_dir};
     use std::io::Write;
     use std::path::Path;
     let ts = Utc::now().timestamp();
     let sketch_name = format!("{}_{}.{}", name, ts, ext);
     let data_name = format!("{}_{}.txt", name, ts);
+    let dir = Path::new(dir);
+    let _ = create_dir(dir);
     if let Some(descr) = data {
-        let mut output = File::create(Path::new(dir).join(data_name)).unwrap();
+        let mut output = File::create(dir.join(data_name)).unwrap();
         write!(output, "{:#?}", descr).unwrap();
     }
-    canvas.save(Path::new(dir).join(&sketch_name));
+    canvas.save(dir.join(&sketch_name));
 }
 
 pub struct Rand {

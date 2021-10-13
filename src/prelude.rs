@@ -4,14 +4,16 @@ pub use crate::base::*;
 pub use crate::color_names::*;
 pub use crate::kolor::*;
 pub use crate::lines::*;
-pub use crate::noise::*;
 pub use crate::noise::gabor::*;
+pub use crate::noise::*;
 pub use crate::rectangles::*;
 pub use crate::shape::*;
 pub use crate::subdivision::*;
 pub use crate::util::*;
 pub use crate::warp::*;
 pub use euclid::vec2;
+pub use image::*;
+pub use noise::*;
 
 pub type IntRect = euclid::default::Box2D<i32>;
 pub type IntPoint = euclid::default::Point2D<i32>;
@@ -37,11 +39,15 @@ pub struct Dims {
 
 impl Dims {
     pub fn new(width: u32, height: u32) -> Self {
-        Self { width, height, width_f32: width as f32, height_f32: height as f32 }
+        Self {
+            width,
+            height,
+            width_f32: width as f32,
+            height_f32: height as f32,
+        }
     }
 
     pub fn with_aspect(width: u32, numerator: u32, denominator: u32) -> Self {
         Self::new(width, width * denominator / numerator)
     }
 }
-

@@ -1,5 +1,5 @@
 use crate::base::RGBA;
-use crate::prelude::{get_color, point2};
+use crate::prelude::{get_color_clamp, point2};
 use image::DynamicImage;
 use std::rc::Rc;
 
@@ -49,7 +49,7 @@ impl<'a> Warp<'a> {
         match &self.warp {
             Final::More(w) => w.get(x1, y1),
             Final::Func(f) => f(x1, y1),
-            Final::Img(img, w, h) => get_color(img, *w, *h, point2(x1, y1)),
+            Final::Img(img, w, h) => get_color_clamp(img, *w, *h, point2(x1, y1)),
         }
     }
 }

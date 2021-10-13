@@ -1,6 +1,9 @@
 //! Utilities to manage colors and palettes.
 
-use crate::{base::RGBA, prelude::{PI, Point}};
+use crate::{
+    base::RGBA,
+    prelude::{Point, PI},
+};
 use color_thief::{get_palette, ColorFormat};
 use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
@@ -74,6 +77,13 @@ impl RGBA {
         let (r, g, b, a) = self.as_f32s();
         let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
         srgb.into_color()
+    }
+    pub fn rotate_hue(&self, degrees: f32) -> RGBA {
+        let mut l = self.lcha();
+        let hue = (l.hue.to_degrees() + degrees) % 360.0;
+        l.hue = LabHue::from_degrees(hue);
+        let rgba: Srgba = l.into_color();
+        rgba.into()
     }
 
     pub fn spread(self) -> Self {
@@ -219,17 +229,7 @@ impl Palette {
 
     /// Rotate the [palette::LabHue] of each color.
     pub fn rotate_hue(&mut self, degrees: f32) {
-        self.colors = self
-            .colors
-            .iter()
-            .map(|c| {
-                let mut l = c.lcha();
-                let hue = (l.hue.to_degrees() + degrees) % 360.0;
-                l.hue = LabHue::from_degrees(hue);
-                let rgba: Srgba = l.into_color();
-                rgba.into()
-            })
-            .collect();
+        self.colors = self.colors.iter().map(|c| c.rotate_hue(degrees)).collect();
     }
 
     /// Sort the colors by hue using the CIELCh color space.
@@ -347,7 +347,12 @@ impl CosChannel {
 
 impl Default for CosChannel {
     fn default() -> Self {
-        Self { a: 0.5, b: 0.5, freq: 1.0, phase: 0.0 }
+        Self {
+            a: 0.5,
+            b: 0.5,
+            freq: 1.0,
+            phase: 0.0,
+        }
     }
 }
 
@@ -386,7 +391,7 @@ impl CosColor {
         let mut b = CosChannel::default();
         g.phase = 0.33 * 2.0 * PI;
         b.phase = 0.66 * 2.0 * PI;
-        Self {r, g, b}
+        Self { r, g, b }
     }
 
     pub fn berry() -> Self {
@@ -396,7 +401,7 @@ impl CosColor {
         r.phase = 0.3 * 2.0 * PI;
         g.phase = 0.2 * 2.0 * PI;
         b.phase = 0.2 * 2.0 * PI;
-        Self {r, g, b}
+        Self { r, g, b }
     }
 
     pub fn rain_forest() -> Self {
@@ -407,7 +412,7 @@ impl CosColor {
         g.phase = 0.9 * 2.0 * PI;
         b.freq = 0.5;
         b.phase = 0.3 * 2.0 * PI;
-        Self {r, g, b}
+        Self { r, g, b }
     }
 
     pub fn pink_gold() -> Self {
@@ -418,7 +423,7 @@ impl CosColor {
         g.phase = 0.15 * 2.0 * PI;
         b.freq = 0.4;
         b.phase = 0.2 * 2.0 * PI;
-        Self {r, g, b}
+        Self { r, g, b }
     }
 
     pub fn fuschia() -> Self {
@@ -431,7 +436,7 @@ impl CosColor {
         g.phase = 0.2 * 2.0 * PI;
         b.freq = 0.0;
         b.phase = 0.25 * 2.0 * PI;
-        Self {r, g, b}
+        Self { r, g, b }
     }
 
     pub fn watermelon() -> Self {
@@ -450,7 +455,7 @@ impl CosColor {
         b.b = 0.2;
         b.freq = 1.0;
         b.phase = 0.25 * 2.0 * PI;
-        Self {r, g, b}
+        Self { r, g, b }
     }
 }
 
@@ -461,14 +466,41 @@ impl Default for CosColor {
         let mut b = CosChannel::default();
         g.phase = 0.2 * PI;
         b.phase = 0.4 * PI;
-        Self {r, g, b}
+        Self { r, g, b }
     }
 }
 
 /// Get a color from an image by mapping the canvas coordinates to image coordinates.
-pub fn get_color<T: AsPrimitive<f32>>(img: &DynamicImage, width: T, height: T, p: Point) -> RGBA {
-    let x = ((p.x * img.width() as f32 / width.as_()) as u32).rem_euclid(img.width());
-    let y = ((p.y * img.height() as f32 / height.as_()) as u32).rem_euclid(img.height());
+pub fn get_color<T: AsPrimitive<f32>>(
+    img: &DynamicImage,
+    width: T,
+    height: T,
+    p: Point,
+) -> Option<RGBA> {
+    if p.x < 0.0 || p.x >= width.as_() || p.y < 0.0 || p.y >= height.as_() {
+        None
+    } else {
+        let x = (p.x * img.width() as f32 / width.as_()) as u32;
+        let y = (p.y * img.height() as f32 / height.as_()) as u32;
+        let p = img.get_pixel(x, y);
+        Some(p.into())
+    }
+}
+
+/// Get a color from an image by mapping the canvas coordinates to image coordinates. If the 
+/// point 'p' is out of bounds wrap around as if the image is a torus.
+pub fn get_color_wrap<T: AsPrimitive<f32>>(img: &DynamicImage, width: T, height: T, p: Point) -> RGBA {
+    let x = ((p.x * img.width() as f32 / width.as_()) as i32).rem_euclid(img.width() as i32);
+    let y = ((p.y * img.height() as f32 / height.as_()) as i32).rem_euclid(img.height() as i32);
+    let p = img.get_pixel(x as u32, y as u32);
+    p.into()
+}
+
+/// Get a color from an image by mapping the canvas coordinates to image coordinates.
+/// point 'p' is out of bounds clamp the coordinate.
+pub fn get_color_clamp<T: AsPrimitive<f32>>(img: &DynamicImage, width: T, height: T, p: Point) -> RGBA {
+    let x = ((p.x * img.width() as f32 / width.as_()) as u32).clamp(0, img.width() - 1);
+    let y = ((p.y * img.height() as f32 / height.as_()) as u32).clamp(0, img.height() - 1);
     let p = img.get_pixel(x, y);
     p.into()
 }
