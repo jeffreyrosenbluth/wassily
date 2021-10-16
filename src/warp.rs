@@ -6,6 +6,7 @@ use std::rc::Rc;
 
 type DomWarp = Rc<dyn Fn(Complex32) -> Complex32>;
 
+#[derive(Debug, Clone, Copy)]
 pub enum Coord {
     Polar,
     Cartesian,

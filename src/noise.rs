@@ -133,6 +133,15 @@ where
     }
 }
 
+pub fn get_f32<const N: usize>(ns: impl NoiseFn<f64, N>, point: [f32; N]) -> f32 {
+        let coords = point.iter().map(|p| p.to_f64());
+        let mut a: [f64; N] = [0.0; N];
+        for (i, c) in coords.enumerate() {
+            a[i] = c.unwrap();
+        }
+        ns.get(a) as f32
+}
+
 impl<T> Noise<T, 2>
 where
     T: NoiseFn<f64, 2>,
