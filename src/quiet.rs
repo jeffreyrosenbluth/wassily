@@ -1,5 +1,7 @@
 use noise::NoiseFn;
-use num_traits::ToPrimitive;
+use num_traits::{AsPrimitive, ToPrimitive};
+
+pub mod gabor;
 
 pub struct NoiseOpts {
     pub width: f32,
@@ -26,6 +28,14 @@ impl NoiseOpts {
             y_scale,
             z_scale,
             factor,
+        }
+    }
+
+    pub fn with_wh<T: AsPrimitive<f32>>(width: T, height: T) -> Self {
+        Self {
+            width: width.as_(),
+            height: height.as_(),
+            ..Self::default()
         }
     }
 
@@ -80,11 +90,11 @@ impl NoiseOpts {
 impl Default for NoiseOpts {
     fn default() -> Self {
         Self {
-            width: 1000.0,
-            height: 1000.0,
+            width: 1.0,
+            height: 1.0,
             x_scale: 1.0,
             y_scale: 1.0,
-            z_scale: 0.001,
+            z_scale: 1.0,
             factor: 1.0,
         }
     }
@@ -99,7 +109,7 @@ pub fn get_f32<const N: usize>(nf: impl NoiseFn<f64, N>, point: [f32; N]) -> f32
     nf.get(a) as f32
 }
 
-pub fn get2(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f32 {
+pub fn noise2d(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f32 {
     let cx = opts.width / 2.0;
     let cy = opts.height / 2.0;
     opts.factor
@@ -112,7 +122,7 @@ pub fn get2(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f32 {
         )
 }
 
-pub fn get3(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f32) -> f32 {
+pub fn noise3d(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f32) -> f32 {
     let cx = opts.width / 2.0;
     let cy = opts.height / 2.0;
     opts.factor

@@ -1,6 +1,5 @@
 pub mod base;
 pub mod kolor;
-pub mod noise;
 pub mod quiet;
 pub mod prelude;
 pub mod raqote;

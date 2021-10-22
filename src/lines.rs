@@ -1,5 +1,5 @@
 use crate::base::*;
-use crate::noise::*;
+use crate::quiet::*;
 use crate::prelude::{vec2, Vector, BLACK};
 use crate::util::Rand;
 use noise::OpenSimplex;
@@ -118,9 +118,8 @@ impl DotLine {
     }
 
     pub fn draw<T: Sketch>(&self, canvas: &mut T) {
-        let ns = Noise::<_, 3>::new(1200.0, 1200.0, OpenSimplex::default())
-            .factor(self.noise_strength)
-            .scales(1.0);
+        let noise_opts = NoiseOpts::new(1200.0, 1200.0, 1.0, 1.0, 1.0, self.noise_strength);
+        let nf = OpenSimplex::default();
         let v: Vector = self.end - self.start;
         let n: Vector = vec2(v.y, -v.x).normalize(); // n . v == 0, n is the normal.
         let mut rng = thread_rng();
@@ -130,8 +129,8 @@ impl DotLine {
         for t in 0..length as u32 {
             let t = t as f32 / length;
             let p = point2(self.start.x + t * v.x, self.start.y + t * v.y);
-            let nx = ns.get(p.x, p.y, 0.0);
-            let ny = ns.get(p.x, p.y, 10.3711);
+            let nx = noise3d(nf, &noise_opts, p.x, p.y, 0.0);
+            let ny = noise3d(nf, &noise_opts, p.x, p.y, 10.3711);
             for _ in 0..self.weight {
                 let r = normal.sample(&mut rng);
                 let mut a = 1.0 / (20.0 + r.abs());
