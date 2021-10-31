@@ -11,6 +11,7 @@ pub use crate::shape::*;
 pub use crate::subdivision::*;
 pub use crate::util::*;
 pub use crate::warp::*;
+pub use crate::matrix::*;
 pub use euclid::vec2;
 pub use image::*;
 pub use noise::*;

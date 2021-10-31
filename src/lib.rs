@@ -11,4 +11,5 @@ pub mod lines;
 pub mod rectangles;
 pub mod color_names;
 pub mod warp;
+pub mod matrix;
 pub mod subdivision;
