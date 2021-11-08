@@ -1,4 +1,11 @@
-use crate::prelude::{point2, Point, Sketch};
+use std::{
+    fs::{create_dir, File},
+    path::PathBuf,
+    io::Write
+};
+
+use crate::prelude::{point2, BasicModel, Point, Sketch};
+use chrono::prelude::Utc;
 use num_traits::{AsPrimitive, FromPrimitive};
 use rand::{Rng, SeedableRng};
 use rand_distr::{uniform::SampleUniform, Distribution, Normal};
@@ -7,6 +14,33 @@ use rand_pcg::Pcg64;
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
 
+pub fn save_sketch<T, S>(model: T, canvas: S)
+where
+    T: BasicModel,
+    S: Sketch,
+{
+    let ts = format!("{}", Utc::now().timestamp());
+    let dir = format!(r"{}/{}/{}", model.name(), model.dir(), model.name());
+    let mut sketch = PathBuf::from(format!(r"{}_{}", dir, ts));
+    let _ = create_dir(model.dir());
+    sketch.set_extension(model.ext());
+    canvas.save(sketch);
+}
+
+pub fn save_json<T>(model: T)
+where
+    T: serde::Serialize + BasicModel,
+{
+    let ts = format!("{}", Utc::now().timestamp());
+    let dir = format!(r"{}/{}/{}", model.name(), model.dir(), model.name());
+    let mut data_name = PathBuf::from(format!(r"{}_{}", dir, ts));
+    let _ = create_dir(model.dir());
+    data_name.set_extension("json");
+    let json = serde_json::to_string_pretty(&model).expect("Could not serialize data");
+    let mut output = File::create(data_name).unwrap();
+    write!(output, "{}", json).unwrap();
+}
+
 pub fn save<S: Sketch, T: std::fmt::Debug>(
     name: &str,
     dir: &str,
@@ -14,9 +48,6 @@ pub fn save<S: Sketch, T: std::fmt::Debug>(
     data: Option<T>,
     canvas: &mut S,
 ) {
-    use chrono::prelude::Utc;
-    use std::fs::{File, create_dir};
-    use std::io::Write;
     use std::path::Path;
     let ts = Utc::now().timestamp();
     let sketch_name = format!("{}_{}.{}", name, ts, ext);

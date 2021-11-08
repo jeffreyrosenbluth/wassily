@@ -52,3 +52,40 @@ impl Dims {
         Self::new(width, width * denominator / numerator)
     }
 }
+
+pub trait BasicModel {
+    fn width(&self) -> u32;
+    fn height(&self) -> u32;
+    fn name(&self) -> &str;
+    fn ext(&self) -> &str;
+    fn dir(&self) -> &str;
+    fn width_f32(&self) -> f32 {
+        self.width() as f32
+    }
+    fn height_f32(&self) -> f32 {
+        self.height() as f32
+    }
+}
+
+#[macro_export]
+macro_rules! basic_model {
+    ($t:ident) => {
+        impl BasicModel for $t {
+            fn width(&self) -> u32 {
+                self.width
+            }
+            fn height(&self) -> u32 {
+                self.height
+            }
+            fn name(&self) -> &str {
+                self.name
+            }
+            fn ext(&self) -> &str {
+                self.ext
+            }
+            fn dir(&self) -> &str {
+                self.dir
+            }
+        }
+    }
+}

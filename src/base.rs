@@ -1,4 +1,5 @@
 use std::{fmt::Display, str::FromStr};
+use serde::{Serialize, Deserialize};
 
 pub use crate::prelude::{point2, Point, Transform, Vector};
 
@@ -18,7 +19,7 @@ pub trait Sketch {
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
 }
 
-#[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Debug)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Serialize, Deserialize)]
 pub struct RGBA {
     pub r: u8,
     pub g: u8,
