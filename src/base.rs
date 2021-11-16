@@ -1,3 +1,8 @@
+//! Since wassily is designed to have multiple rendering backends we must of a set
+//! of internal data structures that are converted to the rendering backend  before
+//! rendering. Those data structures are defined here. Backends must implement the
+//! Sketch trait.
+
 use std::{fmt::Display, str::FromStr};
 use serde::{Serialize, Deserialize};
 
@@ -19,6 +24,9 @@ pub trait Sketch {
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
 }
 
+/// Unified color format for wassily, formats from external crates e.g. image-rs, tiny-skia,
+/// palette ... should be converted to `RGBA` to use in wassily. Hopefully the functions
+/// in kolor.rs are sufficient for most purposes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Serialize, Deserialize)]
 pub struct RGBA {
     pub r: u8,
@@ -28,6 +36,8 @@ pub struct RGBA {
 }
 
 impl RGBA {
+    /// Construct an `RGBA` value from 4 f32s (red, green, blue, alpha) between 0 
+    /// and 1. Numbers outside of this range will be clamped.
     pub fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
         let r = (255.0 * r.clamp(0.0, 1.0)) as u8;
         let g = (255.0 * g.clamp(0.0, 1.0)) as u8;
@@ -36,6 +46,9 @@ impl RGBA {
         Self {r, g, b, a}
     }
 
+    /// Construct an `RGBA` value from 3 f32s (red, green, blue) between 0 and 1. 
+    /// The alpha value will be set to 255 - opaque. Numbers outside of
+    /// this range will be clamped.
     pub fn rgb(r: f32, g: f32, b: f32) -> Self {
         let r = (255.0 * r.clamp(0.0, 1.0)) as u8;
         let g = (255.0 * g.clamp(0.0, 1.0)) as u8;
@@ -43,18 +56,24 @@ impl RGBA {
         Self { r, g, b, a: 255 }
     }
 
+    /// Construct an `RGBA` value from 3 u8s (red, green, blue) between 0 
+    /// and 255. Alpha is set to 255 - opaque.
     pub const fn rgb8(r: u8, g: u8, b: u8) -> Self {
         Self {r, g, b, a: 255}
     }
 
+    /// Construct an `RGBA` value from 4 u8s (red, green, blue, alpha) between 0 
+    /// and 255. 
     pub const fn rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self { r, g, b, a }
     }
 
+    /// Return the `RGBA` as a 4-tuple of u8s.
     pub fn as_tuple(&self) -> (u8, u8, u8, u8) {
         (self.r, self.g, self.b, self.a)
     }
 
+    /// Return the `RGBA` as a 4-tuple of f32s.
     pub fn as_f32s(&self) -> (f32, f32, f32, f32) {
         let r = self.r as f32 / 255.0;
         let g = self.g as f32 / 255.0;
@@ -62,12 +81,9 @@ impl RGBA {
         let a = self.a as f32 / 255.0;
         (r, g, b, a)
     }
-
-    pub fn set_opacity(self, opacity: f32) -> Self {
-        Self { a: (opacity * 255.0) as u8, ..self }
-    }
 }
 
+// Mostly for debugging purposes.
 impl Display for RGBA {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(

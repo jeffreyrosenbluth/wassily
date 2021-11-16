@@ -1,7 +1,8 @@
 use crate::base::{self, Sketch, Texture, TextureKind, RGBA};
+use image::{DynamicImage, RgbImage, RgbaImage};
 use skia::StrokeDash;
 use tiny_skia as skia;
-use tiny_skia::Pixmap;
+use tiny_skia::{Pixmap, PixmapRef};
 use num_traits::AsPrimitive;
 
 #[derive(Clone, PartialEq, Debug)]
@@ -57,6 +58,37 @@ impl Sketch for Canvas {
 
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.save_png(path).unwrap();
+    }
+}
+
+impl From<RgbaImage> for Canvas {
+    fn from(ib: RgbaImage) -> Self {
+        let w = ib.width();
+        let h = ib.height();
+        let data = ib.into_vec();
+        let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
+        Canvas(pixmap.to_owned())
+    }
+}
+
+impl From<RgbImage> for Canvas {
+    fn from(ib: RgbImage) -> Self {
+        let img = DynamicImage::ImageRgb8(ib);
+        let buf = img.to_rgba8();
+        let w = buf.width();
+        let h = buf.height();
+        let data = buf.into_vec();
+        let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
+        Canvas(pixmap.to_owned())
+    }
+}
+
+impl From<Canvas> for RgbaImage {
+    fn from(canvas: Canvas) -> Self {
+        let w = canvas.0.width();
+        let h = canvas.0.height();
+        let data = canvas.0.data().to_vec();
+        RgbaImage::from_vec(w, h, data).unwrap()
     }
 }
 

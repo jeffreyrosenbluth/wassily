@@ -70,7 +70,7 @@ impl SandLine {
                 let x = x + delta * n.x * self.thickness / 2.0 * (i as f32 * w);
                 let y = y + delta * n.y * self.thickness / 2.0 * (i as f32 * w);
                 delta *= -1.0;
-                canvas.pixel(x, y, self.color.set_opacity(a));
+                canvas.pixel(x, y, self.color.opacity(a));
             }
         }
     }
@@ -135,7 +135,7 @@ impl DotLine {
                 let r = normal.sample(&mut rng);
                 let mut a = 1.0 / (20.0 + r.abs());
                 a = a.clamp(0.0, 1.0);
-                let o = c.set_opacity(a);
+                let o = c.opacity(a);
                 let q = point2(p.x + r * n.x + nx, p.y + r * n.y + ny);
                 canvas.pixel(q.x, q.y, o);
             }

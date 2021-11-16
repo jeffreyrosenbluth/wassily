@@ -9,7 +9,6 @@ use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    white_point::D65,
     Alpha, IntoColor, Lab, LabHue, Laba, Lcha, Srgb, Srgba,
 };
 use rand::prelude::*;
@@ -47,6 +46,10 @@ impl Jiggle {
 }
 
 impl RGBA {
+    /// Set the opacity of the color, opacity = [0,1);
+    pub fn opacity(&self, opacity: f32) -> Self {
+        Self { a: (opacity * 255.0) as u8, ..*self }
+    }
     /// Black with opacity alpha [0.0, 1.0].
     pub fn black(alpha: f32) -> Self {
         Self::rgba(0.0, 0.0, 0.0, alpha)
@@ -72,22 +75,18 @@ impl RGBA {
         (0.2989 * r as f32 + 0.5870 * g as f32 + 0.1140 * b as f32).clamp(0.0, 255.0) as u8
     }
 
-    /// Convert a `RGBA` to a [palette::Lcha].
-    pub fn lcha(self) -> Lcha<D65> {
-        let (r, g, b, a) = self.as_f32s();
-        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
-        srgb.into_color()
-    }
     pub fn rotate_hue(&self, degrees: f32) -> RGBA {
-        let mut l = self.lcha();
+        let mut l: Lcha = self.into();
         let hue = (l.hue.to_degrees() + degrees) % 360.0;
         l.hue = LabHue::from_degrees(hue);
         let rgba: Srgba = l.into_color();
         rgba.into()
     }
 
-    pub fn spread(self) -> Self {
-        let mut lcha = self.lcha();
+    /// Change the lighness of a color to it's square root, i.e. spreading
+    /// it towards lighter or darker which ever is closer.
+    pub fn spread(&self) -> Self {
+        let mut lcha: Lcha = self.into();
         let l1 = lcha.l / 50.0 - 1.0;
         let l2 = l1.abs().sqrt() * l1.signum();
         let l3 = 50.0 * (l2 + 1.0);
@@ -117,6 +116,14 @@ impl RGBA {
 
     pub fn shade(self, t: f32) -> Self {
         Self::lerp(self, RGBA::rgb8(0, 0, 0), t)
+    }
+}
+
+impl From<&RGBA> for Lcha {
+    fn from(color: &RGBA) -> Self {
+        let (r, g, b, a) = color.as_f32s();
+        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
+        srgb.into_color()
     }
 }
 
@@ -229,6 +236,8 @@ impl Palette {
         Self::new(palette.collect())
     }
 
+    /// Change the lighness of the colors to their square root, i.e. spreading
+    /// them towards lighter or darker which ever is closer.
     pub fn spread(&mut self) {
         self.colors = self.colors.iter().map(|c| c.spread()).collect();
     }
@@ -241,7 +250,7 @@ impl Palette {
     /// Sort the colors by hue using the CIELCh color space.
     pub fn sort_by_hue(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha = c.lcha();
+            let lcha: Lcha = c.into();
             (1000.0 * lcha.hue.to_radians()) as u32
         })
     }
@@ -249,7 +258,7 @@ impl Palette {
     /// Sort the colors by chroma using the CIELCh color space.
     pub fn sort_by_chroma(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha = c.lcha();
+            let lcha: Lcha = c.into();
             (1000.0 * lcha.chroma) as u32
         })
     }
@@ -257,7 +266,7 @@ impl Palette {
     /// Sort the colors by lightness using the CIELCh color space.
     pub fn sort_by_lightness(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha = c.lcha();
+            let lcha: Lcha = c.into();
             (1000.0 * lcha.l) as u32
         })
     }
@@ -265,7 +274,7 @@ impl Palette {
     /// Sort the colors by alpha(opacity) using the CIELCh color space.
     pub fn sort_by_alpha(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha = c.lcha();
+            let lcha: Lcha = c.into();
             (1000.0 * lcha.alpha) as u32
         })
     }

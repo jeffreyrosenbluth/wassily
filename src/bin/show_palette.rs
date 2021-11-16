@@ -13,8 +13,6 @@ fn main() {
     let swatch_width = width / (NUM_COLORS as f32).sqrt();
     let mut palette = Palette::steal(FILE, NUM_COLORS);
     println!("-----------------------------------");
-    println!("Primary Hue: {:3.1}",palette[0].lcha().hue.to_positive_degrees());
-    println!("-----------------------------------");
     palette.rotate_hue(ANGLE);
     for i in 0..n {
         for j in 0..n {

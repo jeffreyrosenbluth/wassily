@@ -56,7 +56,7 @@ impl SandBox {
             let alpha = map_range(noise2d(nf, &noise_opts, from.x, from.y), -1.0, 1.0, 0.0, 1.0);
             ShapeBuilder::new()
                 .line(from, to)
-                .stroke_color(self.color1.set_opacity(alpha))
+                .stroke_color(self.color1.opacity(alpha))
                 .build()
                 .draw(canvas);
         }
@@ -66,7 +66,7 @@ impl SandBox {
             let alpha = map_range(noise2d(nf, &noise_opts, from.x, from.y), -1.0, 1.0, 0.0, 1.0);
             ShapeBuilder::new()
                 .line(from, to)
-                .stroke_color(self.color2.set_opacity(alpha))
+                .stroke_color(self.color2.opacity(alpha))
                 .build()
                 .draw(canvas);
         }
