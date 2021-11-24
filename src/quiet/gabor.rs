@@ -28,7 +28,7 @@ fn morton(x: u32, y: u32) -> u32 {
     for i in 0..32 {
         z |= ((x & (1 << i)) << i) | ((y & (1 << i)) << (i + 1));
     }
-    return z;
+    z
 }
 
 #[derive(Debug, Clone, Copy)]

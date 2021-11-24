@@ -1,5 +1,5 @@
 use crate::base::{self, Sketch, Texture, TextureKind, RGBA};
-use image::{DynamicImage, RgbImage, RgbaImage};
+use image::{buffer::ConvertBuffer, RgbImage, RgbaImage, ImageFormat};
 use skia::StrokeDash;
 use tiny_skia as skia;
 use tiny_skia::{Pixmap, PixmapRef};
@@ -16,6 +16,16 @@ impl Canvas {
 
     pub fn load_png<P: AsRef<std::path::Path>>(path: P) -> Self {
         Self(skia::Pixmap::load_png(path).expect("Error loading png"))
+    }
+
+    pub fn save_jpg<P: AsRef<std::path::Path>>(&self, path: P) {
+        let img: RgbaImage = self.into();
+        img.save_with_format(path, ImageFormat::Jpeg).expect("Error writing jpeg");
+    }
+
+    pub fn save_tiff<P: AsRef<std::path::Path>>(&self, path: P) {
+        let img: RgbaImage = self.into();
+        img.save_with_format(path, ImageFormat::Tiff).expect("Error writing tiff");
     }
 }
 
@@ -61,6 +71,16 @@ impl Sketch for Canvas {
     }
 }
 
+impl From<&RgbaImage> for Canvas {
+    fn from(ib: &RgbaImage) -> Self {
+        let w = ib.width();
+        let h = ib.height();
+        let data = ib.clone().into_vec();
+        let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
+        Canvas(pixmap.to_owned())
+    }
+}
+
 impl From<RgbaImage> for Canvas {
     fn from(ib: RgbaImage) -> Self {
         let w = ib.width();
@@ -71,15 +91,34 @@ impl From<RgbaImage> for Canvas {
     }
 }
 
-impl From<RgbImage> for Canvas {
-    fn from(ib: RgbImage) -> Self {
-        let img = DynamicImage::ImageRgb8(ib);
-        let buf = img.to_rgba8();
+impl From<&RgbImage> for Canvas {
+    fn from(ib: &RgbImage) -> Self {
+        let buf: RgbaImage = ib.convert();
         let w = buf.width();
         let h = buf.height();
         let data = buf.into_vec();
         let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
         Canvas(pixmap.to_owned())
+    }
+}
+
+impl From<RgbImage> for Canvas {
+    fn from(ib: RgbImage) -> Self {
+        let buf: RgbaImage = ib.convert();
+        let w = buf.width();
+        let h = buf.height();
+        let data = buf.into_vec();
+        let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
+        Canvas(pixmap.to_owned())
+    }
+}
+
+impl From<&Canvas> for RgbaImage {
+    fn from(canvas: &Canvas) -> Self {
+        let w = canvas.0.width();
+        let h = canvas.0.height();
+        let data = canvas.0.data().to_vec();
+        RgbaImage::from_vec(w, h, data).unwrap()
     }
 }
 
@@ -187,24 +226,23 @@ fn to_transform(t: base::Transform) -> skia::Transform {
 
 impl From<&base::Stroke> for skia::Stroke {
     fn from(s: &base::Stroke) -> Self {
-        let mut skia_stroke = skia::Stroke::default();
-        skia_stroke.width = s.width;
-        skia_stroke.miter_limit = s.miter_limit;
-        skia_stroke.line_cap = match s.line_cap {
+        let width = s.width;
+        let miter_limit = s.miter_limit;
+        let line_cap = match s.line_cap {
             base::LineCap::Butt => skia::LineCap::Butt,
             base::LineCap::Round => skia::LineCap::Round,
             base::LineCap::Square => skia::LineCap::Square,
         };
-        skia_stroke.line_join = match s.line_join {
+        let line_join = match s.line_join {
             base::LineJoin::Miter => skia::LineJoin::Miter,
             base::LineJoin::Round => skia::LineJoin::Round,
             base::LineJoin::Bevel => skia::LineJoin::Bevel,
         };
-        skia_stroke.dash = match s.dash {
+        let dash = match s.dash {
             Some(ref dash) => StrokeDash::new(dash.array.clone(), dash.offset),
             None => None,
         };
-        skia_stroke
+        skia::Stroke {width, miter_limit, line_cap, line_join, dash}
     }
 }
 

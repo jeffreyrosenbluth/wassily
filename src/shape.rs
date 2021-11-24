@@ -2,7 +2,7 @@ use crate::base::*;
 use crate::prelude::{vec2, Point, BLACK};
 use num_traits::AsPrimitive;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum ShapeType {
     Poly,
     PolyQuad,
@@ -34,7 +34,7 @@ pub fn tagged(ps: Vec<Point>) -> Vec<TaggedPoint> {
 
 #[derive(Debug, Clone)]
 pub struct Shape {
-    pub points: Box<Vec<TaggedPoint>>,
+    pub points: Vec<TaggedPoint>,
     pub fill_texture: Box<Option<Texture>>,
     pub stroke: Stroke,
     pub stroke_texture: Box<Option<Texture>>,
@@ -45,7 +45,7 @@ pub struct Shape {
 
 impl<'a> Shape {
     pub(crate) fn new(
-        points: Box<Vec<TaggedPoint>>,
+        points: Vec<TaggedPoint>,
         fill_texture: Box<Option<Texture>>,
         stroke: Stroke,
         stroke_texture: Box<Option<Texture>>,
@@ -65,7 +65,8 @@ impl<'a> Shape {
     }
 
     pub fn draw<T: Sketch>(&self, canvas: &mut T) {
-        match self.shape {
+        let shape = self.shape;
+        match shape {
             ShapeType::Poly => self.draw_poly(canvas),
             ShapeType::PolyQuad => self.draw_quad(canvas),
             ShapeType::PolyCubic => self.draw_cubic(canvas),
@@ -213,10 +214,16 @@ pub struct ShapeBuilder {
     line_cap: LineCap,
     line_join: LineJoin,
     stroke_dash: Option<Dash>,
-    points: Box<Vec<TaggedPoint>>,
+    points: Vec<TaggedPoint>,
     shape: ShapeType,
     fillrule: FillRule,
     transform: Transform,
+}
+
+impl Default for ShapeBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<'a> ShapeBuilder {
@@ -225,10 +232,10 @@ impl<'a> ShapeBuilder {
             fill_texture: Some(Texture::solid_color(BLACK)),
             stroke_texture: Some(Texture::solid_color(BLACK)),
             stroke_width: 1.0,
-            line_cap: LineCap::default(),
-            line_join: LineJoin::default(),
+            line_cap: Default::default(),
+            line_join: Default::default(),
             stroke_dash: None,
-            points: Box::new(vec![]),
+            points: vec![],
             shape: ShapeType::Poly,
             fillrule: FillRule::Winding,
             transform: Transform::identity(),
@@ -288,42 +295,42 @@ impl<'a> ShapeBuilder {
     pub fn points(mut self, pts: &[Point]) -> Self {
         let points = pts.to_vec();
         let tagged = points.iter().map(|p| TaggedPoint::new(*p)).collect();
-        self.points = Box::new(tagged);
+        self.points = tagged;
         self
     }
 
     pub fn tagged_points(mut self, tps: &[TaggedPoint]) -> Self {
-        self.points = Box::new(tps.to_vec());
+        self.points = tps.to_vec();
         self
     }
 
     pub fn rect_ltrb(mut self, lt: Point, rb: Point) -> Self {
         self.shape = ShapeType::Rect;
-        self.points = Box::new(vec![TaggedPoint::new(lt), TaggedPoint::new(rb)]);
+        self.points = vec![TaggedPoint::new(lt), TaggedPoint::new(rb)];
         self
     }
 
     pub fn rect_xywh(mut self, xy: Point, wh: Point) -> Self {
         self.shape = ShapeType::Rect;
-        self.points = Box::new(vec![
+        self.points = vec![
             TaggedPoint::new(xy),
             TaggedPoint::new(Point::new(xy.x + wh.x, xy.y + wh.y)),
-        ]);
+        ];
         self
     }
 
     pub fn ellipse(mut self, center: Point, wh: Point) -> Self {
         self.shape = ShapeType::Ellipse;
-        self.points = Box::new(vec![TaggedPoint::new(center), TaggedPoint::new(wh)]);
+        self.points = vec![TaggedPoint::new(center), TaggedPoint::new(wh)];
         self
     }
 
     pub fn circle(mut self, center: Point, radius: f32) -> Self {
         self.shape = ShapeType::Ellipse;
-        self.points = Box::new(vec![
+        self.points = vec![
             TaggedPoint::new(center),
             TaggedPoint::new(Point::new(radius, radius)),
-        ]);
+        ];
         self
     }
 
@@ -338,7 +345,7 @@ impl<'a> ShapeBuilder {
     }
 
     pub fn line(mut self, from: Point, to: Point) -> Self {
-        self.points = Box::new(vec![TaggedPoint::new(from), TaggedPoint::new(to)]);
+        self.points = vec![TaggedPoint::new(from), TaggedPoint::new(to)];
         self.shape = ShapeType::Line;
         self
     }
@@ -372,11 +379,12 @@ impl<'a> ShapeBuilder {
         if let Some(ss) = self.stroke_texture {
             stroke_texture = Box::new(Some(ss));
         };
-        let mut stroke = Stroke::default();
-        stroke.width = self.stroke_width;
-        stroke.line_cap = self.line_cap;
-        stroke.line_join = self.line_join;
-        stroke.width = self.stroke_width;
+        let stroke = Stroke {
+            width: self.stroke_width,
+            line_cap: self.line_cap,
+            line_join: self.line_join,
+            ..Default::default()
+        };
         Shape::new(
             self.points,
             fill_texture,
@@ -390,9 +398,10 @@ impl<'a> ShapeBuilder {
 }
 
 pub fn stroke(weight: f32) -> Stroke {
-    let mut stroke = Stroke::default();
-    stroke.width = weight;
-    stroke
+    Stroke {
+        width: weight,
+        ..Default::default()
+    }
 }
 
 pub fn line<T: Sketch>(
@@ -408,5 +417,5 @@ pub fn line<T: Sketch>(
     pb.move_to(x0, y0);
     pb.line_to(x1, y1);
     let path = pb.finish();
-    canvas.stroke_path(&path, &stroke_texture, &stroke);
+    canvas.stroke_path(&path, stroke_texture, stroke);
 }

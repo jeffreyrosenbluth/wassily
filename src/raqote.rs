@@ -16,12 +16,15 @@ impl Sketch for Canvas {
     fn fill_path(&mut self, path: &base::Path, texture: &Texture) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
-        let mut draw_options = DrawOptions::default();
-        draw_options.antialias = match texture.anti_alias {
+        let antialias = match texture.anti_alias {
             true => AntialiasMode::Gray,
             false => AntialiasMode::None,
         };
-        draw_options.blend_mode = texture.mode.into();
+        let draw_options = DrawOptions {
+            antialias,
+            blend_mode: texture.mode.into(),
+            ..Default::default()
+        };
         self.0.fill(&raqote_path, &source, &draw_options);
     }
 
@@ -29,12 +32,14 @@ impl Sketch for Canvas {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         let stroke = stroke.into();
-        let mut draw_options = DrawOptions::default();
-        draw_options.antialias = match texture.anti_alias {
+        let antialias = match texture.anti_alias {
             true => AntialiasMode::Gray,
             false => AntialiasMode::None,
         };
-
+        let draw_options = DrawOptions {
+            antialias,
+            ..Default::default()
+        };
         self.0.stroke(&raqote_path, &source, &stroke, &draw_options);
     }
 
@@ -44,12 +49,15 @@ impl Sketch for Canvas {
 
     fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture) {
         let src: raqote::Source = texture.into();
-        let mut draw_options = DrawOptions::default();
-        draw_options.antialias = match texture.anti_alias {
+        let antialias = match texture.anti_alias {
             true => AntialiasMode::Gray,
             false => AntialiasMode::None,
         };
-        draw_options.blend_mode = texture.mode.into();
+        let draw_options = DrawOptions {
+            antialias,
+            blend_mode: texture.mode.into(),
+            ..Default::default()
+        };
         self.0.fill_rect(x, y, width, height, &src, &draw_options);
     }
 
@@ -148,30 +156,36 @@ impl From<&base::Texture> for raqote::Source<'_> {
 
 impl From<&base::Stroke> for raqote::StrokeStyle {
     fn from(s: &base::Stroke) -> Self {
-        let mut raqote_stroke = raqote::StrokeStyle::default();
-        raqote_stroke.width = s.width;
-        raqote_stroke.miter_limit = s.miter_limit;
-        raqote_stroke.cap = match s.line_cap {
+        let width = s.width;
+        let miter_limit = s.miter_limit;
+        let cap = match s.line_cap {
             base::LineCap::Butt => raqote::LineCap::Butt,
             base::LineCap::Round => raqote::LineCap::Round,
             base::LineCap::Square => raqote::LineCap::Square,
         };
-        raqote_stroke.join = match s.line_join {
+        let join = match s.line_join {
             base::LineJoin::Miter => raqote::LineJoin::Miter,
             base::LineJoin::Round => raqote::LineJoin::Round,
             base::LineJoin::Bevel => raqote::LineJoin::Bevel,
         };
-        raqote_stroke.dash_array = match s.dash {
+        let dash_array = match s.dash {
             Some(ref dash) => dash.array.clone(),
             None => {
                 vec![]
             }
         };
-        raqote_stroke.dash_offset = match &s.dash {
+        let dash_offset = match &s.dash {
             Some(dash) => dash.offset,
             None => 0.0,
         };
-        raqote_stroke
+        raqote::StrokeStyle {
+            width,
+            miter_limit,
+            cap,
+            join,
+            dash_array,
+            dash_offset,
+        }
     }
 }
 

@@ -4,7 +4,7 @@ use std::{
     io::Write
 };
 
-use crate::prelude::{point2, BasicModel, Point, Sketch};
+use crate::prelude::{pt, BasicModel, Point, Sketch};
 use chrono::prelude::Utc;
 use num_traits::{AsPrimitive, FromPrimitive};
 use rand::{Rng, SeedableRng};
@@ -41,6 +41,7 @@ where
     write!(output, "{}", json).unwrap();
 }
 
+#[deprecated(note="Use save_sketch and save_json instead")]
 pub fn save<S: Sketch, T: std::fmt::Debug>(
     name: &str,
     dir: &str,
@@ -127,7 +128,7 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
     let xs = (k..n + k - 1).map(|i| halton(i, 2));
     let ys = (k..n + k - 1).map(|i| halton(i, 3));
     xs.zip(ys)
-        .map(|p| point2(p.0 * width.as_(), p.1 * height.as_()))
+        .map(|p| pt(p.0 * width.as_(), p.1 * height.as_()))
         .collect()
 }
 

@@ -3,10 +3,10 @@
 //! rendering. Those data structures are defined here. Backends must implement the
 //! Sketch trait.
 
+use serde::{Deserialize, Serialize};
 use std::{fmt::Display, str::FromStr};
-use serde::{Serialize, Deserialize};
 
-pub use crate::prelude::{point2, Point, Transform, Vector};
+pub use crate::prelude::{pt, Point, Transform, Vector};
 
 pub trait Sketch {
     fn fill_path(&mut self, path: &Path, texture: &Texture);
@@ -27,7 +27,7 @@ pub trait Sketch {
 /// Unified color format for wassily, formats from external crates e.g. image-rs, tiny-skia,
 /// palette ... should be converted to `RGBA` to use in wassily. Hopefully the functions
 /// in kolor.rs are sufficient for most purposes.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Default, Serialize, Deserialize)]
 pub struct RGBA {
     pub r: u8,
     pub g: u8,
@@ -36,17 +36,17 @@ pub struct RGBA {
 }
 
 impl RGBA {
-    /// Construct an `RGBA` value from 4 f32s (red, green, blue, alpha) between 0 
+    /// Construct an `RGBA` value from 4 f32s (red, green, blue, alpha) between 0
     /// and 1. Numbers outside of this range will be clamped.
     pub fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
         let r = (255.0 * r.clamp(0.0, 1.0)) as u8;
         let g = (255.0 * g.clamp(0.0, 1.0)) as u8;
         let b = (255.0 * b.clamp(0.0, 1.0)) as u8;
         let a = (255.0 * a.clamp(0.0, 1.0)) as u8;
-        Self {r, g, b, a}
+        Self { r, g, b, a }
     }
 
-    /// Construct an `RGBA` value from 3 f32s (red, green, blue) between 0 and 1. 
+    /// Construct an `RGBA` value from 3 f32s (red, green, blue) between 0 and 1.
     /// The alpha value will be set to 255 - opaque. Numbers outside of
     /// this range will be clamped.
     pub fn rgb(r: f32, g: f32, b: f32) -> Self {
@@ -56,14 +56,14 @@ impl RGBA {
         Self { r, g, b, a: 255 }
     }
 
-    /// Construct an `RGBA` value from 3 u8s (red, green, blue) between 0 
+    /// Construct an `RGBA` value from 3 u8s (red, green, blue) between 0
     /// and 255. Alpha is set to 255 - opaque.
     pub const fn rgb8(r: u8, g: u8, b: u8) -> Self {
-        Self {r, g, b, a: 255}
+        Self { r, g, b, a: 255 }
     }
 
-    /// Construct an `RGBA` value from 4 u8s (red, green, blue, alpha) between 0 
-    /// and 255. 
+    /// Construct an `RGBA` value from 4 u8s (red, green, blue, alpha) between 0
+    /// and 255.
     pub const fn rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self { r, g, b, a }
     }
@@ -86,11 +86,7 @@ impl RGBA {
 // Mostly for debugging purposes.
 impl Display for RGBA {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "[{:}, {:}, {:}, {:}]",
-            self.r, self.g, self.b, self.a
-        )
+        write!(f, "[{:}, {:}, {:}, {:}]", self.r, self.g, self.b, self.a)
     }
 }
 
@@ -104,7 +100,7 @@ impl FromStr for RGBA {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, PartialOrd, Debug, Default)]
 pub struct GradientStop {
     pub position: f32,
     pub color: RGBA,
@@ -123,7 +119,13 @@ pub enum SpreadMode {
     Repeat,
 }
 
-#[derive(Clone, PartialEq, Debug)]
+impl Default for SpreadMode {
+    fn default() -> Self {
+        Self::Pad
+    }
+}
+
+#[derive(Clone, PartialEq, Debug, Default)]
 pub struct Gradient {
     pub start: Point,
     pub end: Point,
@@ -208,6 +210,12 @@ pub enum BlendMode {
     Luminosity,
 }
 
+impl Default for BlendMode {
+    fn default() -> Self {
+        Self::SourceOver
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Texture {
     pub kind: TextureKind,
@@ -232,15 +240,15 @@ impl Texture {
         }
     }
 
-    pub fn mode(self, mode: BlendMode) -> Self {
-        Self { mode, ..self }
+    pub fn mode(&mut self, mode: BlendMode) {
+        self.mode = mode;
     }
 }
 
 impl Default for Texture {
     fn default() -> Self {
         Self {
-            kind: TextureKind::default(),
+            kind: Default::default(),
             mode: BlendMode::SourceOver,
             anti_alias: true,
         }
@@ -261,8 +269,8 @@ impl Default for Stroke {
         Stroke {
             width: 1.0,
             miter_limit: 4.0,
-            line_cap: LineCap::default(),
-            line_join: LineJoin::default(),
+            line_cap: Default::default(),
+            line_join: Default::default(),
             dash: None,
         }
     }
@@ -322,6 +330,13 @@ pub enum FillRule {
     EvenOdd,
 }
 
+impl Default for FillRule {
+    fn default() -> Self {
+        FillRule::Winding
+    }
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct Path {
     pub cmds: Vec<PathCmd>,
     pub fill_rule: FillRule,
@@ -348,6 +363,7 @@ impl Path {
     }
 }
 
+#[derive(Debug, Clone, Default)]
 pub struct PathBuilder {
     path: Path,
     position: Point,
@@ -357,7 +373,7 @@ impl From<Path> for PathBuilder {
     fn from(path: Path) -> Self {
         PathBuilder {
             path,
-            position: point2(0.0, 0.0),
+            position: pt(0.0, 0.0),
         }
     }
 }
@@ -370,38 +386,38 @@ impl PathBuilder {
                 fill_rule: FillRule::Winding,
                 transform: Transform::identity(),
             },
-            position: point2(0.0, 0.0),
+            position: pt(0.0, 0.0),
         }
     }
 
     /// Moves the current point to `x`, `y`
     pub fn move_to(&mut self, x: f32, y: f32) {
-        self.position = point2(x, y);
+        self.position = pt(x, y);
         self.path.cmds.push(PathCmd::MoveTo(Point::new(x, y)))
     }
 
     pub fn move_by(&mut self, x: f32, y: f32) {
         let (x, y) = (self.position.x + x, self.position.y + y);
-        self.position = point2(x, y);
+        self.position = pt(x, y);
         self.path.cmds.push(PathCmd::MoveTo(Point::new(x, y)))
     }
 
     /// Adds a line segment from the current point to `x`, `y`
     pub fn line_to(&mut self, x: f32, y: f32) {
-        self.position = point2(x, y);
+        self.position = pt(x, y);
         self.path.cmds.push(PathCmd::LineTo(Point::new(x, y)))
     }
 
     pub fn line_by(&mut self, x: f32, y: f32) {
         let (x, y) = (self.position.x + x, self.position.y + y);
-        self.position = point2(x, y);
+        self.position = pt(x, y);
         self.path.cmds.push(PathCmd::LineTo(Point::new(x, y)))
     }
 
     /// Adds a quadratic bezier from the current point to `x`, `y`,
     /// using a control point of `cx`, `cy`
     pub fn quad_to(&mut self, cx: f32, cy: f32, x: f32, y: f32) {
-        self.position = point2(x, y);
+        self.position = pt(x, y);
         self.path
             .cmds
             .push(PathCmd::QuadTo(Point::new(cx, cy), Point::new(x, y)))

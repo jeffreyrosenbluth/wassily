@@ -32,8 +32,8 @@ impl Sketch for Canvas {
         let svg_path = svg_path
             .set("fill", color.0)
             .set("fill-opacity", color.1)
-            .set("transform", transform(&path))
-            .set("fill-rule", fill_rule(&path));
+            .set("transform", transform(path))
+            .set("fill-rule", fill_rule(path));
 
         self.0 = doc.add(svg_path);
     }
@@ -52,9 +52,9 @@ impl Sketch for Canvas {
             .set("fill", "none")
             .set("stroke-miterlimit", stroke.miter_limit)
             .set("stroke-width", stroke.width)
-            .set("stroke-linecap", linecap(&stroke))
-            .set("stroke-linejoin", linejoin(&stroke))
-            .set("transform", transform(&path));
+            .set("stroke-linecap", linecap(stroke))
+            .set("stroke-linejoin", linejoin(stroke))
+            .set("transform", transform(path));
         self.0 = doc.add(svg_path);
     }
 
@@ -109,7 +109,7 @@ impl From<&base::Path> for vg::Path {
 }
 
 impl RGBA {
-    fn to_svg(&self) -> (String, f32) {
+    fn to_svg(self) -> (String, f32) {
         let (r, g, b, a) = self.as_tuple();
         (format!("rgb({},{},{})", r, g, b), a as f32 / 255.0)
     }

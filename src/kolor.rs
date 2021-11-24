@@ -9,7 +9,7 @@ use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    Alpha, IntoColor, Lab, LabHue, Laba, Lcha, Srgb, Srgba,
+    Alpha, FromColor, Hue, IntoColor, Lab, Laba, Lcha, Srgb, Srgba,
 };
 use rand::prelude::*;
 use rand_distr::Normal;
@@ -48,7 +48,10 @@ impl Jiggle {
 impl RGBA {
     /// Set the opacity of the color, opacity = [0,1);
     pub fn opacity(&self, opacity: f32) -> Self {
-        Self { a: (opacity * 255.0) as u8, ..*self }
+        Self {
+            a: (opacity * 255.0) as u8,
+            ..*self
+        }
     }
     /// Black with opacity alpha [0.0, 1.0].
     pub fn black(alpha: f32) -> Self {
@@ -76,10 +79,8 @@ impl RGBA {
     }
 
     pub fn rotate_hue(&self, degrees: f32) -> RGBA {
-        let mut l: Lcha = self.into();
-        let hue = (l.hue.to_degrees() + degrees) % 360.0;
-        l.hue = LabHue::from_degrees(hue);
-        let rgba: Srgba = l.into_color();
+        let l: Lcha = self.into();
+        let rgba = Srgba::from_color(l.shift_hue(degrees));
         rgba.into()
     }
 
@@ -374,9 +375,9 @@ impl Default for CosChannel {
 /// [Procedural Color Palettess](https://iquilezles.org/www/articles/palettes/palettes.htm).
 #[derive(Debug, Clone, Copy)]
 pub struct CosColor {
-    r: CosChannel,
-    g: CosChannel,
-    b: CosChannel,
+    pub r: CosChannel,
+    pub g: CosChannel,
+    pub b: CosChannel,
 }
 
 impl CosColor {

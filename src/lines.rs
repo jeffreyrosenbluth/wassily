@@ -128,7 +128,7 @@ impl DotLine {
         let c = RGBA::rgba8(self.color.r, self.color.g, self.color.b, 255);
         for t in 0..length as u32 {
             let t = t as f32 / length;
-            let p = point2(self.start.x + t * v.x, self.start.y + t * v.y);
+            let p = pt(self.start.x + t * v.x, self.start.y + t * v.y);
             let nx = noise3d(nf, &noise_opts, p.x, p.y, 0.0);
             let ny = noise3d(nf, &noise_opts, p.x, p.y, 10.3711);
             for _ in 0..self.weight {
@@ -136,7 +136,7 @@ impl DotLine {
                 let mut a = 1.0 / (20.0 + r.abs());
                 a = a.clamp(0.0, 1.0);
                 let o = c.opacity(a);
-                let q = point2(p.x + r * n.x + nx, p.y + r * n.y + ny);
+                let q = pt(p.x + r * n.x + nx, p.y + r * n.y + ny);
                 canvas.pixel(q.x, q.y, o);
             }
         }
