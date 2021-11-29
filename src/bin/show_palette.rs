@@ -9,9 +9,10 @@ const ANGLE: f32 = 0.0;
 fn main() {
     let width = WIDTH as f32;
     let mut canvas = Canvas::new(WIDTH, WIDTH);
-    let n = (0.5 + (NUM_COLORS as f32).sqrt()) as usize;
-    let swatch_width = width / (NUM_COLORS as f32).sqrt();
     let mut palette = Palette::steal(FILE, NUM_COLORS);
+    let num_colors = palette.len() as f32;
+    let n = (0.5 + num_colors.sqrt()) as usize;
+    let swatch_width = width / n as f32;
     println!("-----------------------------------");
     palette.rotate_hue(ANGLE);
     for i in 0..n {
@@ -22,7 +23,7 @@ fn main() {
             let c = palette[(i * n + j)];
             let c8 = c.as_tuple();
             let texture = Texture::solid_color(c);
-            println!("({:2}, {:2}) : [{}, {}, {}]", i, j, c8.0, c8.1, c8.2);
+            println!("({:2}, {:2}) : [{}, {}, {}]", j, i, c8.0, c8.1, c8.2);
             let x = j as f32 * swatch_width;
             let y = i as f32 * swatch_width;
             canvas.fill_rect(x, y, swatch_width, swatch_width, &texture)
