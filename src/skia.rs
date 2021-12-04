@@ -69,6 +69,14 @@ impl Sketch for Canvas {
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.save_png(path).unwrap();
     }
+
+    fn pixel(&mut self, x: f32, y: f32, color: RGBA) {
+        let width = self.0.width();
+        let pixel_map = self.0.pixels_mut();
+        let k = y as usize * width as usize + x as usize;
+        let c: skia::Color = color.into();
+        pixel_map[k] = c.premultiply().to_color_u8();
+    }
 }
 
 impl From<&RgbaImage> for Canvas {

@@ -2,9 +2,9 @@ use crate::base::RGBA;
 use num_complex::Complex32;
 use crate::prelude::{get_color_clamp, pt};
 use image::DynamicImage;
-use std::rc::Rc;
+use std::sync::Arc;
 
-type DomWarp = Rc<dyn Fn(Complex32) -> Complex32>;
+type DomWarp = Arc<dyn Fn(Complex32) -> Complex32 + Send + Sync>;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Coord {
@@ -13,8 +13,8 @@ pub enum Coord {
     Absolute,
 }
 pub enum Final<'a> {
-    More(Box<Warp<'a>>),
-    Func(Box<dyn Fn(f32, f32) -> RGBA>),
+    More(Arc<Warp<'a>>),
+    Func(Arc<dyn Fn(f32, f32) -> RGBA + Sync + Send>),
     Img(&'a DynamicImage, f32, f32),
 }
 

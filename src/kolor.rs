@@ -83,6 +83,17 @@ impl RGBA {
         let rgba = Srgba::from_color(l.shift_hue(degrees));
         rgba.into()
     }
+    /// Change the lighness of a color to it's square, i.e. tightening
+    /// it away lighter or darker which ever is closer.
+    pub fn tighten(&self) -> Self {
+        let mut lcha: Lcha = self.into();
+        let l1 = lcha.l / 50.0 - 1.0;
+        let l2 = l1.abs() * l1.abs() * l1.signum();
+        let l3 = 50.0 * (l2 + 1.0);
+        lcha.l = l3;
+        let c: Srgba = lcha.into_color();
+        c.into()
+    }
 
     /// Change the lighness of a color to it's square root, i.e. spreading
     /// it towards lighter or darker which ever is closer.
@@ -235,6 +246,10 @@ impl Palette {
         let palette = get_palette(img.as_bytes(), color_type, 10, max_colors).unwrap();
         let palette = palette.into_iter().map(|c| RGBA::rgba8(c.r, c.g, c.b, 255));
         Self::new(palette.collect())
+    }
+
+    pub fn tighten(&mut self) {
+        self.colors = self.colors.iter().map(|c| c.tighten()).collect();
     }
 
     /// Change the lighness of the colors to their square root, i.e. spreading
