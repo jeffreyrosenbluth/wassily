@@ -1,5 +1,6 @@
 use crate::base::{self, Sketch, Texture, TextureKind, RGBA};
 use image::{buffer::ConvertBuffer, RgbImage, RgbaImage, ImageFormat};
+use image::imageops::rotate180;
 use skia::StrokeDash;
 use tiny_skia as skia;
 use tiny_skia::{Pixmap, PixmapRef};
@@ -81,9 +82,10 @@ impl Sketch for Canvas {
 
 impl From<&RgbaImage> for Canvas {
     fn from(ib: &RgbaImage) -> Self {
+        let ib = rotate180(ib);
         let w = ib.width();
         let h = ib.height();
-        let data = ib.clone().into_vec();
+        let data = ib.into_vec();
         let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
         Canvas(pixmap.to_owned())
     }
@@ -91,6 +93,7 @@ impl From<&RgbaImage> for Canvas {
 
 impl From<RgbaImage> for Canvas {
     fn from(ib: RgbaImage) -> Self {
+        let ib = rotate180(&ib);
         let w = ib.width();
         let h = ib.height();
         let data = ib.into_vec();
@@ -101,7 +104,7 @@ impl From<RgbaImage> for Canvas {
 
 impl From<&RgbImage> for Canvas {
     fn from(ib: &RgbImage) -> Self {
-        let buf: RgbaImage = ib.convert();
+        let buf: RgbaImage = rotate180(&ib.convert());
         let w = buf.width();
         let h = buf.height();
         let data = buf.into_vec();
@@ -112,7 +115,7 @@ impl From<&RgbImage> for Canvas {
 
 impl From<RgbImage> for Canvas {
     fn from(ib: RgbImage) -> Self {
-        let buf: RgbaImage = ib.convert();
+        let buf: RgbaImage = rotate180(&ib.convert());
         let w = buf.width();
         let h = buf.height();
         let data = buf.into_vec();
@@ -126,7 +129,7 @@ impl From<&Canvas> for RgbaImage {
         let w = canvas.0.width();
         let h = canvas.0.height();
         let data = canvas.0.data().to_vec();
-        RgbaImage::from_vec(w, h, data).unwrap()
+        rotate180(&RgbaImage::from_vec(w, h, data).unwrap())
     }
 }
 
@@ -135,7 +138,7 @@ impl From<Canvas> for RgbaImage {
         let w = canvas.0.width();
         let h = canvas.0.height();
         let data = canvas.0.data().to_vec();
-        RgbaImage::from_vec(w, h, data).unwrap()
+        rotate180(&RgbaImage::from_vec(w, h, data).unwrap())
     }
 }
 
