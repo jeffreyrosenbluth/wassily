@@ -22,7 +22,7 @@ pub type Point = euclid::default::Point2D<f32>;
 pub type Transform = euclid::default::Transform2D<f32>;
 pub type Vector = euclid::default::Vector2D<f32>;
 
-#[deprecated(note="please use `pt` instead")]
+#[deprecated(note = "please use `pt` instead")]
 pub fn point2<S, T>(x: S, y: T) -> Point
 where
     S: AsPrimitive<f32>,
@@ -37,6 +37,14 @@ where
     T: AsPrimitive<f32>,
 {
     euclid::point2(x.as_(), y.as_())
+}
+
+pub fn polar<S, T>(theta: S, r: T) -> Point
+where
+    S: AsPrimitive<f32>,
+    T: AsPrimitive<f32>,
+{
+    euclid::point2(r.as_() * theta.as_().cos(), r.as_() * theta.as_().sin())
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -79,8 +87,8 @@ pub trait BasicModel {
 #[macro_export]
 macro_rules! basic_model {
     ($t:ident < $lt:lifetime >) => {
-     impl<$lt> BasicModel for $t<$lt> {
-            fn width(& self) -> u32 {
+        impl<$lt> BasicModel for $t<$lt> {
+            fn width(&self) -> u32 {
                 self.width
             }
             fn height(&self) -> u32 {
@@ -96,5 +104,5 @@ macro_rules! basic_model {
                 self.dir
             }
         }
-    }
+    };
 }

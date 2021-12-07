@@ -7,7 +7,7 @@ use tiny_skia::{Pixmap, PixmapRef};
 use num_traits::AsPrimitive;
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct Canvas(Pixmap);
+pub struct Canvas(pub Pixmap);
 
 impl Canvas {
     pub fn new<T: AsPrimitive<u32>>(width: T, height: T) -> Self {

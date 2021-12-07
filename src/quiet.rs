@@ -2,6 +2,7 @@ use noise::NoiseFn;
 use num_traits::{AsPrimitive, ToPrimitive};
 
 pub mod gabor;
+pub mod trig;
 
 pub struct NoiseOpts {
     pub width: f32,

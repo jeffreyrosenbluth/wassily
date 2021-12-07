@@ -7,7 +7,7 @@ use svg::Document;
 use num_traits::AsPrimitive;
 
 // The usize is for gradient ids'
-pub struct Canvas(Document, usize);
+pub struct Canvas(pub Document, usize);
 
 impl Canvas {
     pub fn new<T: AsPrimitive<u32>>(width: T, height: T) -> Self {

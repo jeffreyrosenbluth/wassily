@@ -3,7 +3,7 @@ use base::RGBA;
 use num_traits::AsPrimitive;
 use raqote::{self, AntialiasMode, DrawOptions, DrawTarget, SolidSource, Source};
 
-pub struct Canvas(DrawTarget);
+pub struct Canvas(pub DrawTarget);
 
 impl Canvas {
     pub fn new<T: AsPrimitive<i32>>(width: T, height: T) -> Self {
