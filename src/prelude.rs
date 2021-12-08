@@ -6,6 +6,7 @@ pub use crate::kolor::*;
 pub use crate::lines::*;
 pub use crate::matrix::*;
 pub use crate::quiet::gabor::*;
+pub use crate::quiet::trig::*;
 pub use crate::quiet::*;
 pub use crate::rectangles::*;
 pub use crate::shape::*;
