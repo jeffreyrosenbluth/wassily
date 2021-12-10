@@ -16,6 +16,7 @@ pub use crate::warp::*;
 pub use euclid::vec2;
 pub use image::*;
 pub use noise::*;
+pub use palette;
 
 pub type IntRect = euclid::default::Box2D<i32>;
 pub type IntPoint = euclid::default::Point2D<i32>;

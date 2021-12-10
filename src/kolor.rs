@@ -9,7 +9,7 @@ use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    Alpha, FromColor, Hue, IntoColor, Lab, Laba, Lcha, Srgb, Srgba,
+    Alpha, FromColor, Hue, IntoColor, Lab, Laba, Lcha, Srgb, Srgba, Hsluva,
 };
 use rand::prelude::*;
 use rand_distr::Normal;
@@ -42,6 +42,34 @@ impl Jiggle {
             (b + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
             a,
         )
+    }
+
+    pub fn jiggle_lightness(&mut self, color: RGBA) -> RGBA {
+        let mut l: Hsluva = color.into();
+        l.l += self.normal.sample(&mut self.rng) * 100.0;
+        let rgba = Srgba::from_color(l);
+        rgba.into()
+    }
+
+    pub fn jiggle_chroma(&mut self, color: RGBA) -> RGBA {
+        let mut l: Lcha = color.into();
+        l.chroma += self.normal.sample(&mut self.rng) * 132.0;
+        let rgba = Srgba::from_color(l);
+        rgba.into()
+    }
+
+    pub fn jiggle_saturation(&mut self, color: RGBA) -> RGBA {
+        let mut l: Hsluva = color.into();
+        l.saturation += self.normal.sample(&mut self.rng) * 100.0;
+        let rgba = Srgba::from_color(l);
+        rgba.into()
+    }
+
+    pub fn jiggle_hue(&mut self, color: RGBA) -> RGBA {
+        let mut l: Hsluva = color.into();
+        l.hue += self.normal.sample(&mut self.rng) * 360.0;
+        let rgba = Srgba::from_color(l);
+        rgba.into()
     }
 }
 
@@ -139,8 +167,38 @@ impl From<&RGBA> for Lcha {
     }
 }
 
+impl From<RGBA> for Lcha {
+    fn from(color: RGBA) -> Self {
+        let (r, g, b, a) = color.as_f32s();
+        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
+        srgb.into_color()
+    }
+}
+
+impl From<&RGBA> for Hsluva {
+    fn from(color: &RGBA) -> Self {
+        let (r, g, b, a) = color.as_f32s();
+        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
+        srgb.into_color()
+    }
+}
+
+impl From<RGBA> for Hsluva {
+    fn from(color: RGBA) -> Self {
+        let (r, g, b, a) = color.as_f32s();
+        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
+        srgb.into_color()
+    }
+}
+
 impl From<image::Rgba<u8>> for RGBA {
     fn from(p: image::Rgba<u8>) -> Self {
+        RGBA::rgba8(p.0[0], p.0[1], p.0[2], p.0[3])
+    }
+}
+
+impl From<&image::Rgba<u8>> for RGBA {
+    fn from(p: &image::Rgba<u8>) -> Self {
         RGBA::rgba8(p.0[0], p.0[1], p.0[2], p.0[3])
     }
 }
