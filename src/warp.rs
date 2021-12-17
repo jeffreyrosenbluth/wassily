@@ -1,6 +1,6 @@
 use crate::base::RGBA;
 use num_complex::Complex32;
-use crate::prelude::{get_color_clamp, pt};
+use crate::prelude::{get_color_clamp, get_color_tile, pt};
 use image::DynamicImage;
 use std::sync::Arc;
 
@@ -52,6 +52,21 @@ impl<'a> Warp<'a> {
             Final::More(w) => w.get(x1, y1),
             Final::Func(f) => f(x1, y1),
             Final::Img(img, w, h) => get_color_clamp(img, *w, *h, pt(x1, y1)),
+        }
+    }
+
+    pub fn get_tiled(&self, x: f32, y: f32) -> RGBA {
+        let c = (self.dw)(Complex32::new(x, y));
+        let r = c.im.abs();
+        let (x1, y1) = match self.coord {
+            Coord::Polar => (x + c.re.cos() * r, y + c.re.sin() * r),
+            Coord::Cartesian => (x + c.re, y + c.im),
+            Coord::Absolute => (c.re, c.im),
+        };
+        match &self.warp {
+            Final::More(w) => w.get(x1, y1),
+            Final::Func(f) => f(x1, y1),
+            Final::Img(img, _, _) => get_color_tile::<f32>(img, pt(x1, y1)),
         }
     }
 }

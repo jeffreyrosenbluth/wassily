@@ -3,7 +3,9 @@ use num_traits::{AsPrimitive, ToPrimitive};
 
 pub mod gabor;
 pub mod trig;
+pub mod white;
 
+#[derive(Debug, Clone, Copy)]
 pub struct NoiseOpts {
     pub width: f32,
     pub height: f32,

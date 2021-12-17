@@ -70,11 +70,11 @@ impl Quad {
     pub fn subdivide(
         &self,
         mut dir: impl FnMut(&Quad) -> Orientation,
-        mut ab: impl FnMut() -> (f32, f32),
+        mut ab: impl FnMut(Orientation) -> (f32, f32),
     ) -> (Self, Self) {
-        let vert = dir(self);
-        let (a, b) = ab();
-        match vert {
+        let or = dir(self);
+        let (a, b) = ab(or);
+        match or {
             Orientation::Horizontal => self.split_h(a, b),
             Orientation::Vertical => self.split_v(a, b),
         }
@@ -140,7 +140,7 @@ impl Ord for Quad {
 pub fn quad_divide_vec(
     quads: &[Quad],
     mut dir: impl FnMut(&Quad) -> Orientation,
-    mut ab: impl FnMut() -> (f32, f32),
+    mut ab: impl FnMut(Orientation) -> (f32, f32),
 ) -> Vec<Quad> {
     let mut sub = vec![];
     for quad in quads {

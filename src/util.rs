@@ -1,7 +1,7 @@
 use std::{
     fs::{create_dir, File},
-    path::PathBuf,
-    io::Write
+    io::Write,
+    path::PathBuf, hash::{Hash, Hasher}, collections::hash_map::DefaultHasher,
 };
 
 use crate::prelude::{pt, BasicModel, Point, Sketch};
@@ -41,7 +41,7 @@ where
     write!(output, "{}", json).unwrap();
 }
 
-#[deprecated(note="Use save_sketch and save_json instead")]
+#[deprecated(note = "Use save_sketch and save_json instead")]
 pub fn save<S: Sketch, T: std::fmt::Debug>(
     name: &str,
     dir: &str,
@@ -60,6 +60,12 @@ pub fn save<S: Sketch, T: std::fmt::Debug>(
         write!(output, "{:#?}", descr).unwrap();
     }
     canvas.save(dir.join(&sketch_name));
+}
+
+pub fn calculate_hash<T: Hash>(t: T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }
 
 pub struct Rand {
@@ -132,7 +138,7 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
         .collect()
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Orientation {
     Horizontal,
     Vertical,

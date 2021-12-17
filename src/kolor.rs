@@ -3,18 +3,50 @@
 use crate::{
     base::RGBA,
     prelude::{Point, PI},
+    quiet::white::normal_xy,
 };
 use color_thief::{get_palette, ColorFormat};
 use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    Alpha, FromColor, Hue, IntoColor, Lab, Laba, Lcha, Srgb, Srgba, Hsluva,
+    Alpha, FromColor, Hsluva, Hue, IntoColor, Lab, Laba, Srgb, Srgba,
 };
 use rand::prelude::*;
 use rand_distr::Normal;
 use rand_pcg::Pcg64;
 use std::{ops::Index, ops::IndexMut, path::Path, usize};
+
+pub fn jiggle_xy(color: RGBA, x: u32, y: u32, mean: f32, std: f32) -> RGBA {
+    let (r, g, b, a) = color.as_f32s();
+    RGBA::rgba(
+        (r + (std * normal_xy(123, x, y) as f32 + mean)).clamp(0.0, 1.0),
+        (g + (std * normal_xy(456, x, y) as f32 + mean)).clamp(0.0, 1.0),
+        (b + (std * normal_xy(789, x, y) as f32 + mean)).clamp(0.0, 1.0),
+        a,
+    )
+}
+
+pub fn jiggle_xy_lightness(color: RGBA, x: u32, y: u32, mean: f32, std: f32) -> RGBA {
+    let mut l: Hsluva = color.into();
+    l.l += (std * normal_xy(123, x, y) as f32 + mean) * 100.0;
+    let rgba = Srgba::from_color(l);
+    rgba.into()
+}
+
+pub fn jiggle_xy_saturation(color: RGBA, x: u32, y: u32, mean: f32, std: f32) -> RGBA {
+    let mut l: Hsluva = color.into();
+    l.saturation += (std * normal_xy(123, x, y) as f32 + mean) * 100.0;
+    let rgba = Srgba::from_color(l);
+    rgba.into()
+}
+
+pub fn jiggle_xy_hue(color: RGBA, x: u32, y: u32, mean: f32, std: f32) -> RGBA {
+    let mut l: Hsluva = color.into();
+    l.hue += (std * normal_xy(123, x, y) as f32 + mean) * 360.0;
+    let rgba = Srgba::from_color(l);
+    rgba.into()
+}
 
 /// Perturb a `RGBA` value.
 pub struct Jiggle {
@@ -47,13 +79,6 @@ impl Jiggle {
     pub fn jiggle_lightness(&mut self, color: RGBA) -> RGBA {
         let mut l: Hsluva = color.into();
         l.l += self.normal.sample(&mut self.rng) * 100.0;
-        let rgba = Srgba::from_color(l);
-        rgba.into()
-    }
-
-    pub fn jiggle_chroma(&mut self, color: RGBA) -> RGBA {
-        let mut l: Lcha = color.into();
-        l.chroma += self.normal.sample(&mut self.rng) * 132.0;
         let rgba = Srgba::from_color(l);
         rgba.into()
     }
@@ -101,37 +126,37 @@ impl RGBA {
         }
     }
 
-    pub fn grayscale(&self) -> u8 {
+    pub fn grayscale(self) -> u8 {
         let (r, g, b, _) = self.as_tuple();
         (0.2989 * r as f32 + 0.5870 * g as f32 + 0.1140 * b as f32).clamp(0.0, 255.0) as u8
     }
 
-    pub fn rotate_hue(&self, degrees: f32) -> RGBA {
-        let l: Lcha = self.into();
+    pub fn rotate_hue(self, degrees: f32) -> RGBA {
+        let l: Hsluva = self.into();
         let rgba = Srgba::from_color(l.shift_hue(degrees));
         rgba.into()
     }
     /// Change the lighness of a color to it's square, i.e. tightening
     /// it away lighter or darker which ever is closer.
-    pub fn tighten(&self) -> Self {
-        let mut lcha: Lcha = self.into();
-        let l1 = lcha.l / 50.0 - 1.0;
+    pub fn tighten(self) -> Self {
+        let mut hsluva: Hsluva = self.into();
+        let l1 = hsluva.l / 50.0 - 1.0;
         let l2 = l1.abs() * l1.abs() * l1.signum();
         let l3 = 50.0 * (l2 + 1.0);
-        lcha.l = l3;
-        let c: Srgba = lcha.into_color();
+        hsluva.l = l3;
+        let c: Srgba = hsluva.into_color();
         c.into()
     }
 
     /// Change the lighness of a color to it's square root, i.e. spreading
     /// it towards lighter or darker which ever is closer.
-    pub fn spread(&self) -> Self {
-        let mut lcha: Lcha = self.into();
-        let l1 = lcha.l / 50.0 - 1.0;
+    pub fn spread(self) -> Self {
+        let mut hsluva: Hsluva = self.into();
+        let l1 = hsluva.l / 50.0 - 1.0;
         let l2 = l1.abs().sqrt() * l1.signum();
         let l3 = 50.0 * (l2 + 1.0);
-        lcha.l = l3;
-        let c: Srgba = lcha.into_color();
+        hsluva.l = l3;
+        let c: Srgba = hsluva.into_color();
         c.into()
     }
 
@@ -159,30 +184,6 @@ impl RGBA {
     }
 }
 
-impl From<&RGBA> for Lcha {
-    fn from(color: &RGBA) -> Self {
-        let (r, g, b, a) = color.as_f32s();
-        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
-        srgb.into_color()
-    }
-}
-
-impl From<RGBA> for Lcha {
-    fn from(color: RGBA) -> Self {
-        let (r, g, b, a) = color.as_f32s();
-        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
-        srgb.into_color()
-    }
-}
-
-impl From<&RGBA> for Hsluva {
-    fn from(color: &RGBA) -> Self {
-        let (r, g, b, a) = color.as_f32s();
-        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
-        srgb.into_color()
-    }
-}
-
 impl From<RGBA> for Hsluva {
     fn from(color: RGBA) -> Self {
         let (r, g, b, a) = color.as_f32s();
@@ -193,12 +194,6 @@ impl From<RGBA> for Hsluva {
 
 impl From<image::Rgba<u8>> for RGBA {
     fn from(p: image::Rgba<u8>) -> Self {
-        RGBA::rgba8(p.0[0], p.0[1], p.0[2], p.0[3])
-    }
-}
-
-impl From<&image::Rgba<u8>> for RGBA {
-    fn from(p: &image::Rgba<u8>) -> Self {
         RGBA::rgba8(p.0[0], p.0[1], p.0[2], p.0[3])
     }
 }
@@ -324,32 +319,32 @@ impl Palette {
     /// Sort the colors by hue using the CIELCh color space.
     pub fn sort_by_hue(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha: Lcha = c.into();
-            (1000.0 * lcha.hue.to_radians()) as u32
+            let hsluva: Hsluva = (*c).into();
+            (1000.0 * hsluva.hue.to_radians()) as u32
         })
     }
 
     /// Sort the colors by chroma using the CIELCh color space.
-    pub fn sort_by_chroma(&mut self) {
+    pub fn sort_by_saturation(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha: Lcha = c.into();
-            (1000.0 * lcha.chroma) as u32
+            let hsluva: Hsluva = (*c).into();
+            (1000.0 * hsluva.saturation) as u32
         })
     }
 
     /// Sort the colors by lightness using the CIELCh color space.
     pub fn sort_by_lightness(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha: Lcha = c.into();
-            (1000.0 * lcha.l) as u32
+            let hsluva: Hsluva = (*c).into();
+            (1000.0 * hsluva.l) as u32
         })
     }
 
     /// Sort the colors by alpha(opacity) using the CIELCh color space.
     pub fn sort_by_alpha(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lcha: Lcha = c.into();
-            (1000.0 * lcha.alpha) as u32
+            let hsluva: Hsluva = (*c).into();
+            (1000.0 * hsluva.alpha) as u32
         })
     }
 
@@ -600,6 +595,14 @@ pub fn get_color_clamp<T: AsPrimitive<f32>>(
 ) -> RGBA {
     let x = ((p.x * img.width() as f32 / width.as_()) as u32).clamp(0, img.width() - 1);
     let y = ((p.y * img.height() as f32 / height.as_()) as u32).clamp(0, img.height() - 1);
+    let p = img.get_pixel(x, y);
+    p.into()
+}
+
+/// Get a color from an image by tiling the image.
+pub fn get_color_tile<T: AsPrimitive<f32>>(img: &DynamicImage, p: Point) -> RGBA {
+    let x = (p.x as u32).rem_euclid(img.width());
+    let y = (p.y as u32).rem_euclid(img.height());
     let p = img.get_pixel(x, y);
     p.into()
 }
