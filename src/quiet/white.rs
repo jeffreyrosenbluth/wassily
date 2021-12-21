@@ -20,11 +20,15 @@ pub fn box_muller(seed: u32, x: u32, y: u32) -> (f64, f64) {
     (r * (u2 * std::f64::consts::TAU).cos(), r * (u2 * std::f64::consts::TAU).sin())
 }
 
+pub fn normal2(seed: u32, mean: f64, std: f64, x: u32, y: u32) -> (f64, f64) {
+    let (dx, dy) = box_muller(seed, x, y);
+    (mean + std * dx, mean + std * dy)
+}
+
 pub fn normal_xy(seed: u32, x: u32, y: u32) -> f64 {
     let (a, b) = box_muller(seed, x, y);
     (a + b) / std::f64::consts::SQRT_2    
 }
-
 
 pub struct White {
     factor: f64,

@@ -10,7 +10,7 @@ use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    Alpha, FromColor, Hsluva, Hue, IntoColor, Lab, Laba, Srgb, Srgba,
+    Alpha, FromColor, Hsluva, Hue, IntoColor, Lab, Laba, Srgb, Srgba, Mix,
 };
 use rand::prelude::*;
 use rand_distr::Normal;
@@ -162,13 +162,10 @@ impl RGBA {
 
     pub fn lerp(color1: Self, color2: Self, t: f32) -> Self {
         let s = t.clamp(0.0, 1.0);
-        let c1 = color1.as_f32s();
-        let c2 = color2.as_f32s();
-        let r = c1.0 + s * (c2.0 - c1.0);
-        let g = c1.1 + s * (c2.1 - c1.1);
-        let b = c1.2 + s * (c2.2 - c1.2);
-        let a = c1.3 + s * (c2.3 - c1.3);
-        RGBA::rgba(r, g, b, a)
+        let c1 = Srgba::from(color1).into_linear();
+        let c2 = Srgba::from(color2).into_linear();
+        let c = Srgba::from_linear(c1.mix(&c2, s));
+        c.into()
     }
 
     pub fn tint(self, t: f32) -> Self {
@@ -208,6 +205,13 @@ impl From<Srgba> for RGBA {
     fn from(rgb: Srgba) -> Self {
         let c = rgb.into_components();
         RGBA::rgba(c.0, c.1, c.2, c.3)
+    }
+}
+
+impl From<RGBA> for Srgba {
+    fn from(rgb: RGBA) -> Self {
+        let (red, green, blue, alpha) = rgb.as_f32s();
+        Srgba::new(red, green, blue, alpha)
     }
 }
 
@@ -605,4 +609,17 @@ pub fn get_color_tile<T: AsPrimitive<f32>>(img: &DynamicImage, p: Point) -> RGBA
     let y = (p.y as u32).rem_euclid(img.height());
     let p = img.get_pixel(x, y);
     p.into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::prelude::BLACK;
+    #[test]
+    fn lerp_test() {
+        let c1 = BLACK;
+        let c2 = RGBA::gray(255);
+        assert_eq!(RGBA::lerp(c1, c2, 0.5), RGBA::rgb8(187, 187, 187));
+    }
 }

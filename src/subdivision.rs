@@ -23,6 +23,7 @@
 use crate::prelude::{Orientation, Point};
 
 /// A Quadrilateral.
+/// Cartesian coordinates
 #[derive(Debug, Clone, Copy)]
 pub struct Quad {
     /// Bottom Left
