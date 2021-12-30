@@ -78,6 +78,14 @@ impl Sketch for Canvas {
         let c: skia::Color = color.into();
         pixel_map[k] = c.premultiply().to_color_u8();
     }
+
+    fn width(&self) -> u32 {
+        self.0.width()
+    }
+
+    fn height(&self) -> u32 {
+        self.0.height()
+    }
 }
 
 impl From<&RgbaImage> for Canvas {

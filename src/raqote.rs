@@ -64,6 +64,14 @@ impl Sketch for Canvas {
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {
         self.0.write_png(path).unwrap();
     }
+
+    fn width(&self) -> u32 {
+        self.0.width() as u32
+    }
+
+    fn height(&self) -> u32 {
+        self.0.height() as u32
+    }
 }
 
 impl From<RGBA> for SolidSource {

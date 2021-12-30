@@ -22,6 +22,8 @@ pub trait Sketch {
         self.fill_rect(x, y, 1.0, 1.0, &tex);
     }
     fn save<P: AsRef<std::path::Path>>(&self, path: P);
+    fn width(&self) -> u32;
+    fn height(&self) -> u32;
 }
 
 /// Unified color format for wassily, formats from external crates e.g. image-rs, tiny-skia,

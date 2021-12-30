@@ -1,6 +1,6 @@
 use crate::base::*;
-use crate::quiet::*;
 use crate::prelude::{vec2, Vector, BLACK};
+use crate::quiet::*;
 use crate::util::Rand;
 use noise::OpenSimplex;
 use rand::prelude::*;
@@ -118,7 +118,14 @@ impl DotLine {
     }
 
     pub fn draw<T: Sketch>(&self, canvas: &mut T) {
-        let noise_opts = NoiseOpts::new(1200.0, 1200.0, 1.0, 1.0, 1.0, self.noise_strength);
+        let noise_opts = NoiseOpts::new(
+            canvas.width() as f32,
+            canvas.height() as f32,
+            1.0,
+            1.0,
+            1.0,
+            self.noise_strength,
+        );
         let nf = OpenSimplex::default();
         let v: Vector = self.end - self.start;
         let n: Vector = vec2(v.y, -v.x).normalize(); // n . v == 0, n is the normal.

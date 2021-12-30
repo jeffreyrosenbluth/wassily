@@ -6,8 +6,12 @@ use svg::node::element::path::Data;
 use svg::Document;
 use num_traits::AsPrimitive;
 
-// The usize is for gradient ids'
-pub struct Canvas(pub Document, usize);
+pub struct Canvas {
+    pub doc: Document,
+    width: u32,
+    height: u32,
+    grad_id: usize,
+}
 
 impl Canvas {
     pub fn new<T: AsPrimitive<u32>>(width: T, height: T) -> Self {
@@ -16,13 +20,13 @@ impl Canvas {
             .set("width", width.as_())
             .set("height", height.as_())
             .set("viewbox", (0, 0, width.as_(), height.as_()));
-        Canvas(doc, 0)
+        Canvas {doc, width: width.as_(), height: height.as_(),grad_id: 0}
     }
 }
 
 impl Sketch for Canvas {
     fn fill_path(&mut self, path: &base::Path, texture: &base::Texture) {
-        let doc = self.0.clone();
+        let doc = self.doc.clone();
         let svg_path: vg::Path = path.into();
         let color = match texture.kind {
             base::TextureKind::SolidColor(c) => c.to_svg(),
@@ -35,11 +39,11 @@ impl Sketch for Canvas {
             .set("transform", transform(path))
             .set("fill-rule", fill_rule(path));
 
-        self.0 = doc.add(svg_path);
+        self.doc = doc.add(svg_path);
     }
 
     fn stroke_path(&mut self, path: &base::Path, texture: &base::Texture, stroke: &base::Stroke) {
-        let doc = self.0.clone();
+        let doc = self.doc.clone();
         let svg_path: vg::Path = path.into();
         let color = match texture.kind {
             base::TextureKind::SolidColor(c) => c.to_svg(),
@@ -55,22 +59,22 @@ impl Sketch for Canvas {
             .set("stroke-linecap", linecap(stroke))
             .set("stroke-linejoin", linejoin(stroke))
             .set("transform", transform(path));
-        self.0 = doc.add(svg_path);
+        self.doc = doc.add(svg_path);
     }
 
     fn fill(&mut self, color: base::RGBA) {
-        let doc = self.0.clone();
+        let doc = self.doc.clone();
         let color = color.to_svg();
         let rect = vg::Rectangle::new()
             .set("width", "100%")
             .set("height", "100%")
             .set("fill", color.0)
             .set("fill-opacity", color.1);
-        self.0 = doc.add(rect);
+        self.doc = doc.add(rect);
     }
 
     fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &base::Texture) {
-        let doc = self.0.clone();
+        let doc = self.doc.clone();
         let color = match texture.kind {
             base::TextureKind::SolidColor(c) => c.to_svg(),
             base::TextureKind::LinearGradient(_) => {todo!()}
@@ -82,11 +86,19 @@ impl Sketch for Canvas {
             .set("width", width)
             .set("height", height)
             .set("fill", color.0).set("fill-opacity", color.1);
-        self.0 = doc.add(rect);
+        self.doc = doc.add(rect);
     }
 
     fn save<P: AsRef<std::path::Path>>(&self, path: P) {
-        svg::save(path, &self.0).unwrap();
+        svg::save(path, &self.doc).unwrap();
+    }
+
+    fn width(&self) -> u32 {
+        self.width
+    }
+    
+    fn height(&self) -> u32 {
+        self.height
     }
 }
 
