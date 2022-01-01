@@ -14,7 +14,7 @@ use rand_pcg::Pcg64;
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
 
-pub fn save_sketch<T, S>(model: &T, canvas: &S)
+pub fn save_sketch<'a, S, T, U: 'a>(model: &T, canvas: &S)
 where
     T: BasicModel,
     S: Sketch,

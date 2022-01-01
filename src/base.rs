@@ -9,10 +9,10 @@ use std::{fmt::Display, str::FromStr};
 pub use crate::prelude::{pt, Point, Transform, Vector};
 
 pub trait Sketch {
-    fn fill_path(&mut self, path: &Path, texture: &Texture);
-    fn stroke_path(&mut self, path: &Path, texture: &Texture, stroke: &Stroke);
+    fn fill_path(&mut self, path: &Path, texture: &Texture<&Self>);
+    fn stroke_path(&mut self, path: &Path, texture: &Texture<&Self>, stroke: &Stroke);
     fn fill(&mut self, color: RGBA);
-    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture) {
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture<&Self>) {
         let rect = Path::rect(x, y, width, height);
         self.fill_path(&rect, texture);
     }
@@ -157,14 +157,49 @@ impl Gradient {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum FilterQuality {
+    Nearest,
+    Bilinear,
+    Bicubic,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Pattern<'a, S> {
+    pub canvas: &'a S,
+    pub spread_mode: SpreadMode,
+    pub quality: FilterQuality,
+    pub opacity: f32,
+    pub transform: Transform,
+}
+
+impl<'a, S> Pattern<'a, S> {
+    pub fn new(
+        canvas: &'a S,
+        spread_mode: SpreadMode,
+        quality: FilterQuality,
+        opacity: f32,
+        transform: Transform,
+    ) -> Self {
+        Self {
+            canvas,
+            spread_mode,
+            quality,
+            opacity,
+            transform,
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Debug)]
-pub enum TextureKind {
+pub enum TextureKind<'a, S> {
     SolidColor(RGBA),
     LinearGradient(Gradient),
     RadialGradient(Gradient),
+    Pattern(Pattern<'a, S>),
 }
 
-impl TextureKind {
+impl<'a, S> TextureKind<'a, S> {
     pub fn white() -> Self {
         TextureKind::SolidColor(RGBA::rgb8(255, 255, 255))
     }
@@ -174,7 +209,7 @@ impl TextureKind {
     }
 }
 
-impl Default for TextureKind {
+impl<'a, S> Default for TextureKind<'a, S> {
     fn default() -> Self {
         Self::SolidColor(RGBA::rgb8(0, 0, 0))
     }
@@ -219,14 +254,14 @@ impl Default for BlendMode {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Texture {
-    pub kind: TextureKind,
+pub struct Texture<'a, S> {
+    pub kind: TextureKind<'a, S>,
     pub mode: BlendMode,
     pub anti_alias: bool,
 }
 
-impl Texture {
-    pub fn new(kind: TextureKind) -> Self {
+impl<'a, S> Texture<'a, S> {
+    pub fn new(kind: TextureKind<'a, S>) -> Self {
         Self {
             kind,
             mode: BlendMode::SourceOver,
@@ -247,7 +282,7 @@ impl Texture {
     }
 }
 
-impl Default for Texture {
+impl<'a, S> Default for Texture<'a, S> {
     fn default() -> Self {
         Self {
             kind: Default::default(),

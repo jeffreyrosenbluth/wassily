@@ -1,10 +1,10 @@
 use crate::base::{self, Sketch, Texture, TextureKind, RGBA};
-use image::{buffer::ConvertBuffer, RgbImage, RgbaImage, ImageFormat};
 use image::imageops::rotate180;
+use image::{buffer::ConvertBuffer, ImageFormat, RgbImage, RgbaImage};
+use num_traits::AsPrimitive;
 use skia::StrokeDash;
 use tiny_skia as skia;
 use tiny_skia::{Pixmap, PixmapRef};
-use num_traits::AsPrimitive;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Canvas(pub Pixmap);
@@ -21,17 +21,19 @@ impl Canvas {
 
     pub fn save_jpg<P: AsRef<std::path::Path>>(&self, path: P) {
         let img: RgbaImage = self.into();
-        img.save_with_format(path, ImageFormat::Jpeg).expect("Error writing jpeg");
+        img.save_with_format(path, ImageFormat::Jpeg)
+            .expect("Error writing jpeg");
     }
 
     pub fn save_tiff<P: AsRef<std::path::Path>>(&self, path: P) {
         let img: RgbaImage = self.into();
-        img.save_with_format(path, ImageFormat::Tiff).expect("Error writing tiff");
+        img.save_with_format(path, ImageFormat::Tiff)
+            .expect("Error writing tiff");
     }
 }
 
 impl Sketch for Canvas {
-    fn fill_path(&mut self, path: &base::Path, texture: &base::Texture) {
+    fn fill_path(&mut self, path: &base::Path, texture: &base::Texture<&Canvas>) {
         let skia_path: skia::Path = path.into();
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = texture.anti_alias;
@@ -42,7 +44,12 @@ impl Sketch for Canvas {
             .fill_path(&skia_path, &paint, fill_rule, transform, None);
     }
 
-    fn stroke_path(&mut self, path: &base::Path, texture: &base::Texture, stroke: &base::Stroke) {
+    fn stroke_path(
+        &mut self,
+        path: &base::Path,
+        texture: &base::Texture<&Canvas>,
+        stroke: &base::Stroke,
+    ) {
         let skia_path: skia::Path = path.into();
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = texture.anti_alias;
@@ -53,7 +60,14 @@ impl Sketch for Canvas {
             .stroke_path(&skia_path, &paint, &stroke, transform, None);
     }
 
-    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &base::Texture) {
+    fn fill_rect(
+        &mut self,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+        texture: &base::Texture<&Canvas>,
+    ) {
         let mut paint: skia::Paint = texture.into();
         paint.anti_alias = texture.anti_alias;
         paint.blend_mode = texture.mode.into();
@@ -159,6 +173,16 @@ impl From<base::FillRule> for skia::FillRule {
     }
 }
 
+impl From<base::FilterQuality> for skia::FilterQuality {
+    fn from(fq: base::FilterQuality) -> Self {
+        match fq {
+            base::FilterQuality::Nearest => skia::FilterQuality::Nearest,
+            base::FilterQuality::Bilinear => skia::FilterQuality::Bilinear,
+            base::FilterQuality::Bicubic => skia::FilterQuality::Bicubic,
+        }
+    }
+}
+
 impl From<&base::Path> for skia::Path {
     fn from(path: &base::Path) -> Self {
         let mut pb = skia::PathBuilder::new();
@@ -187,8 +211,8 @@ impl From<base::RGBA> for skia::Color {
     }
 }
 
-impl<'a> From<&Texture> for skia::Paint<'a> {
-    fn from(t: &Texture) -> Self {
+impl<'a> From<&Texture<'a, &'a Canvas>> for skia::Paint<'a> {
+    fn from(t: &Texture<&'a Canvas>) -> Self {
         let mut p = Self::default();
         match &t.kind {
             TextureKind::SolidColor(c) => {
@@ -235,6 +259,15 @@ impl<'a> From<&Texture> for skia::Paint<'a> {
                     skia::RadialGradient::new(start, end, radius, stops, mode, transform).unwrap();
                 p
             }
+            TextureKind::Pattern(pat) => {
+                let pixmap = pat.canvas.0.as_ref();
+                let spread_mode = pat.spread_mode.into();
+                let quality = pat.quality.into();
+                let opacity = pat.opacity;
+                let transform = to_transform(pat.transform);
+                p.shader = skia::Pattern::new(pixmap, spread_mode, quality, opacity, transform);
+                p
+            }
         }
     }
 }
@@ -261,7 +294,13 @@ impl From<&base::Stroke> for skia::Stroke {
             Some(ref dash) => StrokeDash::new(dash.array.clone(), dash.offset),
             None => None,
         };
-        skia::Stroke {width, miter_limit, line_cap, line_join, dash}
+        skia::Stroke {
+            width,
+            miter_limit,
+            line_cap,
+            line_join,
+            dash,
+        }
     }
 }
 

@@ -33,22 +33,22 @@ pub fn tagged(ps: Vec<Point>) -> Vec<TaggedPoint> {
 }
 
 #[derive(Debug, Clone)]
-pub struct Shape {
+pub struct Shape<'a, S> {
     pub points: Vec<TaggedPoint>,
-    pub fill_texture: Box<Option<Texture>>,
+    pub fill_texture: Option<Texture<'a, &'a S>>,
     pub stroke: Stroke,
-    pub stroke_texture: Box<Option<Texture>>,
+    pub stroke_texture: Option<Texture<'a, &'a S>>,
     shape: ShapeType,
     fillrule: FillRule,
     transform: Transform,
 }
 
-impl<'a> Shape {
+impl<'a, S: Sketch> Shape<'a, S> {
     pub(crate) fn new(
         points: Vec<TaggedPoint>,
-        fill_texture: Box<Option<Texture>>,
+        fill_texture: Option<Texture<'a, &'a S>>,
         stroke: Stroke,
-        stroke_texture: Box<Option<Texture>>,
+        stroke_texture: Option<Texture<'a, &'a S>>,
         shape: ShapeType,
         fillrule: FillRule,
         transform: Transform,
@@ -64,7 +64,7 @@ impl<'a> Shape {
         }
     }
 
-    pub fn draw<T: Sketch>(&self, canvas: &mut T) {
+    pub fn draw(&self, canvas: &mut S) {
         let shape = self.shape;
         match shape {
             ShapeType::Poly => self.draw_poly(canvas),
@@ -76,7 +76,7 @@ impl<'a> Shape {
         }
     }
 
-    fn draw_poly<T: Sketch>(&self, canvas: &mut T) {
+    fn draw_poly(&self, canvas: &mut S) {
         let mut pb = PathBuilder::new();
         pb.set_fillrule(self.fillrule);
         let head = self.points[0].point;
@@ -94,15 +94,15 @@ impl<'a> Shape {
         }
         pb.set_transform(self.transform);
         let path = pb.finish();
-        if let Some(fp) = *self.fill_texture.clone() {
+        if let Some(fp) = self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
         }
-        if let Some(sp) = *self.stroke_texture.clone() {
+        if let Some(sp) = self.stroke_texture.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke)
         }
     }
 
-    fn draw_quad<T: Sketch>(&self, canvas: &mut T) {
+    fn draw_quad(&self, canvas: &mut S) {
         let mut pb = PathBuilder::new();
         pb.set_fillrule(self.fillrule);
         let head = self.points[0].point;
@@ -118,15 +118,15 @@ impl<'a> Shape {
         }
         pb.set_transform(self.transform);
         let path = pb.finish();
-        if let Some(fp) = *self.fill_texture.clone() {
+        if let Some(fp) = self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
         }
-        if let Some(sp) = *self.stroke_texture.clone() {
+        if let Some(sp) = self.stroke_texture.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
-    pub fn draw_cubic<T: Sketch>(&self, canvas: &mut T) {
+    pub fn draw_cubic(&self, canvas: &mut S) {
         let mut pb = PathBuilder::new();
         pb.set_fillrule(self.fillrule);
         let head = self.points[0].point;
@@ -143,15 +143,15 @@ impl<'a> Shape {
         }
         pb.set_transform(self.transform);
         let path = pb.finish();
-        if let Some(fp) = *self.fill_texture.clone() {
+        if let Some(fp) = self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
         }
-        if let Some(sp) = *self.stroke_texture.clone() {
+        if let Some(sp) = self.stroke_texture.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
-    fn draw_rect<T: Sketch>(&self, canvas: &mut T) {
+    fn draw_rect(&self, canvas: &mut S) {
         if self.points.len() < 2 {
             panic!("Rectangle's points vector contains less than 2 points");
         }
@@ -161,15 +161,15 @@ impl<'a> Shape {
         let bottom = self.points[1].point.y;
         let mut path = Path::rect(left, top, right - left, bottom - top);
         path.transform = self.transform;
-        if let Some(fp) = *self.fill_texture.clone() {
+        if let Some(fp) = self.fill_texture.clone() {
             canvas.fill_path(&path, &fp);
         }
-        if let Some(sp) = *self.stroke_texture.clone() {
+        if let Some(sp) = self.stroke_texture.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 
-    fn draw_ellipse<T: Sketch>(&self, canvas: &mut T) {
+    fn draw_ellipse(&self, canvas: &mut S) {
         if self.points.len() < 2 {
             panic!("Ellipse points vector contains less than 2 points");
         }
@@ -179,15 +179,15 @@ impl<'a> Shape {
         let _h = self.points[1].point.y;
         let mut pb = Path::circle(cx, cy, w);
         pb.transform = self.transform;
-        if let Some(fp) = *self.fill_texture.clone() {
+        if let Some(fp) = self.fill_texture.clone() {
             canvas.fill_path(&pb, &fp);
         }
-        if let Some(sp) = *self.stroke_texture.clone() {
+        if let Some(sp) = self.stroke_texture.clone() {
             canvas.stroke_path(&pb, &sp, &self.stroke);
         }
     }
 
-    fn draw_line<T: Sketch>(&self, canvas: &mut T) {
+    fn draw_line(&self, canvas: &mut S) {
         if self.points.len() < 2 {
             panic!("Line points vector contains less than 2 points");
         }
@@ -200,16 +200,16 @@ impl<'a> Shape {
         pb.line_to(x1, y1);
         pb.set_transform(self.transform);
         let path = pb.finish();
-        if let Some(sp) = *self.stroke_texture.clone() {
+        if let Some(sp) = self.stroke_texture.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke);
         }
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct ShapeBuilder {
-    fill_texture: Option<Texture>,
-    stroke_texture: Option<Texture>,
+pub struct ShapeBuilder<'a, S> {
+    fill_texture: Option<Texture<'a, &'a S>>,
+    stroke_texture: Option<Texture<'a, &'a S>>,
     stroke_width: f32,
     line_cap: LineCap,
     line_join: LineJoin,
@@ -220,13 +220,13 @@ pub struct ShapeBuilder {
     transform: Transform,
 }
 
-impl Default for ShapeBuilder {
+impl<'a, S: Sketch> Default for ShapeBuilder<'a, S> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<'a> ShapeBuilder {
+impl<'a, S: Sketch> ShapeBuilder<'a, S> {
     pub fn new() -> Self {
         Self {
             fill_texture: Some(Texture::solid_color(BLACK)),
@@ -247,7 +247,7 @@ impl<'a> ShapeBuilder {
         self
     }
 
-    pub fn fill_texture(mut self, texture: &Texture) -> Self {
+    pub fn fill_texture(mut self, texture: &Texture<'a, &S>) -> Self {
         self.fill_texture = Some(texture.clone());
         self
     }
@@ -267,7 +267,7 @@ impl<'a> ShapeBuilder {
         self
     }
 
-    pub fn stroke_texture(mut self, texture: &Texture) -> Self {
+    pub fn stroke_texture(mut self, texture: &Texture<'a, &S>) -> Self {
         self.stroke_texture = Some(texture.clone());
         self
     }
@@ -370,14 +370,14 @@ impl<'a> ShapeBuilder {
         self
     }
 
-    pub fn build(self) -> Shape {
-        let mut fill_texture: Box<Option<Texture>> = Box::new(None);
-        let mut stroke_texture: Box<Option<Texture>> = Box::new(None);
+    pub fn build(self) -> Shape<'a, S> {
+        let mut fill_texture: Option<Texture<'a, &'a S>> = None;
+        let mut stroke_texture: Option<Texture<'a, &'a S>> = None;
         if let Some(fs) = self.fill_texture {
-            fill_texture = Box::new(Some(fs));
+            fill_texture = Some(fs);
         };
         if let Some(ss) = self.stroke_texture {
-            stroke_texture = Box::new(Some(ss));
+            stroke_texture = Some(ss);
         };
         let stroke = Stroke {
             width: self.stroke_width,
@@ -404,14 +404,14 @@ pub fn stroke(weight: f32) -> Stroke {
     }
 }
 
-pub fn line<T: Sketch>(
-    canvas: &mut T,
+pub fn line<S: Sketch>(
+    canvas: &mut S,
     x0: f32,
     y0: f32,
     x1: f32,
     y1: f32,
     stroke: &Stroke,
-    stroke_texture: &Texture,
+    stroke_texture: &Texture<&S>,
 ) {
     let mut pb = PathBuilder::new();
     pb.move_to(x0, y0);

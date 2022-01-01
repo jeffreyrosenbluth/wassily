@@ -13,7 +13,7 @@ impl Canvas {
 }
 
 impl Sketch for Canvas {
-    fn fill_path(&mut self, path: &base::Path, texture: &Texture) {
+    fn fill_path(&mut self, path: &base::Path, texture: &Texture<&Canvas>) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         let antialias = match texture.anti_alias {
@@ -28,7 +28,7 @@ impl Sketch for Canvas {
         self.0.fill(&raqote_path, &source, &draw_options);
     }
 
-    fn stroke_path(&mut self, path: &base::Path, texture: &Texture, stroke: &base::Stroke) {
+    fn stroke_path(&mut self, path: &base::Path, texture: &Texture<&Canvas>, stroke: &base::Stroke) {
         let raqote_path: raqote::Path = path.into();
         let source: raqote::Source = texture.into();
         let stroke = stroke.into();
@@ -47,7 +47,7 @@ impl Sketch for Canvas {
         self.0.clear(color.into());
     }
 
-    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture) {
+    fn fill_rect(&mut self, x: f32, y: f32, width: f32, height: f32, texture: &Texture<&Canvas>) {
         let src: raqote::Source = texture.into();
         let antialias = match texture.anti_alias {
             true => AntialiasMode::Gray,
@@ -113,8 +113,8 @@ impl From<&base::Path> for raqote::Path {
     }
 }
 
-impl From<&base::Texture> for raqote::Source<'_> {
-    fn from(t: &base::Texture) -> Self {
+impl<'a, S> From<&base::Texture<'a, S>> for raqote::Source<'a> {
+    fn from(t: &base::Texture<S>) -> Self {
         match &t.kind {
             TextureKind::SolidColor(c) => {
                 let sc: SolidSource = c.into();
@@ -157,6 +157,9 @@ impl From<&base::Texture> for raqote::Source<'_> {
                 let gradient = raqote::Gradient { stops };
                 let spread = g.mode.into();
                 Source::new_radial_gradient(gradient, g.start, g.radius, spread)
+            }
+            TextureKind::Pattern(pat) => {
+                unimplemented!()
             }
         }
     }
