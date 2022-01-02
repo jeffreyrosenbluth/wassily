@@ -1,54 +1,31 @@
 use num_traits::AsPrimitive;
+use tiny_skia::Point;
 
-pub use crate::base::*;
-pub use crate::color_names::*;
+// pub use crate::color_names::*;
 pub use crate::kolor::*;
-pub use crate::lines::*;
+// pub use crate::lines::*;
 pub use crate::matrix::*;
 pub use crate::quiet::gabor::*;
 pub use crate::quiet::trig::*;
 pub use crate::quiet::white::*;
 pub use crate::quiet::*;
-pub use crate::rectangles::*;
+// pub use crate::rectangles::*;
 pub use crate::shape::*;
-pub use crate::subdivision::*;
+// pub use crate::subdivision::*;
 pub use crate::util::*;
-pub use crate::warp::*;
-pub use crate::grain::*;
-pub use euclid::vec2;
+// pub use crate::warp::*;
+// pub use crate::grain::*;
 pub use image::*;
 pub use noise::*;
 pub use palette;
 
-pub type IntRect = euclid::default::Box2D<i32>;
-pub type IntPoint = euclid::default::Point2D<i32>;
-pub type Point = euclid::default::Point2D<f32>;
-pub type Transform = euclid::default::Transform2D<f32>;
-pub type Vector = euclid::default::Vector2D<f32>;
-
-#[deprecated(note = "please use `pt` instead")]
-pub fn point2<S, T>(x: S, y: T) -> Point
-where
-    S: AsPrimitive<f32>,
-    T: AsPrimitive<f32>,
-{
-    euclid::point2(x.as_(), y.as_())
-}
-
-pub fn pt<S, T>(x: S, y: T) -> Point
-where
-    S: AsPrimitive<f32>,
-    T: AsPrimitive<f32>,
-{
-    euclid::point2(x.as_(), y.as_())
-}
 
 pub fn polar<S, T>(theta: S, r: T) -> Point
 where
     S: AsPrimitive<f32>,
     T: AsPrimitive<f32>,
 {
-    euclid::point2(r.as_() * theta.as_().cos(), r.as_() * theta.as_().sin())
+    Point::from_xy(r.as_() * theta.as_().cos(), r.as_() * theta.as_().sin())
 }
 
 #[derive(Debug, Clone, Copy)]

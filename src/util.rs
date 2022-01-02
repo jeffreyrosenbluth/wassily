@@ -3,8 +3,8 @@ use std::{
     io::Write,
     path::PathBuf, hash::{Hash, Hasher}, collections::hash_map::DefaultHasher,
 };
-
-use crate::prelude::{pt, BasicModel, Point, Sketch};
+use tiny_skia::{Pixmap, Point};
+use crate::prelude::BasicModel;
 use chrono::prelude::Utc;
 use num_traits::{AsPrimitive, FromPrimitive};
 use rand::{Rng, SeedableRng};
@@ -14,17 +14,16 @@ use rand_pcg::Pcg64;
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
 
-pub fn save_sketch<T, S>(model: &T, canvas: &S)
+pub fn save_sketch<T>(model: &T, canvas: &Pixmap)
 where
     T: BasicModel,
-    S: Sketch,
 {
     let ts = format!("{}", Utc::now().timestamp());
     let dir = format!(r"{}/{}/{}", model.name(), model.dir(), model.name());
     let mut sketch = PathBuf::from(format!(r"{}_{}", dir, ts));
     let _ = create_dir(model.dir());
     sketch.set_extension(model.ext());
-    canvas.save(sketch);
+    canvas.save_png(sketch).unwrap();
 }
 
 pub fn save_json<T>(model: &T)
@@ -41,26 +40,6 @@ where
     write!(output, "{}", json).unwrap();
 }
 
-#[deprecated(note = "Use save_sketch and save_json instead")]
-pub fn save<S: Sketch, T: std::fmt::Debug>(
-    name: &str,
-    dir: &str,
-    ext: &str,
-    data: Option<T>,
-    canvas: &mut S,
-) {
-    use std::path::Path;
-    let ts = Utc::now().timestamp();
-    let sketch_name = format!("{}_{}.{}", name, ts, ext);
-    let data_name = format!("{}_{}.txt", name, ts);
-    let dir = Path::new(dir);
-    let _ = create_dir(dir);
-    if let Some(descr) = data {
-        let mut output = File::create(dir.join(data_name)).unwrap();
-        write!(output, "{:#?}", descr).unwrap();
-    }
-    canvas.save(dir.join(&sketch_name));
-}
 
 pub fn calculate_hash<T: Hash>(t: T) -> u64 {
     let mut s = DefaultHasher::new();
@@ -134,7 +113,7 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
     let xs = (k..n + k - 1).map(|i| halton(i, 2));
     let ys = (k..n + k - 1).map(|i| halton(i, 3));
     xs.zip(ys)
-        .map(|p| pt(p.0 * width.as_(), p.1 * height.as_()))
+        .map(|p| Point::from_xy(p.0 * width.as_(), p.1 * height.as_()))
         .collect()
 }
 
