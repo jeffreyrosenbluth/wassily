@@ -1,8 +1,8 @@
-use crate::base::RGBA;
 use num_complex::Complex32;
 use crate::prelude::{get_color_clamp, get_color_tile, pt};
 use image::DynamicImage;
 use std::sync::Arc;
+use tiny_skia::Color;
 
 type DomWarp = Arc<dyn Fn(Complex32) -> Complex32 + Send + Sync>;
 
@@ -14,7 +14,7 @@ pub enum Coord {
 }
 pub enum Final<'a> {
     More(Arc<Warp<'a>>),
-    Func(Arc<dyn Fn(f32, f32) -> RGBA + Sync + Send>),
+    Func(Arc<dyn Fn(f32, f32) -> Color + Sync + Send>),
     Img(&'a DynamicImage, f32, f32),
 }
 
@@ -40,7 +40,7 @@ impl<'a> Warp<'a> {
         Self { dw, warp, coord }
     }
 
-    pub fn get(&self, x: f32, y: f32) -> RGBA {
+    pub fn get(&self, x: f32, y: f32) -> Color {
         let c = (self.dw)(Complex32::new(x, y));
         let r = c.im.abs();
         let (x1, y1) = match self.coord {
@@ -55,7 +55,7 @@ impl<'a> Warp<'a> {
         }
     }
 
-    pub fn get_tiled(&self, x: f32, y: f32) -> RGBA {
+    pub fn get_tiled(&self, x: f32, y: f32) -> Color {
         let c = (self.dw)(Complex32::new(x, y));
         let r = c.im.abs();
         let (x1, y1) = match self.coord {

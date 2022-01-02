@@ -1,10 +1,10 @@
-use crate::base::*;
-use crate::prelude::{vec2, Vector, BLACK};
-use crate::quiet::*;
+use crate::{quiet::*, prelude::{pt, normalize, magnitude}};
 use crate::util::Rand;
 use noise::OpenSimplex;
 use rand::prelude::*;
 use rand_distr::{Distribution, Normal};
+use tiny_skia::{Color, Point, Pixmap};
+use crate::skia::pixel;
 
 pub struct SandLine {
     pub start: Point,
@@ -13,7 +13,7 @@ pub struct SandLine {
     rando: Rand,
     grains: u32,
     thickness: f32,
-    color: RGBA,
+    color: Color,
 }
 
 impl SandLine {
@@ -28,7 +28,7 @@ impl SandLine {
             rando,
             grains: 64,
             thickness: 40.0,
-            color: BLACK,
+            color: Color::BLACK,
         }
     }
 
@@ -42,15 +42,15 @@ impl SandLine {
         self
     }
 
-    pub fn color(mut self, color: RGBA) -> Self {
+    pub fn color(mut self, color: Color) -> Self {
         self.color = color;
         self
     }
 
-    pub fn draw<T: Sketch>(&mut self, canvas: &mut T) {
-        let v: Vector = self.end - self.start;
-        let n: Vector = vec2(v.y, -v.x).normalize(); // n . v == 0, n is the normal.
-        let length = v.length();
+    pub fn draw(&mut self, canvas: &mut Pixmap) {
+        let v: Point = self.end - self.start;
+        let n: Point = normalize(pt(v.y, -v.x)); // n . v == 0, n is the normal.
+        let length = magnitude(v);
         for t in 0..length as u32 {
             let t = t as f32 / length;
             let x = self.start.x + t * v.x;
@@ -70,7 +70,9 @@ impl SandLine {
                 let x = x + delta * n.x * self.thickness / 2.0 * (i as f32 * w);
                 let y = y + delta * n.y * self.thickness / 2.0 * (i as f32 * w);
                 delta *= -1.0;
-                canvas.pixel(x, y, self.color.opacity(a));
+                let mut color = self.color;
+                color.set_alpha(a);
+                pixel(canvas, x, y, color);
             }
         }
     }
@@ -81,7 +83,7 @@ pub struct DotLine {
     pub end: Point,
     noise_strength: f32,
     stdev: f32,
-    color: RGBA,
+    color: Color,
     weight: u32,
 }
 
@@ -92,7 +94,7 @@ impl DotLine {
             end,
             noise_strength: 20.0,
             stdev: 1.0,
-            color: BLACK,
+            color: Color::BLACK,
             weight: 25,
         }
     }
@@ -107,7 +109,7 @@ impl DotLine {
         self
     }
 
-    pub fn color(mut self, color: RGBA) -> Self {
+    pub fn color(mut self, color: Color) -> Self {
         self.color = color;
         self
     }
@@ -117,7 +119,7 @@ impl DotLine {
         self
     }
 
-    pub fn draw<T: Sketch>(&self, canvas: &mut T) {
+    pub fn draw(&self, canvas: &mut Pixmap) {
         let noise_opts = NoiseOpts::new(
             canvas.width() as f32,
             canvas.height() as f32,
@@ -127,12 +129,12 @@ impl DotLine {
             self.noise_strength,
         );
         let nf = OpenSimplex::default();
-        let v: Vector = self.end - self.start;
-        let n: Vector = vec2(v.y, -v.x).normalize(); // n . v == 0, n is the normal.
+        let v: Point = self.end - self.start;
+        let n: Point = normalize(pt(v.y, -v.x)); // n . v == 0, n is the normal.
         let mut rng = thread_rng();
         let normal = Normal::new(0.0, self.stdev).unwrap();
-        let length = v.length();
-        let c = RGBA::rgba8(self.color.r, self.color.g, self.color.b, 255);
+        let length = magnitude(v);
+        let mut c = self.color;
         for t in 0..length as u32 {
             let t = t as f32 / length;
             let p = pt(self.start.x + t * v.x, self.start.y + t * v.y);
@@ -142,9 +144,9 @@ impl DotLine {
                 let r = normal.sample(&mut rng);
                 let mut a = 1.0 / (20.0 + r.abs());
                 a = a.clamp(0.0, 1.0);
-                let o = c.opacity(a);
+                c.set_alpha(a);
                 let q = pt(p.x + r * n.x + nx, p.y + r * n.y + ny);
-                canvas.pixel(q.x, q.y, o);
+                pixel(canvas, q.x, q.y, c);
             }
         }
     }

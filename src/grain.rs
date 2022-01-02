@@ -1,6 +1,6 @@
 use crate::quiet::{noise2d, NoiseOpts};
 use noise::{Fbm, Perlin};
-use tiny_skia::{Pixmap, Shader, Paint};
+use tiny_skia::{Pixmap, Paint, BlendMode, Rect, Transform};
 use crate::kolor::rgb;
 
 /// Add film grain to a canvas. 'scale' = 0.1 and 'factor' = 0.1 are good
@@ -13,10 +13,11 @@ pub fn grain(canvas: &mut Pixmap, scale: f32, factor: f32) {
             let n = noise2d(&nf, &noise_opts, i as f32, j as f32);
             let n1 = (n + 1.0) / 2.0;
             let c = rgb(n1, n1, n1);
-            let mut texture = Shader::solid_color(c);
             let mut paint = Paint::default();
-            texture.mode(BlendMode::Overlay);
-            canvas.fill_rect(i as f32, j as f32, 1.0, 1.0, &texture);
+            paint.set_color(c);
+            paint.blend_mode = BlendMode::Overlay;
+            let rect = Rect::from_xywh(i as f32, j as f32, 1.0, 1.0).unwrap();
+            canvas.fill_rect(rect, &paint, Transform::identity(), None).unwrap()
         }
     }
 }
