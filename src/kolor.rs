@@ -210,7 +210,7 @@ pub fn color_to_image_rgba(c: Color) -> image::Rgba<u8> {
     let g = c.green() * 255.0;
     let b = c.blue() * 255.0;
     let a = c.alpha() * 255.0;
-    image::Rgba([r as u8, r as u8, b as u8, a as u8])
+    image::Rgba([r as u8, g as u8, b as u8, a as u8])
 }
 
 pub fn srgba_to_color(rgb: Srgba) -> Color {

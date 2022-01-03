@@ -159,7 +159,7 @@ impl<'a> Shape<'a> {
         let right = self.points[1].point.x;
         let bottom = self.points[1].point.y;
         let rect = Rect::from_ltrb(left, top, right, bottom).unwrap();
-        let mut path = PathBuilder::from_rect(rect);
+        let path = PathBuilder::from_rect(rect);
         if let Some(fp) = *self.fill_paint.clone() {
             canvas
                 .fill_path(&path, &fp, self.fillrule, self.transform, None)
@@ -178,7 +178,7 @@ impl<'a> Shape<'a> {
         let cy = self.points[0].point.y;
         let w = self.points[1].point.x;
         let _h = self.points[1].point.y;
-        let mut circle = PathBuilder::from_circle(cx, cy, w).unwrap();
+        let circle = PathBuilder::from_circle(cx, cy, w).unwrap();
         if let Some(fp) = *self.fill_paint.clone() {
             canvas
                 .fill_path(&circle, &fp, self.fillrule, self.transform, None)
