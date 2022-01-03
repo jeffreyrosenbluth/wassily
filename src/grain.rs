@@ -60,6 +60,8 @@ impl Grain {
             1.0,
             Transform::identity(),
         );
-        paint_shader(pattern)
+        let mut p = paint_shader(pattern);
+        p.blend_mode = BlendMode::Overlay;
+        p
     }
 }
