@@ -52,30 +52,6 @@ pub fn normalize(p: Point) -> Point {
     let m = magnitude(p);
     Point::from_xy(p.x / m, p.y / m)
 }
-
-#[derive(Debug, Clone, Copy)]
-pub struct Dims {
-    pub width: u32,
-    pub height: u32,
-    pub width_f32: f32,
-    pub height_f32: f32,
-}
-
-impl Dims {
-    pub fn new(width: u32, height: u32) -> Self {
-        Self {
-            width,
-            height,
-            width_f32: width as f32,
-            height_f32: height as f32,
-        }
-    }
-
-    pub fn with_aspect(width: u32, numerator: u32, denominator: u32) -> Self {
-        Self::new(width, width * denominator / numerator)
-    }
-}
-
 pub trait BasicModel {
     fn width(&self) -> u32;
     fn height(&self) -> u32;

@@ -247,6 +247,7 @@ impl<'a> ShapeBuilder<'a> {
 
     pub fn fill_color(mut self, color: Color) -> Self {
         let mut paint = Paint::default();
+        paint.anti_alias = true;
         paint.set_color(color);
         self.fill_paint = Some(paint);
         self
@@ -269,6 +270,7 @@ impl<'a> ShapeBuilder<'a> {
 
     pub fn stroke_color(mut self, color: Color) -> Self {
         let mut paint = Paint::default();
+        paint.anti_alias = true;
         paint.set_color(color);
         self.stroke_paint = Some(paint);
         self
@@ -356,11 +358,11 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    // pub fn transform(mut self, transform: &Transform) -> Self {
-    //     let t = self.transform.post_transform(transform);
-    //     self.transform = t;
-    //     self
-    // }
+    pub fn transform(mut self, transform: &Transform) -> Self {
+        let t = self.transform.post_concat(*transform);
+        self.transform = t;
+        self
+    }
 
     /// Interpret points as cartiesian coordinates with center at (0, 0).
     pub fn cartesian<T: AsPrimitive<f32>>(mut self, width: T, height: T) -> Self {
