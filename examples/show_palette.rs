@@ -1,5 +1,4 @@
 use wassily::prelude::*;
-use tiny_skia::{Paint, Rect, Pixmap, Transform};
 
 const WIDTH: u32 = 1024;
 const NUM_COLORS: u8 = 32;
@@ -22,8 +21,7 @@ fn main() {
             }
             let c = palette[(i * n + j)];
             let c8 = as_u8s(c);
-            let mut paint = Paint::default();
-            paint.set_color(c);
+            let paint = paint_solid(c);
             println!("({:2}, {:2}) : [{}, {}, {}]", j, i, c8.0, c8.1, c8.2);
             let x = j as f32 * swatch_width;
             let y = i as f32 * swatch_width;
@@ -31,5 +29,5 @@ fn main() {
             canvas.fill_rect(rect, &paint, Transform::identity(), None);
         }
     }
-    canvas.save_png("./colors.png");
+    canvas.save_png("./colors.png").unwrap();
 }

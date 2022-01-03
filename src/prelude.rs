@@ -1,7 +1,8 @@
 use num_traits::AsPrimitive;
-use tiny_skia::Point;
+pub use tiny_skia::*;
 
 pub use crate::color_names::*;
+pub use crate::grain::*;
 pub use crate::kolor::*;
 pub use crate::lines::*;
 pub use crate::matrix::*;
@@ -11,10 +12,10 @@ pub use crate::quiet::white::*;
 pub use crate::quiet::*;
 pub use crate::rectangles::*;
 pub use crate::shape::*;
+pub use crate::skia::*;
 pub use crate::subdivision::*;
 pub use crate::util::*;
 pub use crate::warp::*;
-pub use crate::grain::*;
 pub use image::*;
 pub use noise::*;
 pub use palette;
@@ -26,7 +27,6 @@ where
 {
     Point::from_xy(x.as_(), y.as_())
 }
-
 
 pub fn polar<S, T>(theta: S, r: T) -> Point
 where
