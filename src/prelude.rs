@@ -1,6 +1,7 @@
 use num_traits::AsPrimitive;
 pub use tiny_skia::*;
 
+pub use crate::canvas::*;
 pub use crate::color_names::*;
 pub use crate::grain::*;
 pub use crate::kolor::*;
