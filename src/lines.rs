@@ -3,8 +3,8 @@ use crate::util::Rand;
 use noise::OpenSimplex;
 use rand::prelude::*;
 use rand_distr::{Distribution, Normal};
-use tiny_skia::{Color, Point, Pixmap};
-use crate::skia::pixel;
+use tiny_skia::{Color, Point};
+use crate::canvas::Canvas;
 
 pub struct SandLine {
     pub start: Point,
@@ -47,7 +47,7 @@ impl SandLine {
         self
     }
 
-    pub fn draw(&mut self, canvas: &mut Pixmap) {
+    pub fn draw(&mut self, canvas: &mut Canvas) {
         let v: Point = self.end - self.start;
         let n: Point = normalize(pt(v.y, -v.x)); // n . v == 0, n is the normal.
         let length = magnitude(v);
@@ -72,7 +72,7 @@ impl SandLine {
                 delta *= -1.0;
                 let mut color = self.color;
                 color.set_alpha(a);
-                pixel(canvas, x, y, color);
+                canvas.dot(x, y, color);
             }
         }
     }
@@ -119,7 +119,7 @@ impl DotLine {
         self
     }
 
-    pub fn draw(&self, canvas: &mut Pixmap) {
+    pub fn draw(&self, canvas: &mut Canvas) {
         let noise_opts = NoiseOpts::new(
             canvas.width() as f32,
             canvas.height() as f32,
@@ -146,7 +146,7 @@ impl DotLine {
                 a = a.clamp(0.0, 1.0);
                 c.set_alpha(a);
                 let q = pt(p.x + r * n.x + nx, p.y + r * n.y + ny);
-                pixel(canvas, q.x, q.y, c);
+                canvas.dot( q.x, q.y, c);
             }
         }
     }

@@ -8,7 +8,6 @@ pub mod prelude;
 pub mod quiet;
 pub mod rectangles;
 pub mod shape;
-pub mod skia;
 pub mod subdivision;
 pub mod util;
 pub mod warp;

@@ -4,7 +4,7 @@ const WIDTH: f32 = 1200.0;
 const HEIGHT: f32 = 0.80 * WIDTH;
 
 fn main() {
-    let mut canvas = Pixmap::new(WIDTH as u32, HEIGHT as u32).unwrap();
+    let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let mut palette = Palette::steal("fruit.png", 16);
     palette.set_seed(71731);
     canvas.fill(Color::from_rgba8(122, 122, 122, 255));

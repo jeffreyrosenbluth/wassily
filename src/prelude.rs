@@ -13,7 +13,6 @@ pub use crate::quiet::white::*;
 pub use crate::quiet::*;
 pub use crate::rectangles::*;
 pub use crate::shape::*;
-pub use crate::skia::*;
 pub use crate::subdivision::*;
 pub use crate::util::*;
 pub use crate::warp::*;

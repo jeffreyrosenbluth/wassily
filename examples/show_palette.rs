@@ -7,7 +7,7 @@ const ANGLE: f32 = 0.0;
 
 fn main() {
     let width = WIDTH as f32;
-    let mut canvas = Pixmap::new(WIDTH, WIDTH).unwrap();
+    let mut canvas = Canvas::new(WIDTH, WIDTH);
     let mut palette = Palette::steal(FILE, NUM_COLORS);
     let num_colors = palette.len() as f32;
     let n = (0.5 + num_colors.sqrt()) as usize;
@@ -25,8 +25,7 @@ fn main() {
             println!("({:2}, {:2}) : [{}, {}, {}]", j, i, c8.0, c8.1, c8.2);
             let x = j as f32 * swatch_width;
             let y = i as f32 * swatch_width;
-            let rect = Rect::from_xywh(x, y, swatch_width, swatch_width).unwrap();
-            canvas.fill_rect(rect, &paint, Transform::identity(), None);
+            canvas.fill_rect(x, y, swatch_width, swatch_width, &paint);
         }
     }
     canvas.save_png("./colors.png").unwrap();
