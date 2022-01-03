@@ -12,7 +12,8 @@ pub fn grain(canvas: &mut Pixmap, scale: f32, factor: f32) {
         for j in 0..canvas.height() {
             let n = noise2d(&nf, &noise_opts, i as f32, j as f32);
             let n1 = (n + 1.0) / 2.0;
-            let c = rgb(n1, n1, n1);
+            let n2 = n1.clamp(0.0, 1.0);
+            let c = rgb(n2, n2, n2);
             let mut paint = Paint::default();
             paint.set_color(c);
             paint.blend_mode = BlendMode::Overlay;
