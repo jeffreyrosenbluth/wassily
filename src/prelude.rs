@@ -1,4 +1,3 @@
-use num_traits::AsPrimitive;
 pub use tiny_skia::*;
 
 pub use crate::canvas::*;
@@ -20,38 +19,6 @@ pub use image::*;
 pub use noise::*;
 pub use palette;
 
-pub fn pt<S, T>(x: S, y: T) -> Point
-where
-    S: AsPrimitive<f32>,
-    T: AsPrimitive<f32>,
-{
-    Point::from_xy(x.as_(), y.as_())
-}
-
-pub fn polar<S, T>(theta: S, r: T) -> Point
-where
-    S: AsPrimitive<f32>,
-    T: AsPrimitive<f32>,
-{
-    Point::from_xy(r.as_() * theta.as_().cos(), r.as_() * theta.as_().sin())
-}
-
-pub fn mag_squared(p: Point) -> f32 {
-    p.x * p.x + p.y * p.y
-}
-
-pub fn magnitude(p: Point) -> f32 {
-    mag_squared(p).sqrt()
-}
-
-pub fn scale(k: f32, p: Point) -> Point {
-    Point::from_xy(k * p.x, k * p.y)
-}
-
-pub fn normalize(p: Point) -> Point {
-    let m = magnitude(p);
-    Point::from_xy(p.x / m, p.y / m)
-}
 pub trait BasicModel {
     fn width(&self) -> u32;
     fn height(&self) -> u32;

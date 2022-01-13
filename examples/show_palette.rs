@@ -28,5 +28,5 @@ fn main() {
             canvas.fill_rect(x, y, swatch_width, swatch_width, &paint);
         }
     }
-    canvas.save_png("./colors.png").unwrap();
+    canvas.save_png("./colors.png");
 }

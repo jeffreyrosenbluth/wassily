@@ -276,8 +276,8 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    pub fn stroke_texture(mut self, texture: &'a Paint) -> Self {
-        self.stroke_paint = Some(texture.clone());
+    pub fn stroke_paint(mut self, pain: &'a Paint) -> Self {
+        self.stroke_paint = Some(pain.clone());
         self
     }
 

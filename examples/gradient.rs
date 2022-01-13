@@ -13,8 +13,8 @@ fn main() {
         pt(600.0, 480.0),
         pt(600.0, 480.0),
         vec![
-            GradientStop::new(0.0, ORANGE.into()),
-            GradientStop::new(1.0, BLUE.into()),
+            GradientStop::new(0.0, *ORANGE),
+            GradientStop::new(1.0, *BLUE),
         ],
         SpreadMode::Pad,
         Transform::identity(),
@@ -26,8 +26,8 @@ fn main() {
         pt(600.0, 480.0),
         600.0,
         vec![
-            GradientStop::new(0.0, ORANGE.into()),
-            GradientStop::new(1.0, BLUE.into()),
+            GradientStop::new(0.0, *ORANGE),
+            GradientStop::new(1.0, *BLUE),
         ],
         SpreadMode::Pad,
         Transform::identity(),
@@ -61,5 +61,5 @@ fn main() {
         .build()
         .draw(&mut canvas);
 
-    canvas.save_png("gradient.png").unwrap();
+    canvas.save_png("gradient.png");
 }
