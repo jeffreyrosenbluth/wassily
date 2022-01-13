@@ -246,8 +246,10 @@ impl<'a> ShapeBuilder<'a> {
     }
 
     pub fn fill_color(mut self, color: Color) -> Self {
-        let mut paint = Paint::default();
-        paint.anti_alias = true;
+        let mut paint = Paint {
+            anti_alias: true,
+            ..Default::default()
+        };
         paint.set_color(color);
         self.fill_paint = Some(paint);
         self
@@ -269,8 +271,10 @@ impl<'a> ShapeBuilder<'a> {
     }
 
     pub fn stroke_color(mut self, color: Color) -> Self {
-        let mut paint = Paint::default();
-        paint.anti_alias = true;
+        let mut paint = Paint {
+            anti_alias: true,
+            ..Default::default()
+        };
         paint.set_color(color);
         self.stroke_paint = Some(paint);
         self
@@ -382,12 +386,13 @@ impl<'a> ShapeBuilder<'a> {
         if let Some(ss) = self.stroke_paint {
             stroke_paint = Box::new(Some(ss));
         };
-        let mut stroke = Stroke::default();
-        stroke.line_join = self.line_join;
-        stroke.line_cap = self.line_cap;
-        stroke.miter_limit = self.miter_limit;
-        stroke.width = self.stroke_width;
-        stroke.dash = self.stroke_dash;
+        let stroke = Stroke {
+            width: self.stroke_width,
+            miter_limit: self.miter_limit,
+            line_cap: self.line_cap,
+            line_join: self.line_join,
+            dash: self.stroke_dash,
+        };
         Shape::new(
             self.points,
             fill_paint,

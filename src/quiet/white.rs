@@ -10,7 +10,7 @@ pub fn prf(seed: u32, x: u32) -> f64 {
 pub fn prf2(seed: u32, x: u32, y: u32) -> f64 {
     let t = format!("{},{},{}", seed, x, y);
     let h = calculate_hash(t) % 1_000_000_000;
-    (h + 1) as f64 / 1_000_000_001 as f64
+    (h + 1) as f64 / 1_000_000_001.0
 }
 
 pub fn box_muller(seed: u32, x: u32, y: u32) -> (f64, f64) {

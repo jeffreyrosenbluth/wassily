@@ -74,8 +74,7 @@ impl Canvas {
     }
 
     pub fn stroke_path(&mut self, path: &Path, weight: f32, paint: &Paint) {
-        let mut stroke = Stroke::default();
-        stroke.width = weight;
+        let stroke = Stroke {width: weight, ..Default::default()};
         self.0
             .stroke_path(path, paint, &stroke, Transform::identity(), None);
     }
@@ -105,15 +104,11 @@ impl Canvas {
 }
 
 pub fn paint_solid<'a>(color: Color) -> Paint<'a> {
-    let mut paint = Paint::default();
-    paint.anti_alias = true;
+    let mut paint = Paint {anti_alias: true, ..Default::default() };
     paint.set_color(color);
     paint
 }
 
 pub fn paint_shader<'a>(shader: Shader<'a>) -> Paint<'a> {
-    let mut paint = Paint::default();
-    paint.anti_alias = true;
-    paint.shader = shader;
-    paint
+    Paint {anti_alias: true, shader, ..Default::default() }
 }

@@ -25,7 +25,7 @@ impl Grain {
         }
         Grain(canvas)
     }
-    pub fn grain<'a>(&'a self) -> Paint<'a> {
+    pub fn grain(&self) -> Paint {
         let pattern = Pattern::new(
             self.0.as_ref(),
             SpreadMode::Repeat,
