@@ -150,6 +150,18 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
         .collect()
 }
 
+pub fn bias(b: f32, t: f32) -> f32 {
+    t / ((1.0 / b - 2.0) * (1.0 - t) + 1.0)
+}
+
+pub fn gain(g: f32, t: f32) -> f32 {
+    if t < 0.5 {
+        bias(g, 2.0 * t) / 2.0
+    } else {
+        bias(1.0 - g, 2.0 * t - 1.0) / 2.0 + 0.5
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Orientation {
     Horizontal,

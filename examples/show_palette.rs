@@ -20,7 +20,7 @@ fn main() {
                 break;
             }
             let c = palette[(i * n + j)];
-            let c8 = as_u8s(c);
+            let c8 = c.as_u8s();
             let paint = paint_solid(c);
             println!("({:2}, {:2}) : [{}, {}, {}]", j, i, c8.0, c8.1, c8.2);
             let x = j as f32 * swatch_width;

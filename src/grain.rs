@@ -25,6 +25,7 @@ impl Grain {
         }
         Grain(canvas)
     }
+
     pub fn grain(&self) -> Paint {
         let pattern = Pattern::new(
             self.0.as_ref(),
@@ -36,5 +37,16 @@ impl Grain {
         let mut p = paint_shader(pattern);
         p.blend_mode = BlendMode::Overlay;
         p
+    }
+
+    pub fn canvas_grain(&self, canvas: &mut Canvas) {
+        let paint = self.grain();
+        canvas.fill_rect(
+            0.0,
+            0.0,
+            canvas.width() as f32,
+            canvas.height() as f32,
+            &paint,
+        );
     }
 }

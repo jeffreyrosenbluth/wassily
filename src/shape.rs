@@ -1,3 +1,4 @@
+use crate::prelude::{pt, TAU};
 use num_traits::AsPrimitive;
 use tiny_skia::*;
 
@@ -338,6 +339,43 @@ impl<'a> ShapeBuilder<'a> {
             TaggedPoint::new(center),
             TaggedPoint::new(Point::from_xy(radius, radius)),
         ];
+        self
+    }
+
+    pub fn polygon(mut self, center: Point, radius: f32, sides: u32) -> Self {
+        self.shape = ShapeType::Poly;
+        let mut theta = 0.0;
+        let delta = TAU / sides as f32;
+        let mut pts = vec![];
+        while theta < TAU {
+            pts.push(TaggedPoint::new(pt(
+                center.x + radius * theta.cos(),
+                center.y + radius * theta.sin(),
+            )));
+            theta += delta;
+        }
+        self.points = pts;
+        self
+    }
+
+    pub fn star(mut self, center: Point, radius1: f32, radius2: f32, sides: u32) -> Self {
+        self.shape = ShapeType::Poly;
+        let mut theta = 0.0;
+        let delta = TAU / sides as f32;
+        let half_delta = delta / 2.0;
+        let mut pts = vec![];
+        while theta < TAU {
+            pts.push(TaggedPoint::new(pt(
+                center.x + radius2 * theta.cos(),
+                center.y + radius2 * theta.sin(),
+            )));
+            pts.push(TaggedPoint::new(pt(
+                center.x + radius1 * (theta + half_delta).cos(),
+                center.y + radius1 * (theta + half_delta).sin(),
+            )));
+            theta += delta;
+        }
+        self.points = pts;
         self
     }
 

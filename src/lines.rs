@@ -1,10 +1,14 @@
-use crate::{quiet::*, prelude::{pt, normalize, magnitude}};
+use crate::canvas::Canvas;
+use crate::prelude::paint_solid;
 use crate::util::Rand;
+use crate::{
+    prelude::{magnitude, normalize, pt},
+    quiet::*,
+};
 use noise::OpenSimplex;
 use rand::prelude::*;
 use rand_distr::{Distribution, Normal};
 use tiny_skia::{Color, Point};
-use crate::canvas::Canvas;
 
 pub struct SandLine {
     pub start: Point,
@@ -67,12 +71,15 @@ impl SandLine {
             let mut delta = 1.0;
             for i in 0..self.grains {
                 let a = 0.1 - i as f32 / (10.0 * self.grains as f32);
-                let x = x + delta * n.x * self.thickness / 2.0 * (i as f32 * w);
-                let y = y + delta * n.y * self.thickness / 2.0 * (i as f32 * w);
+                let x = (x + delta * n.x * self.thickness / 2.0 * (i as f32 * w))
+                    .clamp(0.0, canvas.width() as f32 - 1.0);
+                let y = (y + delta * n.y * self.thickness / 2.0 * (i as f32 * w))
+                    .clamp(0.0, canvas.height() as f32 - 1.0);
                 delta *= -1.0;
                 let mut color = self.color;
                 color.set_alpha(a);
-                canvas.dot(x, y, color);
+                let paint = paint_solid(color);
+                canvas.fill_rect(x, y, 1.0, 1.0, &paint)
             }
         }
     }
@@ -146,7 +153,7 @@ impl DotLine {
                 a = a.clamp(0.0, 1.0);
                 c.set_alpha(a);
                 let q = pt(p.x + r * n.x + nx, p.y + r * n.y + ny);
-                canvas.dot( q.x, q.y, c);
+                canvas.dot(q.x, q.y, c);
             }
         }
     }
