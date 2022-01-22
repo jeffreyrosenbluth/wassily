@@ -57,6 +57,10 @@ impl<T> Matrix<T> {
             true
         }
     }
+    
+    pub fn valid(&self, row: usize, col: usize) -> bool {
+        row < self.rows() && col < self.cols()
+    }
 }
 
 impl<T> Matrix<T>

@@ -4,6 +4,7 @@ use num_traits::{AsPrimitive, ToPrimitive};
 pub mod gabor;
 pub mod trig;
 pub mod white;
+pub mod curl;
 
 #[derive(Debug, Clone, Copy)]
 pub struct NoiseOpts {
@@ -125,6 +126,10 @@ pub fn noise2d(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f3
         )
 }
 
+pub fn noise2d_01(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f32 {
+    0.5 * noise2d(&nf, &opts, x, y) + 0.5
+}
+
 pub fn noise3d(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f32) -> f32 {
     let cx = opts.width / 2.0;
     let cy = opts.height / 2.0;
@@ -137,4 +142,8 @@ pub fn noise3d(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f3
                 opts.z_scale * z,
             ],
         )
+}
+
+pub fn noise3d_01(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f32) -> f32 {
+    0.5 * noise3d(&nf, &opts, x, y, z) + 0.5
 }
