@@ -1,3 +1,4 @@
+use std::f64::consts::PI;
 use noise::NoiseFn;
 
 pub struct Curl<T> {
@@ -31,6 +32,6 @@ where
         let y1 = y + self.eps;
         let dfdx = (self.source.get([x1, y]) - self.source.get([x0, y])) / (2.0 * self.eps);
         let dfdy = (self.source.get([x, y1]) - self.source.get([x, y0])) / (2.0 * self.eps);
-        dfdy.atan2(-dfdx)
+        dfdy.atan2(-dfdx) / PI
     }
 }

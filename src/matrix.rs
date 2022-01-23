@@ -58,8 +58,8 @@ impl<T> Matrix<T> {
         }
     }
     
-    pub fn valid(&self, row: usize, col: usize) -> bool {
-        row < self.rows() && col < self.cols()
+    pub fn valid<U: Into<usize>>(&self, row: U, col: U) -> bool {
+        row.into() < self.rows() && col.into() < self.cols()
     }
 }
 
@@ -142,7 +142,6 @@ impl<T> IndexMut<usize> for Matrix<T> {
         &mut self.data[start..start + self.cols]
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
