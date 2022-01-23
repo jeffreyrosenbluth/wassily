@@ -41,7 +41,7 @@ pub trait Colorful {
 
 impl Colorful for Color {
     fn opacity(&self, alpha: f32) -> Self {
-        let mut c = self.clone();
+        let mut c = *self;
         c.set_alpha(alpha);
         c
     }

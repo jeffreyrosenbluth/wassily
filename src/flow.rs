@@ -50,7 +50,7 @@ impl Vertex {
                 break;
             }
             for v in &grid[c.0 as usize][c.1 as usize] {
-                d = self.dist2(&v);
+                d = self.dist2(v);
                 if d < min_dist {
                     min_dist = d;
                 }
