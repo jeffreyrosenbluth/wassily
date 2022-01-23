@@ -1,5 +1,5 @@
 use crate::prelude::pt;
-use crate::quiet::*;
+use crate::noises::*;
 use crate::shape::*;
 use crate::util::*;
 use noise::Perlin;

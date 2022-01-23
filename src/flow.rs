@@ -1,6 +1,6 @@
 use crate::matrix::*;
 use crate::prelude::pt;
-use crate::quiet::{noise2d, NoiseOpts};
+use crate::noises::{noise2d, NoiseOpts};
 use noise::NoiseFn;
 use std::collections::VecDeque;
 use std::f32::consts::PI;

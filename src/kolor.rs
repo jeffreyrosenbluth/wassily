@@ -1,6 +1,6 @@
 //! Utilities to manage colors and palettes.
 
-use crate::quiet::white::normal_xy;
+use crate::noises::white::normal_xy;
 use color_thief::{get_palette, ColorFormat};
 use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;

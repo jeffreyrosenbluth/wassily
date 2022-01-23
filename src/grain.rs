@@ -1,6 +1,6 @@
 use crate::canvas::{paint_shader, Canvas};
 use crate::kolor::rgb;
-use crate::quiet::{noise2d, NoiseOpts};
+use crate::noises::{noise2d, NoiseOpts};
 use noise::{Fbm, Perlin};
 use tiny_skia::{BlendMode, FilterQuality, Paint, Pattern, SpreadMode, Transform};
 

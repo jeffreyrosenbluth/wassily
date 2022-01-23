@@ -3,7 +3,7 @@ use crate::prelude::paint_solid;
 use crate::util::Rand;
 use crate::{
     prelude::{magnitude, normalize, pt},
-    quiet::*,
+    noises::*,
 };
 use noise::OpenSimplex;
 use rand::prelude::*;

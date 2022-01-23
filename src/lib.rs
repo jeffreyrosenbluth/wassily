@@ -6,7 +6,7 @@ pub mod kolor;
 pub mod lines;
 pub mod matrix;
 pub mod prelude;
-pub mod quiet;
+pub mod noises;
 pub mod rectangles;
 pub mod shape;
 pub mod subdivision;
