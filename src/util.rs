@@ -143,8 +143,8 @@ pub fn halton(index: u32, base: u32) -> f32 {
 pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
     let mut rng = rand::thread_rng();
     let k: u32 = rng.gen();
-    let xs = (k..n + k - 1).map(|i| halton(i, 2));
-    let ys = (k..n + k - 1).map(|i| halton(i, 3));
+    let xs = (k..n + k).map(|i| halton(i, 2));
+    let ys = (k..n + k).map(|i| halton(i, 3));
     xs.zip(ys)
         .map(|p| Point::from_xy(p.0 * width.as_(), p.1 * height.as_()))
         .collect()

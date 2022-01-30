@@ -114,14 +114,12 @@ pub fn get_f32<const N: usize>(nf: impl NoiseFn<f64, N>, point: [f32; N]) -> f32
 }
 
 pub fn noise2d(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f32 {
-    let cx = opts.width / 2.0;
-    let cy = opts.height / 2.0;
     opts.factor
         * get_f32(
             nf,
             [
-                (1.0 / cx * opts.x_scale * (x - cx)),
-                (1.0 / cy * opts.y_scale * (y - cy)),
+                1.0 / opts.width * opts.x_scale * x,
+                1.0 / opts.height * opts.y_scale * y,
             ],
         )
 }
@@ -131,14 +129,12 @@ pub fn noise2d_01(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) ->
 }
 
 pub fn noise3d(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f32) -> f32 {
-    let cx = opts.width / 2.0;
-    let cy = opts.height / 2.0;
     opts.factor
         * get_f32(
             nf,
             [
-                (1.0 / cx * opts.x_scale * (x - cx)),
-                (1.0 / cy * opts.y_scale * (y - cy)),
+                1.0 / opts.width * opts.x_scale * x,
+                1.0 / opts.height * opts.y_scale * y,
                 opts.z_scale * z,
             ],
         )

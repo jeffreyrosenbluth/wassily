@@ -48,7 +48,7 @@ impl Default for White {
 
 impl NoiseFn<f64, 2> for White {
     fn get(&self, point: [f64; 2]) -> f64 {
-        prf2(8765321, point[0] as u32, point[1] as u32) * self.factor
+        prf2(524287, point[0] as u32, point[1] as u32) * self.factor
     }
 }
 
@@ -74,6 +74,6 @@ impl Default for Guassian {
 
 impl NoiseFn<f64, 2> for Guassian {
     fn get(&self, point: [f64; 2]) -> f64 {
-        normal_xy(8765321, point[0] as u32, point[1] as u32) * self.std + self.mean
+        normal_xy(524287, point[0] as u32, point[1] as u32) * self.std + self.mean
     }
 }
