@@ -1,8 +1,8 @@
 use crate::matrix::*;
-use crate::prelude::pt;
 use crate::noises::{noise2d, NoiseOpts};
+use crate::prelude::pt;
+use crate::util::{center, Algebra};
 use noise::NoiseFn;
-use std::collections::VecDeque;
 use std::f32::consts::PI;
 use tiny_skia::Point;
 
@@ -66,6 +66,37 @@ impl Vertex {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct Obstacle {
+    pub location: Point,
+    pub radius: f32,
+    pub power: f32,
+}
+
+impl Obstacle {
+    pub fn new(location: Point, radius: f32, power: f32) -> Self {
+        Self {
+            location,
+            radius,
+            power,
+        }
+    }
+
+    pub fn contains(&self, p: Point) -> bool {
+        self.location.dist2(&p) < self.radius * self.radius
+    }
+}
+
+impl Default for Obstacle {
+    fn default() -> Self {
+        Self {
+            location: pt(0, 0),
+            radius: 200.0,
+            power: 200.0,
+        }
+    }
+}
+
 pub struct FlowField {
     pub grid: Grid,
     pub noise_function: Box<dyn NoiseFn<f64, 2>>,
@@ -75,6 +106,7 @@ pub struct FlowField {
     pub width: u32,
     pub height: u32,
     pub max_length: u32,
+    pub obstacles: Vec<Obstacle>,
 }
 
 impl FlowField {
@@ -87,6 +119,7 @@ impl FlowField {
         width: u32,
         height: u32,
         max_length: u32,
+        obstacles: Vec<Obstacle>,
     ) -> Self {
         Self {
             grid,
@@ -97,28 +130,59 @@ impl FlowField {
             width,
             height,
             max_length,
+            obstacles,
         }
     }
 
+    pub fn closest_obstacle(&self, p: Point) -> Option<Obstacle> {
+        if self.obstacles.is_empty() {
+            return None;
+        };
+        let mut closest = self.obstacles[0];
+        for o in self.obstacles.iter().skip(1) {
+            if p.dist2(&o.location) < p.dist2(&closest.location) {
+                closest = *o;
+            }
+        }
+        Some(closest)
+    }
+
     pub fn curve(&mut self, x: f32, y: f32) -> Vec<Point> {
-        let mut pts: VecDeque<Vertex> = VecDeque::new();
+        if self.obstacles.iter().any(|o| o.contains(pt(x, y))) {
+            return vec![];
+        }
+        let mut vertices: Vec<Vertex> = Vec::new();
         let mut theta = noise2d(&self.noise_function, &self.noise_opts, x, y) * PI;
         let v = Vertex::new(x, y, theta, self.sepration);
         if v.distance(self.width, self.height, &self.grid) < self.sepration {
             return vec![];
         }
-        pts.push_back(v);
-        let mut p: Vertex;
+        vertices.push(v);
+        let mut v: Vertex;
         let mut x1: f32;
         let mut y1: f32;
         let mut v1: Vertex;
+        let mut obstacle: Option<Obstacle>;
         for _ in 0..self.max_length {
-            p = *pts.back().unwrap();
-            x1 = p.x + self.step_size * p.theta.cos();
-            y1 = p.y + self.step_size * p.theta.sin();
+            v = *vertices.last().unwrap();
+            x1 = v.x + self.step_size * v.theta.cos();
+            y1 = v.y + self.step_size * v.theta.sin();
             theta = noise2d(&self.noise_function, &self.noise_opts, x1, y1) * PI;
+
+            obstacle = self.closest_obstacle(pt(x1, y1));
+            if obstacle.is_some() {
+                let p = pt(v.x, v.y);
+                let c = obstacle.unwrap().location;
+                let d = p.dist(&c) / obstacle.unwrap().power;
+                let t = (1.0 / (d + 1.0)).clamp(0.0, 1.0);
+                let dir = p - c;
+                let a = dir.y.atan2(dir.x);
+                theta = theta * (1.0 - t) + a * t;
+            }
+
             v1 = Vertex::new(x1, y1, theta, self.sepration);
-            if v1.distance(self.width, self.height, &self.grid) < self.sepration
+            if (v1.distance(self.width, self.height, &self.grid) < self.sepration
+                && self.sepration > 0.0)
                 || v1.x > self.width as f32 - 1.0
                 || v1.y > self.height as f32 - 1.0
                 || v1.x < 0.0
@@ -126,30 +190,16 @@ impl FlowField {
             {
                 break;
             } else {
-                pts.push_back(v1);
+                vertices.push(v1);
             }
         }
-        for _ in 0..self.max_length {
-            p = *pts.front().unwrap();
-            x1 = p.x - self.step_size * p.theta.cos();
-            y1 = p.y - self.step_size * p.theta.sin();
-            theta = noise2d(&self.noise_function, &self.noise_opts, x1, y1) * PI;
-            v1 = Vertex::new(x1, y1, theta, self.sepration);
-            if v1.distance(self.width, self.height, &self.grid) < self.sepration
-                || v1.x > self.width as f32 - 1.0
-                || v1.y > self.height as f32 - 1.0
-                || v1.x < 0.0
-                || v1.y < 0.0
-            {
+        for v in vertices.iter() {
+            if self.sepration <= 0.0 {
                 break;
-            } else {
-                pts.push_front(v1);
             }
-        }
-        for v in pts.iter() {
             self.grid[v.cell.0 as usize][v.cell.1 as usize].push(*v);
         }
-        pts.into_iter().map(|v| v.to_point()).collect()
+        vertices.into_iter().map(|v| v.to_point()).collect()
     }
 }
 

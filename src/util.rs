@@ -1,15 +1,17 @@
-use std::{
-    fs::{create_dir, File},
-    io::Write,
-    path::PathBuf, hash::{Hash, Hasher}, collections::hash_map::DefaultHasher,
-};
-use tiny_skia::{Pixmap, Point};
 use crate::prelude::BasicModel;
 use chrono::prelude::Utc;
 use num_traits::{AsPrimitive, FromPrimitive};
 use rand::{Rng, SeedableRng};
 use rand_distr::{uniform::SampleUniform, Distribution, Normal};
 use rand_pcg::Pcg64;
+use std::{
+    collections::hash_map::DefaultHasher,
+    fs::{create_dir, File},
+    hash::{Hash, Hasher},
+    io::Write,
+    path::PathBuf,
+};
+use tiny_skia::{Pixmap, Point};
 
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
@@ -30,21 +32,63 @@ where
     Point::from_xy(r.as_() * theta.as_().cos(), r.as_() * theta.as_().sin())
 }
 
-pub fn mag_squared(p: Point) -> f32 {
-    p.x * p.x + p.y * p.y
+pub fn center<S, T>(width: S, height: T) -> Point
+where
+    S: AsPrimitive<f32>,
+    T: AsPrimitive<f32>,
+{
+    Point::from_xy(width.as_() / 2.0, height.as_() / 2.0)
 }
 
-pub fn magnitude(p: Point) -> f32 {
-    mag_squared(p).sqrt()
+pub trait Algebra {
+    fn mag_squared(&self) -> f32;
+    fn magnitude(&self) -> f32;
+    fn scale(&self, k: f32) -> Self;
+    fn normalize(&self) -> Self;
+    fn lerp(&self, other: &Self, t: f32) -> Self;
+    fn average(&self, other: &Self) -> Self
+    where
+        Self: Sized,
+    {
+        self.lerp(other, 0.5)
+    }
+    fn dist2(&self, other: &Self) -> f32;
+    fn dist(&self, other: &Self) -> f32;
 }
 
-pub fn scale(k: f32, p: Point) -> Point {
-    Point::from_xy(k * p.x, k * p.y)
-}
+impl Algebra for Point {
+    fn mag_squared(&self) -> f32 {
+        self.x * self.x + self.y * self.y
+    }
 
-pub fn normalize(p: Point) -> Point {
-    let m = magnitude(p);
-    Point::from_xy(p.x / m, p.y / m)
+    fn magnitude(&self) -> f32 {
+        self.mag_squared().sqrt()
+    }
+
+    fn scale(&self, k: f32) -> Self {
+        Point::from_xy(k * self.x, k * self.y)
+    }
+
+    fn normalize(&self) -> Self {
+        let m = self.magnitude();
+        self.scale(1.0 / m)
+    }
+
+    fn lerp(&self, other: &Self, t: f32) -> Self {
+        let x = self.x * (1.0 - t) + t * other.x;
+        let y = self.y * (1.0 - t) + t * other.y;
+        Self::from_xy(x, y)
+    }
+
+    fn dist2(&self, other: &Self) -> f32 {
+       pt(self.x - other.x, self.y - other.y).mag_squared() 
+    }
+
+    fn dist(&self, other: &Self) -> f32 {
+       pt(self.x - other.x, self.y - other.y).magnitude()
+    }
+
+
 }
 
 pub fn save_sketch<T>(model: &T, canvas: &Pixmap)
@@ -72,7 +116,6 @@ where
     let mut output = File::create(data_name).unwrap();
     write!(output, "{}", json).unwrap();
 }
-
 
 pub fn calculate_hash<T: Hash>(t: T) -> u64 {
     let mut s = DefaultHasher::new();

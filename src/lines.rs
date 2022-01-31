@@ -2,7 +2,7 @@ use crate::canvas::Canvas;
 use crate::prelude::paint_solid;
 use crate::util::Rand;
 use crate::{
-    prelude::{magnitude, normalize, pt},
+    prelude::{Algebra, pt},
     noises::*,
 };
 use noise::OpenSimplex;
@@ -53,8 +53,8 @@ impl SandLine {
 
     pub fn draw(&mut self, canvas: &mut Canvas) {
         let v: Point = self.end - self.start;
-        let n: Point = normalize(pt(v.y, -v.x)); // n . v == 0, n is the normal.
-        let length = magnitude(v);
+        let n: Point = (pt(v.y, -v.x)).normalize(); // n . v == 0, n is the normal.
+        let length = v.magnitude();
         for t in 0..length as u32 {
             let t = t as f32 / length;
             let x = self.start.x + t * v.x;
@@ -137,10 +137,10 @@ impl DotLine {
         );
         let nf = OpenSimplex::default();
         let v: Point = self.end - self.start;
-        let n: Point = normalize(pt(v.y, -v.x)); // n . v == 0, n is the normal.
+        let n: Point = (pt(v.y, -v.x)).normalize(); // n . v == 0, n is the normal.
         let mut rng = thread_rng();
         let normal = Normal::new(0.0, self.stdev).unwrap();
-        let length = magnitude(v);
+        let length = v.magnitude();
         let mut c = self.color;
         for t in 0..length as u32 {
             let t = t as f32 / length;
