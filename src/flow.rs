@@ -1,7 +1,7 @@
 use crate::matrix::*;
 use crate::noises::{noise2d, NoiseOpts};
 use crate::prelude::pt;
-use crate::util::{center, Algebra};
+use crate::util::Algebra;
 use noise::NoiseFn;
 use std::f32::consts::PI;
 use tiny_skia::Point;
@@ -83,7 +83,7 @@ impl Obstacle {
     }
 
     pub fn contains(&self, p: Point) -> bool {
-        self.location.dist2(&p) < self.radius * self.radius
+        self.location.dist2(p) < self.radius * self.radius
     }
 }
 
@@ -140,7 +140,7 @@ impl FlowField {
         };
         let mut closest = self.obstacles[0];
         for o in self.obstacles.iter().skip(1) {
-            if p.dist2(&o.location) < p.dist2(&closest.location) {
+            if p.dist2(o.location) < p.dist2(closest.location) {
                 closest = *o;
             }
         }
@@ -173,7 +173,7 @@ impl FlowField {
             if obstacle.is_some() {
                 let p = pt(v.x, v.y);
                 let c = obstacle.unwrap().location;
-                let d = p.dist(&c) / obstacle.unwrap().power;
+                let d = p.dist(c) / obstacle.unwrap().power;
                 let t = (1.0 / (d + 1.0)).clamp(0.0, 1.0);
                 let dir = p - c;
                 let a = dir.y.atan2(dir.x);

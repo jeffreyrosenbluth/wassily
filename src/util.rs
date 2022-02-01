@@ -1,4 +1,4 @@
-use crate::prelude::BasicModel;
+use crate::{matrix::Matrix, prelude::BasicModel};
 use chrono::prelude::Utc;
 use num_traits::{AsPrimitive, FromPrimitive};
 use rand::{Rng, SeedableRng};
@@ -10,6 +10,7 @@ use std::{
     hash::{Hash, Hasher},
     io::Write,
     path::PathBuf,
+    vec,
 };
 use tiny_skia::{Pixmap, Point};
 
@@ -40,55 +41,52 @@ where
     Point::from_xy(width.as_() / 2.0, height.as_() / 2.0)
 }
 
-pub trait Algebra {
-    fn mag_squared(&self) -> f32;
-    fn magnitude(&self) -> f32;
-    fn scale(&self, k: f32) -> Self;
-    fn normalize(&self) -> Self;
-    fn lerp(&self, other: &Self, t: f32) -> Self;
-    fn average(&self, other: &Self) -> Self
-    where
-        Self: Sized,
-    {
-        self.lerp(other, 0.5)
-    }
-    fn dist2(&self, other: &Self) -> f32;
-    fn dist(&self, other: &Self) -> f32;
-}
+pub trait Algebra: Copy {
+    fn scale(self, k: f32) -> Self;
+    fn lerp(self, other: Self, t: f32) -> Self;
+    fn mag_squared(self) -> f32;
+    fn dist2(self, other: Self) -> f32;
+    fn dot(self, other: Self) -> f32;
 
-impl Algebra for Point {
-    fn mag_squared(&self) -> f32 {
-        self.x * self.x + self.y * self.y
-    }
-
-    fn magnitude(&self) -> f32 {
+    fn magnitude(self) -> f32 {
         self.mag_squared().sqrt()
     }
 
-    fn scale(&self, k: f32) -> Self {
+    fn normalize(self) -> Self {
+        self.scale(1.0 / self.magnitude())
+    }
+
+    fn average(self, other: Self) -> Self {
+        self.lerp(other, 0.5)
+    }
+
+    fn dist(self, other: Self) -> f32 {
+        self.dist2(other).sqrt()
+    }
+}
+
+impl Algebra for Point {
+    fn mag_squared(self) -> f32 {
+        self.x * self.x + self.y * self.y
+    }
+
+    fn scale(self, k: f32) -> Self {
         Point::from_xy(k * self.x, k * self.y)
     }
 
-    fn normalize(&self) -> Self {
-        let m = self.magnitude();
-        self.scale(1.0 / m)
-    }
-
-    fn lerp(&self, other: &Self, t: f32) -> Self {
+    fn lerp(self, other: Self, t: f32) -> Self {
         let x = self.x * (1.0 - t) + t * other.x;
         let y = self.y * (1.0 - t) + t * other.y;
         Self::from_xy(x, y)
     }
 
-    fn dist2(&self, other: &Self) -> f32 {
-       pt(self.x - other.x, self.y - other.y).mag_squared() 
+    fn dist2(self, other: Self) -> f32 {
+        pt(self.x - other.x, self.y - other.y).mag_squared()
     }
 
-    fn dist(&self, other: &Self) -> f32 {
-       pt(self.x - other.x, self.y - other.y).magnitude()
+    fn dot(self, other: Self) -> f32 {
+        self.x * other.x + self.y * other.y
     }
-
-
 }
 
 pub fn save_sketch<T>(model: &T, canvas: &Pixmap)
@@ -193,6 +191,74 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
         .collect()
 }
 
+pub fn poisson_disk(width: f32, height: f32, radius: f32) -> Vec<Point> {
+    const K: usize = 30;
+    let mut rng = Pcg64::seed_from_u64(0);
+    let cell_size = radius / 2f32.sqrt();
+    let cols = (width / cell_size).ceil() as usize;
+    let rows = (height / cell_size).ceil() as usize;
+    let mut grid: Matrix<Option<Point>> = Matrix::fill(rows, cols, None);
+    let p0 = pt(rng.gen_range(0.0..width), rng.gen_range(0.0..height));
+    let mut active = vec![p0];
+    let mut ps = vec![p0];
+    let x0 = (p0.y / cell_size).floor() as usize;
+    let y0 = (p0.x / cell_size).floor() as usize;
+    grid[x0][y0] = Some(p0);
+
+    let neighbors = |i: usize, j: usize| -> Vec<(usize, usize)> {
+        let i = i as i32;
+        let j = j as i32;
+        let mut x;
+        let mut y;
+        let mut cells = vec![];
+        for di in -1..=1 {
+            x = i + di;
+            if !(0..rows as i32).contains(&x) {
+                continue;
+            }
+            for dj in -1..=1 {
+                y = j + dj;
+                if (0..cols as i32).contains(&y) {
+                    cells.push((x as usize, y as usize));
+                }
+            }
+        }
+        cells
+    };
+
+    while active.len() > 0 {
+        let mut found = false;
+        let j = rng.gen_range(0..active.len());
+        let p = active[j];
+        for _ in 0..K {
+            let theta = rng.gen_range(0.0..TAU);
+            let r1 = rng.gen_range(radius..(2.0 * radius));
+            let p1 = pt(p.x + r1 * theta.cos(), p.y + r1 * theta.sin());
+            let xi = (p1.y / cell_size).floor() as usize;
+            let yi = (p1.x / cell_size).floor() as usize;
+            if neighbors(xi, yi).iter().any(|(a, b)| {
+                let g = grid[*a][*b];
+                g.is_some() && g.unwrap().dist2(p1) < radius * radius
+            }) || p1.x < 0.0
+                || p1.x >= width
+                || p1.y < 0.0
+                || p1.y >= height
+            {
+                continue;
+            }
+            active.push(p1);
+            ps.push(p1);
+            grid[xi][yi] = Some(p1);
+            found = true;
+            break;
+        }
+        if !found {
+            active.remove(j);
+        }
+    }
+    ps
+}
+
 pub fn bias(b: f32, t: f32) -> f32 {
     t / ((1.0 / b - 2.0) * (1.0 - t) + 1.0)
 }
@@ -227,5 +293,10 @@ mod tests {
         assert_eq!(halton(1, 3), 1.0 / 3.0);
         assert_eq!(halton(3, 3), 1.0 / 9.0);
         assert_eq!(halton(6, 3), 2.0 / 9.0);
+    }
+
+    #[test]
+    fn poisson_disk_test() {
+        dbg!(poisson_disk(100.0, 100.0, 5.0).len());
     }
 }
