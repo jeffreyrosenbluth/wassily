@@ -20,7 +20,8 @@
 //! }
 //! ```
 
-use crate::prelude::{Orientation, Point};
+use crate::prelude::{Algebra, Orientation};
+use tiny_skia::Point;
 
 /// A Quadrilateral.
 /// Cartesian coordinates
@@ -45,8 +46,8 @@ impl Quad {
     pub fn split_h(&self, a: f32, b: f32) -> (Self, Self) {
         let u = self.tl - self.bl;
         let v = self.tr - self.br;
-        let p = self.bl + u * a;
-        let q = self.br + v * b;
+        let p = self.bl + u.scale(a);
+        let q = self.br + v.scale(b);
         (
             Self::new(self.bl, p, q, self.br),
             Self::new(p, self.tl, self.tr, q),
@@ -57,8 +58,8 @@ impl Quad {
     pub fn split_v(&self, a: f32, b: f32) -> (Self, Self) {
         let u = self.br - self.bl;
         let v = self.tr - self.tl;
-        let p = self.bl + u * a;
-        let q = self.tl + v * b;
+        let p = self.bl + u.scale(a);
+        let q = self.tl + v.scale(b);
         (
             Self::new(self.bl, self.tl, q, p),
             Self::new(p, q, self.tr, self.br),
@@ -171,7 +172,7 @@ impl Tri {
     /// Split the triangle from the bottom left vertex into tow triangles.
     pub fn split_bl(&self, a: f32) -> (Self, Self) {
         let u = self.top - self.br;
-        let p = self.br + u * a;
+        let p = self.br + u.scale(a);
         (
             Self::new(self.bl, self.top, p),
             Self::new(self.bl, p, self.br),
@@ -181,7 +182,7 @@ impl Tri {
     /// Split the triangle from the top vertex into tow triangles.
     pub fn split_top(&self, a: f32) -> (Self, Self) {
         let u = self.br - self.bl;
-        let p = self.bl + u * a;
+        let p = self.bl + u.scale(a);
         (
             Self::new(self.bl, self.top, p),
             Self::new(p, self.top, self.br),
@@ -191,7 +192,7 @@ impl Tri {
     /// Split the triangle from the bottom right vertex into tow triangles.
     pub fn split_br(&self, a: f32) -> (Self, Self) {
         let u = self.top - self.bl;
-        let p = self.bl + u * a;
+        let p = self.bl + u.scale(a);
         (
             Self::new(self.bl, p, self.br),
             Self::new(p, self.top, self.br),
@@ -223,9 +224,9 @@ impl Tri {
 
     /// Find the vertex opposite the longest side of the triangle.
     pub fn best_dir(&self) -> Vertex {
-        let bl = (self.top - self.br).length();
-        let top = (self.br - self.bl).length();
-        let br = (self.top - self.bl).length();
+        let bl = (self.top - self.br).mag_squared();
+        let top = (self.br - self.bl).mag_squared();
+        let br = (self.top - self.bl).mag_squared();
         let v = vec![(bl, Vertex::Bl), (top, Vertex::Top), (br, Vertex::Br)];
         let m = v
             .into_iter()

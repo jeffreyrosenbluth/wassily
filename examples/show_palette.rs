@@ -1,5 +1,4 @@
 use wassily::prelude::*;
-use wassily::skia::Canvas;
 
 const WIDTH: u32 = 1024;
 const NUM_COLORS: u8 = 32;
@@ -21,13 +20,13 @@ fn main() {
                 break;
             }
             let c = palette[(i * n + j)];
-            let c8 = c.as_tuple();
-            let texture = Texture::solid_color(c);
+            let c8 = c.as_u8s();
+            let paint = paint_solid(c);
             println!("({:2}, {:2}) : [{}, {}, {}]", j, i, c8.0, c8.1, c8.2);
             let x = j as f32 * swatch_width;
             let y = i as f32 * swatch_width;
-            canvas.fill_rect(x, y, swatch_width, swatch_width, &texture)
+            canvas.fill_rect(x, y, swatch_width, swatch_width, &paint);
         }
     }
-    canvas.save("colors.png");
+    canvas.save_png("./colors.png");
 }

@@ -8,18 +8,16 @@ edition = "2021"
 
 [dependencies]
 tiny-skia = {git = "https://github.com/RazrFalcon/tiny-skia.git", branch = "master" }
-raqote = "0.8"
 noise = { git = "https://github.com/Razaekel/noise-rs.git", branch = "develop" }
 rand = "0.8.3"
 rand_distr = "0.4"
 rand_pcg = "0.3"
 palette = "0.6"
-euclid = "0.20"
 image = "0.23"
-svg = "0.10"
 color-thief = "0.2"
 num-traits = "0.2"
 num-complex = "0.4"
 chrono = "0.4"
 serde_json = "1.0"
 serde = {version = "1.0", features = ["derive"]}
+once_cell = "1.9"

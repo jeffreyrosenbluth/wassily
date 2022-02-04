@@ -4,13 +4,13 @@ use noise::NoiseFn;
 pub fn prf(seed: u32, x: u32) -> f64 {
     let t = format!("{},{}", seed, x);
     let h = calculate_hash(t) % 1_000_000_000;
-    h as f64 / 1_000_000_000 as f64
+    (h + 1) as f64 / 1_000_000_001_f64
 }
 
 pub fn prf2(seed: u32, x: u32, y: u32) -> f64 {
     let t = format!("{},{},{}", seed, x, y);
     let h = calculate_hash(t) % 1_000_000_000;
-    h as f64 / 1_000_000_000 as f64
+    (h + 1) as f64 / 1_000_000_001.0
 }
 
 pub fn box_muller(seed: u32, x: u32, y: u32) -> (f64, f64) {
@@ -48,7 +48,7 @@ impl Default for White {
 
 impl NoiseFn<f64, 2> for White {
     fn get(&self, point: [f64; 2]) -> f64 {
-        prf2(8765321, point[0] as u32, point[1] as u32) * self.factor
+        prf2(524287, point[0] as u32, point[1] as u32) * self.factor
     }
 }
 
@@ -74,6 +74,6 @@ impl Default for Guassian {
 
 impl NoiseFn<f64, 2> for Guassian {
     fn get(&self, point: [f64; 2]) -> f64 {
-        normal_xy(8765321, point[0] as u32, point[1] as u32) * self.std + self.mean
+        normal_xy(524287, point[0] as u32, point[1] as u32) * self.std + self.mean
     }
 }
