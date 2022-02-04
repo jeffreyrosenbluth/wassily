@@ -320,139 +320,19 @@ impl NoiseFn<f64, 2> for FMCross {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct MDSynth {
-    pub carrier_freqs: [f64; 3],
-    pub modulator_freqs: [f64; 3],
-    pub indices: [f64; 3],
-}
-
-impl MDSynth {
-    pub fn new(carrier_freqs: [f64; 3], modulator_freqs: [f64; 3], indices: [f64; 3]) -> Self {
-        Self {
-            carrier_freqs,
-            modulator_freqs,
-            indices,
-        }
-    }
-
-    pub fn new2(
-        carrier_x: f64,
-        modulator_x: f64,
-        idx_x: f64,
-        carrier_y: f64,
-        modulator_y: f64,
-        idx_y: f64,
-    ) -> Self {
-        Self {
-            carrier_freqs: [carrier_x, carrier_y, 0.0],
-            modulator_freqs: [modulator_x, modulator_y, 0.0],
-            indices: [idx_x, idx_y, 0.0],
-        }
-    }
-
-    pub fn new3(
-        carrier_x: f64,
-        modulator_x: f64,
-        idx_x: f64,
-        carrier_y: f64,
-        modulator_y: f64,
-        idx_y: f64,
-        carrier_z: f64,
-        modulator_z: f64,
-        idx_z: f64,
-    ) -> Self {
-        Self {
-            carrier_freqs: [carrier_x, carrier_y, carrier_z],
-            modulator_freqs: [modulator_x, modulator_y, modulator_z],
-            indices: [idx_x, idx_y, idx_z],
-        }
-    }
-
-    pub fn carrier_x(mut self, freq: f64) -> Self {
-        self.carrier_freqs[0] = freq;
-        self
-    }
-
-    pub fn carrier_y(mut self, freq: f64) -> Self {
-        self.carrier_freqs[1] = freq;
-        self
-    }
-
-    pub fn carrier_z(mut self, freq: f64) -> Self {
-        self.carrier_freqs[2] = freq;
-        self
-    }
-
-    pub fn modulator_x(mut self, freq: f64) -> Self {
-        self.modulator_freqs[0] = freq;
-        self
-    }
-
-    pub fn modulator_y(mut self, freq: f64) -> Self {
-        self.modulator_freqs[1] = freq;
-        self
-    }
-
-    pub fn modulator_z(mut self, freq: f64) -> Self {
-        self.modulator_freqs[2] = freq;
-        self
-    }
-
-    pub fn idx_x(mut self, idx: f64) -> Self {
-        self.indices[0] = idx;
-        self
-    }
-
-    pub fn idx_y(mut self, idx: f64) -> Self {
-        self.indices[1] = idx;
-        self
-    }
-
-    pub fn idx_z(mut self, idx: f64) -> Self {
-        self.indices[2] = idx;
-        self
-    }
-}
-
-impl Default for MDSynth {
-    fn default() -> Self {
-        Self {
-            carrier_freqs: [1.0, 1.0, 1.0],
-            modulator_freqs: [0.1, 0.1, 0.1],
-            indices: [5.0, 5.0, 5.0],
-        }
-    }
-}
-
-impl NoiseFn<f64, 2> for MDSynth {
-    fn get(&self, point: [f64; 2]) -> f64 {
-        let fx = std::f64::consts::TAU * self.modulator_freqs[0] * point[0];
-        let xm =
-            std::f64::consts::TAU * self.carrier_freqs[0] * point[0] + self.indices[0] * fx.sin();
-
-        let fy = std::f64::consts::TAU * self.modulator_freqs[1] * point[1];
-        let ym =
-            std::f64::consts::TAU * self.carrier_freqs[1] * point[1] + self.indices[1] * fy.sin();
-
-        (xm + ym).sin()
-    }
-}
-
-impl NoiseFn<f64, 3> for MDSynth {
+impl NoiseFn<f64, 3> for FMCross {
     fn get(&self, point: [f64; 3]) -> f64 {
-        let fx = std::f64::consts::TAU * self.modulator_freqs[0] * point[0];
+        let fx = std::f64::consts::TAU * self.modulator_freqs[0] * point[2];
         let xm =
             std::f64::consts::TAU * self.carrier_freqs[0] * point[0] + self.indices[0] * fx.sin();
 
-        let fy = std::f64::consts::TAU * self.modulator_freqs[1] * point[1];
+        let fy = std::f64::consts::TAU * self.modulator_freqs[1] * point[0];
         let ym =
             std::f64::consts::TAU * self.carrier_freqs[1] * point[1] + self.indices[1] * fy.sin();
-
-        let fz = std::f64::consts::TAU * self.modulator_freqs[2] * point[2];
+        let fz = std::f64::consts::TAU * self.modulator_freqs[1] * point[1];
         let zm =
             std::f64::consts::TAU * self.carrier_freqs[2] * point[2] + self.indices[2] * fz.sin();
 
-        (xm + ym + zm).sin()
+        xm.sin() * ym.sin() * zm.sin()
     }
 }

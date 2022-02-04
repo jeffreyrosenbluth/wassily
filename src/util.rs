@@ -191,14 +191,20 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
         .collect()
 }
 
+// An improvement to Bridson's Algorithm for Poisson Disc sampling.
+// https://observablehq.com/@jrus/bridson-fork/2 
 pub fn poisson_disk(width: f32, height: f32, radius: f32) -> Vec<Point> {
-    const K: usize = 30;
+    // const K: usize = 30;
+    const K: usize = 11; // maximum number of samples before rejection
+    const M: f32 = 4.0; // a number mutually prime to k
+    const EPS: f32 = 0.0000001;
     let mut rng = Pcg64::seed_from_u64(0);
     let cell_size = radius / 2f32.sqrt();
     let cols = (width / cell_size).ceil() as usize;
     let rows = (height / cell_size).ceil() as usize;
     let mut grid: Matrix<Option<Point>> = Matrix::fill(rows, cols, None);
-    let p0 = pt(rng.gen_range(0.0..width), rng.gen_range(0.0..height));
+    // let p0 = pt(rng.gen_range(0.0..width), rng.gen_range(0.0..height));
+    let p0 = center(width, height);
     let mut active = vec![p0];
     let mut ps = vec![p0];
     let x0 = (p0.y / cell_size).floor() as usize;
@@ -230,9 +236,12 @@ pub fn poisson_disk(width: f32, height: f32, radius: f32) -> Vec<Point> {
         let mut found = false;
         let j = rng.gen_range(0..active.len());
         let p = active[j];
-        for _ in 0..K {
-            let theta = rng.gen_range(0.0..TAU);
-            let r1 = rng.gen_range(radius..(2.0 * radius));
+        let seed: f32 = rng.gen();
+        for i in 0..K {
+            // let theta = rng.gen_range(0.0..TAU);
+            let theta = 2.0 * PI * (seed + M * i as f32 / K as f32);
+            let r1: f32 = radius + EPS + radius * 0.5 * rng.gen::<f32>();
+            // let r1 = rng.gen_range(radius..(2.0 * radius));
             let p1 = pt(p.x + r1 * theta.cos(), p.y + r1 * theta.sin());
             let xi = (p1.y / cell_size).floor() as usize;
             let yi = (p1.x / cell_size).floor() as usize;
