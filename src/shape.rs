@@ -10,6 +10,7 @@ pub(crate) enum ShapeType {
     Rect,
     Circle,
     Line,
+    Ellipse,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -73,6 +74,7 @@ impl<'a> Shape<'a> {
             ShapeType::Rect => self.draw_rect(canvas),
             ShapeType::Circle => self.draw_circle(canvas),
             ShapeType::Line => self.draw_line(canvas),
+            ShapeType::Ellipse => self.draw_ellipse(canvas),
         }
     }
 
@@ -173,7 +175,7 @@ impl<'a> Shape<'a> {
 
     fn draw_circle(&self, canvas: &mut Pixmap) {
         if self.points.len() < 2 {
-            panic!("Ellipse points vector contains less than 2 points");
+            panic!("Circle points vector contains less than 2 points");
         }
         let cx = self.points[0].point.x;
         let cy = self.points[0].point.y;
@@ -187,6 +189,27 @@ impl<'a> Shape<'a> {
         }
         if let Some(sp) = *self.stroke_paint.clone() {
             canvas.stroke_path(&circle, &sp, &self.stroke, self.transform, None);
+        }
+    }
+
+    fn draw_ellipse(&self, canvas: &mut Pixmap) {
+        if self.points.len() < 2 {
+            panic!("Ellipse points vector contains less than 2 points");
+        }
+        let cx = self.points[0].point.x;
+        let cy = self.points[0].point.y;
+        let w = self.points[1].point.x;
+        let h = self.points[1].point.y;
+        let rect = Rect::from_xywh(cx - w / 2.0, cy - h / 2.0, w, h).unwrap();
+        let ellipse = PathBuilder::from_oval(rect).unwrap();
+        // let ellipse = PathBuilder::from_ellipse(cx, cy, w, h).unwrap();
+        if let Some(fp) = *self.fill_paint.clone() {
+            canvas
+                .fill_path(&ellipse, &fp, self.fillrule, self.transform, None)
+                .expect("cannot draw circle")
+        }
+        if let Some(sp) = *self.stroke_paint.clone() {
+            canvas.stroke_path(&ellipse, &sp, &self.stroke, self.transform, None);
         }
     }
 
@@ -338,6 +361,15 @@ impl<'a> ShapeBuilder<'a> {
         self.points = vec![
             TaggedPoint::new(center),
             TaggedPoint::new(Point::from_xy(radius, radius)),
+        ];
+        self
+    }
+
+    pub fn ellipse(mut self, center: Point, width: f32, height: f32) -> Self {
+        self.shape = ShapeType::Ellipse;
+        self.points = vec![
+            TaggedPoint::new(center),
+            TaggedPoint::new(Point::from_xy(width, height))
         ];
         self
     }
