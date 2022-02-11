@@ -1,5 +1,3 @@
-use std::f64::consts::PI;
-
 use wassily::prelude::*;
 
 const SIZE: u32 = 1080;
