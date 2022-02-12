@@ -224,9 +224,9 @@ impl Tri {
 
     /// Find the vertex opposite the longest side of the triangle.
     pub fn best_dir(&self) -> Vertex {
-        let bl = (self.top - self.br).mag_squared();
-        let top = (self.br - self.bl).mag_squared();
-        let br = (self.top - self.bl).mag_squared();
+        let bl = (self.top - self.br).mag2();
+        let top = (self.br - self.bl).mag2();
+        let br = (self.top - self.bl).mag2();
         let v = vec![(bl, Vertex::Bl), (top, Vertex::Top), (br, Vertex::Br)];
         let m = v
             .into_iter()

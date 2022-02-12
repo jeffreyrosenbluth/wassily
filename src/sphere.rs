@@ -75,7 +75,7 @@ impl<'a> SphereScene<'a> {
             1.0
         } else {
             let mut normal = point - self.center;
-            normal = normal * (1.0 / normal.dot_prod(&normal).sqrt());
+            normal = normal * (1.0 / normal.dot(normal).sqrt());
             lighting(&self.lights, point, normal, self.center, self.specular)
         };
         illumination = illumination.clamp(0.0, 1.0);
@@ -87,9 +87,9 @@ impl<'a> SphereScene<'a> {
 
     pub fn intersect(&self, direction: Point3) -> Option<(f32, f32)> {
         let w = self.camera - self.center;
-        let a = direction.dot_prod(&direction);
-        let b = 2.0 * w.dot_prod(&direction);
-        let c = w.dot_prod(&w) - self.radius * self.radius;
+        let a = direction.dot(direction);
+        let b = 2.0 * w.dot(direction);
+        let c = w.dot(w) - self.radius * self.radius;
         let discr = b * b - 4.0 * a * c;
         if discr < 0.0 {
             return None;
@@ -105,7 +105,7 @@ impl<'a> SphereScene<'a> {
             let p = self.camera + direction * t;
             return Some(self.color(p));
         }
-        return None;
+        None
     }
 
     pub fn on_sphere(&self, canvas: &mut Canvas) {
@@ -159,7 +159,7 @@ impl Light {
         }
     }
 
-    pub fn direct(intensity: f32, x: f32, y: f32, z: f32) -> Self {
+    pub fn point(intensity: f32, x: f32, y: f32, z: f32) -> Self {
         let vector = Point3::new(x, y, z);
         Self {
             source: LightSource::Point,
@@ -179,7 +179,7 @@ impl Light {
 }
 
 pub fn lighting(
-    lights: &Vec<Light>,
+    lights: &[Light],
     point: Point3,
     normal: Point3,
     camera: Point3,
@@ -195,12 +195,12 @@ pub fn lighting(
         match light.source {
             LightSource::Ambient => intensity += light.intensity,
             LightSource::Point | LightSource::Directional => {
-                let nl = normal.dot_prod(&light_vec);
+                let nl = normal.dot(light_vec);
                 let lv = light_vec.mag();
                 intensity += light.intensity * nl.max(0.0) / lv;
                 if let Some(s) = specular {
-                    let r = (normal * 2.0 * normal.dot_prod(&light_vec)) - light_vec;
-                    let rv = r.dot_prod(&(point - camera));
+                    let r = (normal * 2.0 * normal.dot(light_vec)) - light_vec;
+                    let rv = r.dot(point - camera);
                     if rv > 0.0 {
                         intensity +=
                             light.intensity * (rv / (r.mag() * (point - camera).mag())).powf(s)

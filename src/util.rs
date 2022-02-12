@@ -1,4 +1,8 @@
-use crate::{matrix::Matrix, prelude::BasicModel};
+use crate::{
+    math::{center, pt, Algebra, PI},
+    matrix::Matrix,
+    prelude::BasicModel,
+};
 use chrono::prelude::Utc;
 use num_traits::{AsPrimitive, FromPrimitive};
 use rand::{Rng, SeedableRng};
@@ -13,81 +17,6 @@ use std::{
     vec,
 };
 use tiny_skia::{Pixmap, Point};
-
-pub const TAU: f32 = std::f32::consts::TAU;
-pub const PI: f32 = std::f32::consts::PI;
-
-pub fn pt<S, T>(x: S, y: T) -> Point
-where
-    S: AsPrimitive<f32>,
-    T: AsPrimitive<f32>,
-{
-    Point::from_xy(x.as_(), y.as_())
-}
-
-pub fn polar<S, T>(theta: S, r: T) -> Point
-where
-    S: AsPrimitive<f32>,
-    T: AsPrimitive<f32>,
-{
-    Point::from_xy(r.as_() * theta.as_().cos(), r.as_() * theta.as_().sin())
-}
-
-pub fn center<S, T>(width: S, height: T) -> Point
-where
-    S: AsPrimitive<f32>,
-    T: AsPrimitive<f32>,
-{
-    Point::from_xy(width.as_() / 2.0, height.as_() / 2.0)
-}
-
-pub trait Algebra: Copy {
-    fn scale(self, k: f32) -> Self;
-    fn lerp(self, other: Self, t: f32) -> Self;
-    fn mag_squared(self) -> f32;
-    fn dist2(self, other: Self) -> f32;
-    fn dot(self, other: Self) -> f32;
-
-    fn magnitude(self) -> f32 {
-        self.mag_squared().sqrt()
-    }
-
-    fn normalize(self) -> Self {
-        self.scale(1.0 / self.magnitude())
-    }
-
-    fn average(self, other: Self) -> Self {
-        self.lerp(other, 0.5)
-    }
-
-    fn dist(self, other: Self) -> f32 {
-        self.dist2(other).sqrt()
-    }
-}
-
-impl Algebra for Point {
-    fn mag_squared(self) -> f32 {
-        self.x * self.x + self.y * self.y
-    }
-
-    fn scale(self, k: f32) -> Self {
-        Point::from_xy(k * self.x, k * self.y)
-    }
-
-    fn lerp(self, other: Self, t: f32) -> Self {
-        let x = self.x * (1.0 - t) + t * other.x;
-        let y = self.y * (1.0 - t) + t * other.y;
-        Self::from_xy(x, y)
-    }
-
-    fn dist2(self, other: Self) -> f32 {
-        pt(self.x - other.x, self.y - other.y).mag_squared()
-    }
-
-    fn dot(self, other: Self) -> f32 {
-        self.x * other.x + self.y * other.y
-    }
-}
 
 pub fn save_sketch<T>(model: &T, canvas: &Pixmap)
 where
@@ -192,7 +121,7 @@ pub fn stipple<T: AsPrimitive<f32>>(width: T, height: T, n: u32) -> Vec<Point> {
 }
 
 // An improvement to Bridson's Algorithm for Poisson Disc sampling.
-// https://observablehq.com/@jrus/bridson-fork/2 
+// https://observablehq.com/@jrus/bridson-fork/2
 pub fn poisson_disk(width: f32, height: f32, radius: f32) -> Vec<Point> {
     const K: usize = 11; // maximum number of samples before rejection
     const M: f32 = 4.0; // a number mutually prime to k
@@ -231,7 +160,7 @@ pub fn poisson_disk(width: f32, height: f32, radius: f32) -> Vec<Point> {
         cells
     };
 
-    while active.len() > 0 {
+    while !active.is_empty() {
         let mut found = false;
         let j = rng.gen_range(0..active.len());
         let p = active[j];

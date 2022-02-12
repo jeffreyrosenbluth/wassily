@@ -1,7 +1,7 @@
 use crate::matrix::*;
 use crate::noises::{noise2d, NoiseOpts};
 use crate::prelude::pt;
-use crate::util::Algebra;
+use crate::math::Algebra;
 use noise::NoiseFn;
 use std::f32::consts::PI;
 use tiny_skia::Point;
@@ -170,10 +170,10 @@ impl FlowField {
             theta = noise2d(&self.noise_function, &self.noise_opts, x1, y1) * PI;
 
             obstacle = self.closest_obstacle(pt(x1, y1));
-            if obstacle.is_some() {
+            if let Some(o) = obstacle {
                 let p = pt(v.x, v.y);
-                let c = obstacle.unwrap().location;
-                let d = p.dist(c) / obstacle.unwrap().power;
+                let c = o.location;
+                let d = p.dist(c) / o.power;
                 let t = (1.0 / (d + 1.0)).clamp(0.0, 1.0);
                 let dir = p - c;
                 let a = dir.y.atan2(dir.x);

@@ -10,17 +10,13 @@ fn main() {
     sphere.rotation_y = PI / 16.0;
     sphere.specular = Some(100.0);
     let w = canvas.width() as f32;
-    let ambient = Light::new(LightSource::Ambient, 0.05, Point3::new(0.0, 0.0, 0.0));
-    let direct = Light::new(
-        LightSource::Point,
-        0.9,
-        Point3::new(-w, 2.5 * w, -2.5 * w),
-    );
-    let directional = Light::new(LightSource::Directional, 0.0, Point3::new(-0.5, -1.0, -1.0));
+    let ambient = Light::ambient(0.0);
+    let direct = Light::point(0.9, -w, 2.5 * w, -2.5 * w);
+    let directional = Light::directional(0.1, -0.5, -1.0, -1.0);
     sphere.lights = vec![ambient, direct, directional];
     sphere.on_sphere(&mut canvas);
 
-    canvas.save_png("./ak1.png");
+    canvas.save_png("./sphere.png");
 }
 
 fn checkered(texture: &mut Canvas) {

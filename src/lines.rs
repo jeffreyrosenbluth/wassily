@@ -54,7 +54,7 @@ impl SandLine {
     pub fn draw(&mut self, canvas: &mut Canvas) {
         let v: Point = self.end - self.start;
         let n: Point = (pt(v.y, -v.x)).normalize(); // n . v == 0, n is the normal.
-        let length = v.magnitude();
+        let length = v.mag();
         for t in 0..length as u32 {
             let t = t as f32 / length;
             let x = self.start.x + t * v.x;
@@ -140,7 +140,7 @@ impl DotLine {
         let n: Point = (pt(v.y, -v.x)).normalize(); // n . v == 0, n is the normal.
         let mut rng = thread_rng();
         let normal = Normal::new(0.0, self.stdev).unwrap();
-        let length = v.magnitude();
+        let length = v.mag();
         let mut c = self.color;
         for t in 0..length as u32 {
             let t = t as f32 / length;
