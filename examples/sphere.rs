@@ -4,23 +4,23 @@ fn main() {
     let mut texture = Canvas::new(1080, 1080);
     checkered(&mut texture);
     let mut canvas = Canvas::new(texture.height(), texture.height());
-    canvas.fill((*BLACK).lerp(&RED, 0.0125));
-    let r = canvas.height() as f32 / 2.0;
-    let mut sphere = SphereScene::new(Point3::new(0.0, 0.0, 2.75 * r), r, &texture);
-    sphere.rotation_z = -PI / 5.0;
-    sphere.rotation_y = PI / 8.0;
-    sphere.specular = Some(75.0);
+    canvas.fill(*BLACK);
+    let r = canvas.height() as f32;
+    let mut sphere = SphereScene::basic(Point3::new(0.0, 0.0, 1.3 * r), &texture);
+    sphere.rotation_y = PI / 16.0;
+    sphere.specular = Some(100.0);
     let w = canvas.width() as f32;
-    let ambient = Light::new(LightSource::Ambient, 0.0, Point3::new(0.0, 0.0, 0.0));
+    let ambient = Light::new(LightSource::Ambient, 0.05, Point3::new(0.0, 0.0, 0.0));
     let direct = Light::new(
         LightSource::Point,
-        0.5,
+        0.9,
         Point3::new(-w, 2.5 * w, -2.5 * w),
     );
-    let directional = Light::new(LightSource::Directional, 0.5, Point3::new(-0.5, -1.0, -1.0));
+    let directional = Light::new(LightSource::Directional, 0.0, Point3::new(-0.5, -1.0, -1.0));
     sphere.lights = vec![ambient, direct, directional];
     sphere.on_sphere(&mut canvas);
-    canvas.save_png("./sphere.png");
+
+    canvas.save_png("./ak1.png");
 }
 
 fn checkered(texture: &mut Canvas) {

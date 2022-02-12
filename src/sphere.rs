@@ -1,11 +1,12 @@
-use crate::math::*;
 use crate::canvas::Canvas;
-use crate::prelude::{PI, pt};
 use crate::kolor::rgb8;
+use crate::math::*;
+use crate::prelude::{pt, PI};
 use tiny_skia::Color;
 
 pub struct SphereScene<'a> {
     pub camera: Point3,
+    pub focal_len: f32,
     pub center: Point3,
     pub radius: f32,
     pub texture: &'a Canvas,
@@ -17,11 +18,38 @@ pub struct SphereScene<'a> {
 }
 
 impl<'a> SphereScene<'a> {
-    pub fn new(center: Point3, radius: f32, texture: &'a Canvas) -> Self {
+    pub fn new(
+        camera: Point3,
+        focal_len: f32,
+        center: Point3,
+        radius: f32,
+        texture: &'a Canvas,
+        rotation_x: f32,
+        rotation_y: f32,
+        rotation_z: f32,
+        lights: Vec<Light>,
+        specular: Option<f32>,
+    ) -> Self {
         Self {
-            camera: Point3::new(0.0, 0.0, 0.0),
+            camera,
+            focal_len,
             center,
             radius,
+            texture,
+            rotation_x,
+            rotation_y,
+            rotation_z,
+            lights,
+            specular,
+        }
+    }
+
+    pub fn basic(center: Point3, texture: &'a Canvas) -> Self {
+        Self {
+            camera: Point3::new(0.0, 0.0, 0.0),
+            focal_len: texture.width() as f32,
+            center,
+            radius: texture.width() as f32 / 2.0,
             texture,
             rotation_x: PI / 2.0,
             rotation_y: 0.0,
@@ -87,7 +115,7 @@ impl<'a> SphereScene<'a> {
             let x32 = x as f32;
             for y in 1 - ch2..ch2 {
                 let y32 = y as f32;
-                let d = Point3::new(x32, y32, canvas.width() as f32) - self.camera;
+                let d = Point3::new(x32, y32, self.focal_len) - self.camera;
                 if let Some(c) = self.trace_ray(d) {
                     let p = pt(
                         canvas.width() as f32 / 2.0 + x32,
@@ -110,15 +138,41 @@ pub enum LightSource {
 #[derive(Debug, Clone, Copy)]
 pub struct Light {
     source: LightSource,
-    intesity: f32,
+    intensity: f32,
     vector: Point3,
 }
 
 impl Light {
-    pub fn new(source: LightSource, intesity: f32, vector: Point3) -> Self {
+    pub fn new(source: LightSource, intensity: f32, vector: Point3) -> Self {
         Self {
             source,
-            intesity,
+            intensity,
+            vector,
+        }
+    }
+
+    pub fn ambient(intensity: f32) -> Self {
+        Self {
+            source: LightSource::Ambient,
+            intensity,
+            vector: Point3::new(0.0, 0.0, 0.0),
+        }
+    }
+
+    pub fn direct(intensity: f32, x: f32, y: f32, z: f32) -> Self {
+        let vector = Point3::new(x, y, z);
+        Self {
+            source: LightSource::Point,
+            intensity,
+            vector,
+        }
+    }
+
+    pub fn directional(intensity: f32, x_dir: f32, y_dir: f32, z_dir: f32) -> Self {
+        let vector = Point3::new(x_dir, y_dir, z_dir);
+        Self {
+            source: LightSource::Directional,
+            intensity,
             vector,
         }
     }
@@ -139,17 +193,17 @@ pub fn lighting(
             LightSource::Directional => light.vector,
         };
         match light.source {
-            LightSource::Ambient => intensity += light.intesity,
+            LightSource::Ambient => intensity += light.intensity,
             LightSource::Point | LightSource::Directional => {
                 let nl = normal.dot_prod(&light_vec);
                 let lv = light_vec.mag();
-                intensity += light.intesity * nl.max(0.0) / lv;
+                intensity += light.intensity * nl.max(0.0) / lv;
                 if let Some(s) = specular {
                     let r = (normal * 2.0 * normal.dot_prod(&light_vec)) - light_vec;
                     let rv = r.dot_prod(&(point - camera));
                     if rv > 0.0 {
                         intensity +=
-                            light.intesity * (rv / (r.mag() * (point - camera).mag())).powf(s)
+                            light.intensity * (rv / (r.mag() * (point - camera).mag())).powf(s)
                     }
                 };
             }

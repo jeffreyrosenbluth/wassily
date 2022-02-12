@@ -43,6 +43,10 @@ impl Point3 {
         self.dot_prod(&self).sqrt()
     }
 
+    pub fn mag2(&self) -> f32 {
+        self.dot_prod(&self)
+    }
+
     pub fn rotate_x(&self, theta: f32) -> Self {
         let x = self.x;
         let y = self.y * theta.cos() - self.z * theta.sin();
