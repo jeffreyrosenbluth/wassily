@@ -14,3 +14,4 @@ pub mod sphere;
 pub mod subdivision;
 pub mod util;
 pub mod warp;
+pub mod stipple;

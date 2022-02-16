@@ -74,8 +74,7 @@ impl<'a> SphereScene<'a> {
         let mut illumination = if self.lights.is_empty() {
             1.0
         } else {
-            let mut normal = point - self.center;
-            normal = normal * (1.0 / normal.dot(normal).sqrt());
+            let normal = (point - self.center).normalize();
             lighting(&self.lights, point, normal, self.center, self.specular)
         };
         illumination = illumination.clamp(0.0, 1.0);
@@ -87,9 +86,9 @@ impl<'a> SphereScene<'a> {
 
     pub fn intersect(&self, direction: Point3) -> Option<(f32, f32)> {
         let w = self.camera - self.center;
-        let a = direction.dot(direction);
+        let a = direction.mag2();
         let b = 2.0 * w.dot(direction);
-        let c = w.dot(w) - self.radius * self.radius;
+        let c = w.mag2() - self.radius * self.radius;
         let discr = b * b - 4.0 * a * c;
         if discr < 0.0 {
             return None;

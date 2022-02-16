@@ -16,6 +16,7 @@ pub use crate::noises::*;
 pub use crate::rectangles::*;
 pub use crate::shape::*;
 pub use crate::sphere::*;
+pub use crate::stipple::*;
 pub use crate::subdivision::*;
 pub use crate::util::*;
 pub use crate::warp::*;

@@ -5,17 +5,18 @@ fn main() {
     checkered(&mut texture);
     let mut canvas = Canvas::new(texture.height(), texture.height());
     canvas.fill(*BLACK);
+
     let r = canvas.height() as f32;
     let mut sphere = SphereScene::basic(Point3::new(0.0, 0.0, 1.3 * r), &texture);
     sphere.rotation_y = PI / 16.0;
-    sphere.specular = Some(100.0);
-    let w = canvas.width() as f32;
-    let ambient = Light::ambient(0.0);
-    let direct = Light::point(0.9, -w, 2.5 * w, -2.5 * w);
-    let directional = Light::directional(0.1, -0.5, -1.0, -1.0);
-    sphere.lights = vec![ambient, direct, directional];
-    sphere.on_sphere(&mut canvas);
 
+    let ambient = Light::ambient(0.0);
+    let point = Light::point(0.9, -r, 2.5 * r, -2.5 * r);
+    let directional = Light::directional(0.1, -0.5, -1.0, -1.0);
+    sphere.lights = vec![ambient, point, directional];
+    sphere.specular = Some(100.0);
+
+    sphere.on_sphere(&mut canvas);
     canvas.save_png("./sphere.png");
 }
 

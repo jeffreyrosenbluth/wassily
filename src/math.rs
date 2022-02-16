@@ -227,3 +227,19 @@ impl DivAssign<f32> for Point3 {
         *self = *self / rhs;
     }
 }
+
+impl Mul<Point3> for f32 {
+    type Output = Point3;
+
+    fn mul(self, rhs: Point3) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl Div<Point3> for f32 {
+    type Output = Point3;
+
+    fn div(self, rhs: Point3) -> Self::Output {
+        rhs / self
+    }
+}
