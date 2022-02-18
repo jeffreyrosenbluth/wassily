@@ -1,44 +1,129 @@
-use crate::{
-    prelude::BasicModel,
-};
-use chrono::prelude::Utc;
+use crate::canvas::Canvas;
+use crate::color_names::WHITE;
 use num_traits::FromPrimitive;
+use png;
 use rand::{Rng, SeedableRng};
 use rand_distr::{uniform::SampleUniform, Distribution, Normal};
 use rand_pcg::Pcg64;
+use std::io::Read;
 use std::{
     collections::hash_map::DefaultHasher,
-    fs::{create_dir, File},
+    fs::{create_dir, write, File},
     hash::{Hash, Hasher},
-    io::Write,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
-use tiny_skia::Pixmap;
+use tiny_skia::PremultipliedColorU8;
 
-pub fn save_sketch<T>(model: &T, canvas: &Pixmap)
-where
-    T: BasicModel,
-{
-    let ts = format!("{}", Utc::now().timestamp());
-    let dir = format!(r"{}/{}/{}", model.name(), model.dir(), model.name());
-    let mut sketch = PathBuf::from(format!(r"{}_{}", dir, ts));
-    let _ = create_dir(model.dir());
-    sketch.set_extension(model.ext());
-    canvas.save_png(&sketch).expect(&format!("{:?}", &sketch));
+type ViewFn = fn(canvas: &mut Canvas);
+
+pub struct Sketch {
+    pub width: u32,
+    pub height: u32,
+    dir: &'static str,
+    name: &'static str,
+    ext: &'static str,
+    view_fn: ViewFn,
+    canvas: Canvas,
 }
 
-pub fn save_json<T>(model: &T)
-where
-    T: serde::Serialize + BasicModel,
-{
-    let ts = format!("{}", Utc::now().timestamp());
-    let dir = format!(r"{}/{}/{}", model.name(), model.dir(), model.name());
-    let mut data_name = PathBuf::from(format!(r"{}_{}", dir, ts));
-    let _ = create_dir(model.dir());
-    data_name.set_extension("json");
-    let json = serde_json::to_string_pretty(&model).expect("Could not serialize data");
-    let mut output = File::create(data_name).unwrap();
-    write!(output, "{}", json).unwrap();
+impl Sketch {
+    pub fn new(width: u32, height: u32, view_fn: ViewFn) -> Self {
+        let canvas = Canvas::new(width, height);
+        Self {
+            width,
+            height,
+            dir: "./",
+            name: "sketch",
+            ext: "png",
+            view_fn,
+            canvas,
+        }
+    }
+
+    pub fn dir(self, dir: &'static str) -> Self {
+        Self { dir, ..self }
+    }
+
+    pub fn name(self, name: &'static str) -> Self {
+        Self { name, ..self }
+    }
+
+    pub fn ext(self, ext: &'static str) -> Self {
+        Self { ext, ..self }
+    }
+
+    pub fn w_f32(&self) -> f32 {
+        self.width as f32
+    }
+
+    pub fn h_f32(&self) -> f32 {
+        self.height as f32
+    }
+
+    pub fn run(&mut self) {
+        self.canvas.fill(*WHITE);
+        (self.view_fn)(&mut self.canvas);
+    }
+
+    pub fn save(&self) {
+        let _ = create_dir(self.dir);
+        let path = format!(r"{}/{}", self.dir, self.name);
+        let mut num = 0;
+        let mut sketch = PathBuf::from(format!(r"{}_{}", path, num));
+        sketch.set_extension(self.ext);
+        while sketch.exists() {
+            num += 1;
+            sketch = PathBuf::from(format!(r"{}_{}", path, num));
+            sketch.set_extension(self.ext);
+        }
+        sketch.set_extension(self.ext);
+        self.canvas.save_png(&sketch);
+    }
+
+    pub fn save_with_code(&mut self, file: &'static str) {
+        let _ = create_dir(self.dir);
+        let path = format!(r"{}/{}", self.dir, self.name);
+        let mut num = 0;
+        let mut sketch = PathBuf::from(format!(r"{}_{}", path, num));
+        sketch.set_extension(self.ext);
+        while sketch.exists() {
+            num += 1;
+            sketch = PathBuf::from(format!(r"{}_{}", path, num));
+            sketch.set_extension(self.ext);
+        }
+        sketch.set_extension(self.ext);
+        let file = Path::new(file);
+        let mut source = File::open(file).unwrap();
+        let mut contents = String::new();
+        let _ = source.read_to_string(&mut contents);
+        let mut cargo = File::open("Cargo.toml").unwrap();
+        let mut toml = String::new();
+        let _ = cargo.read_to_string(&mut toml);
+        let data = encode_png(&mut self.canvas, contents, toml).unwrap();
+        write(&sketch, data).unwrap();
+    }
+}
+
+pub fn encode_png(canvas: &mut Canvas, source: String, cargo: String) -> Result<Vec<u8>, png::EncodingError> {
+    let mut tmp_pixmap = canvas.to_owned();
+    // Demultiply alpha.
+    for pixel in tmp_pixmap.pixels_mut() {
+        let c = pixel.demultiply();
+        *pixel = PremultipliedColorU8::from_rgba(c.red(), c.green(), c.blue(), c.alpha()).unwrap();
+    }
+
+    let mut data = Vec::new();
+    {
+        let mut encoder = png::Encoder::new(&mut data, canvas.width(), canvas.height());
+        encoder.set_color(png::ColorType::Rgba);
+        encoder.set_depth(png::BitDepth::Eight);
+        encoder.add_text_chunk("source".to_string(), source).unwrap();
+        encoder.add_text_chunk("cargo".to_string(), cargo).unwrap();
+        let mut writer = encoder.write_header()?;
+        writer.write_image_data(&tmp_pixmap.data())?;
+    }
+
+    Ok(data)
 }
 
 pub fn calculate_hash<T: Hash>(t: T) -> u64 {
