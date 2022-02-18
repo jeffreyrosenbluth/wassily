@@ -1,4 +1,3 @@
-use png;
 use std::fs::File;
 use std::env;
 

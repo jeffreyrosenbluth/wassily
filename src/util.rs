@@ -24,6 +24,7 @@ pub struct Sketch {
     ext: &'static str,
     view_fn: ViewFn,
     canvas: Canvas,
+    pub source: Option<&'static str>,
 }
 
 impl Sketch {
@@ -37,6 +38,7 @@ impl Sketch {
             ext: "png",
             view_fn,
             canvas,
+            source: None,
         }
     }
 
@@ -60,24 +62,35 @@ impl Sketch {
         self.height as f32
     }
 
+    pub fn source(self, source: &'static str) -> Self {
+        Self {
+            source: Some(source),
+            ..self
+        }
+    }
+
     pub fn run(&mut self) {
         self.canvas.fill(*WHITE);
         (self.view_fn)(&mut self.canvas);
     }
 
-    pub fn save(&self) {
-        let _ = create_dir(self.dir);
-        let path = format!(r"{}/{}", self.dir, self.name);
-        let mut num = 0;
-        let mut sketch = PathBuf::from(format!(r"{}_{}", path, num));
-        sketch.set_extension(self.ext);
-        while sketch.exists() {
-            num += 1;
-            sketch = PathBuf::from(format!(r"{}_{}", path, num));
+    pub fn save(&mut self) {
+        if let Some(source) = self.source {
+            self.save_with_code(source);
+        } else {
+            let _ = create_dir(self.dir);
+            let path = format!(r"{}/{}", self.dir, self.name);
+            let mut num = 0;
+            let mut sketch = PathBuf::from(format!(r"{}_{}", path, num));
             sketch.set_extension(self.ext);
+            while sketch.exists() {
+                num += 1;
+                sketch = PathBuf::from(format!(r"{}_{}", path, num));
+                sketch.set_extension(self.ext);
+            }
+            sketch.set_extension(self.ext);
+            self.canvas.save_png(&sketch);
         }
-        sketch.set_extension(self.ext);
-        self.canvas.save_png(&sketch);
     }
 
     pub fn save_with_code(&mut self, file: &'static str) {
@@ -104,7 +117,11 @@ impl Sketch {
     }
 }
 
-pub fn encode_png(canvas: &mut Canvas, source: String, cargo: String) -> Result<Vec<u8>, png::EncodingError> {
+pub fn encode_png(
+    canvas: &mut Canvas,
+    source: String,
+    cargo: String,
+) -> Result<Vec<u8>, png::EncodingError> {
     let mut tmp_pixmap = canvas.to_owned();
     // Demultiply alpha.
     for pixel in tmp_pixmap.pixels_mut() {
@@ -117,10 +134,12 @@ pub fn encode_png(canvas: &mut Canvas, source: String, cargo: String) -> Result<
         let mut encoder = png::Encoder::new(&mut data, canvas.width(), canvas.height());
         encoder.set_color(png::ColorType::Rgba);
         encoder.set_depth(png::BitDepth::Eight);
-        encoder.add_text_chunk("source".to_string(), source).unwrap();
+        encoder
+            .add_text_chunk("source".to_string(), source)
+            .unwrap();
         encoder.add_text_chunk("cargo".to_string(), cargo).unwrap();
         let mut writer = encoder.write_header()?;
-        writer.write_image_data(&tmp_pixmap.data())?;
+        writer.write_image_data(tmp_pixmap.data())?;
     }
 
     Ok(data)
