@@ -1,5 +1,6 @@
 use crate::canvas::Canvas;
 use crate::color_names::WHITE;
+use crate::math::Algebra;
 use num_traits::FromPrimitive;
 use png;
 use rand::{Rng, SeedableRng};
@@ -12,9 +13,9 @@ use std::{
     hash::{Hash, Hasher},
     path::{Path, PathBuf},
 };
-use tiny_skia::PremultipliedColorU8;
+use tiny_skia::{Point, PremultipliedColorU8};
 
-type ViewFn = fn(canvas: &mut Canvas);
+type ViewFn = fn(sketch: &mut Sketch);
 
 pub struct Sketch {
     pub width: u32,
@@ -23,7 +24,7 @@ pub struct Sketch {
     name: &'static str,
     ext: &'static str,
     view_fn: ViewFn,
-    canvas: Canvas,
+    pub canvas: Canvas,
     pub source: Option<&'static str>,
 }
 
@@ -71,7 +72,7 @@ impl Sketch {
 
     pub fn run(&mut self) {
         self.canvas.fill(*WHITE);
-        (self.view_fn)(&mut self.canvas);
+        (self.view_fn)(self);
     }
 
     pub fn save(&mut self) {
@@ -214,4 +215,32 @@ pub fn gain(g: f32, t: f32) -> f32 {
 pub enum Orientation {
     Horizontal,
     Vertical,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Trail {
+    Open,
+    Closed,
+}
+
+pub fn chaiken(mut pts: Vec<Point>, n: u32, trail: Trail) -> Vec<Point> {
+    const RATIO: f32 = 0.25;
+    if n == 0 {
+        if trail == Trail::Closed {
+            pts.push(pts[0])
+        }
+        return pts;
+    }
+    if pts.len() > 2 && trail == Trail::Closed {
+        pts.push(pts[0]);
+    }
+    let mut c: Vec<Point> = pts
+        .windows(2)
+        .flat_map(|ps| [ps[0].lerp(ps[1], RATIO), ps[1].lerp(ps[0], RATIO)])
+        .collect();
+    if trail == Trail::Open {
+        c.insert(0, pts[0]);
+        c.push(pts[pts.len() - 1]);
+    }
+    chaiken(c, n - 1, trail)
 }

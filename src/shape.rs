@@ -1,4 +1,4 @@
-use crate::prelude::{pt, TAU};
+use crate::prelude::{pt, TAU, Trail, chaiken, Rand};
 use num_traits::AsPrimitive;
 use tiny_skia::*;
 
@@ -202,7 +202,6 @@ impl<'a> Shape<'a> {
         let h = self.points[1].point.y;
         let rect = Rect::from_xywh(cx - w / 2.0, cy - h / 2.0, w, h).unwrap();
         let ellipse = PathBuilder::from_oval(rect).unwrap();
-        // let ellipse = PathBuilder::from_ellipse(cx, cy, w, h).unwrap();
         if let Some(fp) = *self.fill_paint.clone() {
             canvas
                 .fill_path(&ellipse, &fp, self.fillrule, self.transform, None)
@@ -369,7 +368,7 @@ impl<'a> ShapeBuilder<'a> {
         self.shape = ShapeType::Ellipse;
         self.points = vec![
             TaggedPoint::new(center),
-            TaggedPoint::new(Point::from_xy(width, height))
+            TaggedPoint::new(Point::from_xy(width, height)),
         ];
         self
     }
@@ -408,6 +407,21 @@ impl<'a> ShapeBuilder<'a> {
             theta += delta;
         }
         self.points = pts;
+        self
+    }
+
+    pub fn pearl(mut self, center: Point, a: f32, b: f32, sides: u32, rng: &mut Rand) -> Self {
+        self.shape = ShapeType::Poly;
+        let mut points = vec![];
+        for i in 0..sides {
+            let dx = rng.rand_normal(0.0, 0.25 * a.min(b));
+            let dy = rng.rand_normal(0.0, 0.25 * a.min(b));
+            let u = TAU * i as f32 / sides as f32;
+            let x1 = a * u.cos() + center.x + dx;
+            let y1 = b * u.sin() + center.y + dy;
+            points.push(pt(x1, y1));
+        }
+        self.points = chaiken(points, 6, Trail::Closed).into_iter().map(|p| TaggedPoint::new(p)).collect();
         self
     }
 
