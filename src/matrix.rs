@@ -1,7 +1,8 @@
-use num_traits::{Float, One, AsPrimitive, Zero};
 /// A zero indexed row-major matrix.
 /// Allows acces to elements of matrix A by A[i][j]
-use std::ops::{Index, IndexMut};
+///
+use num_traits::{zero, AsPrimitive, Float, One, Zero};
+use std::ops::{Add, Index, IndexMut, Mul};
 
 #[derive(Debug)]
 pub struct Matrix<T> {
@@ -12,7 +13,11 @@ pub struct Matrix<T> {
 
 impl<T> Matrix<T> {
     pub fn new<U: AsPrimitive<usize>>(rows: U, cols: U, data: Vec<T>) -> Self {
-        Self { rows: rows.as_(), cols: cols.as_(), data }
+        Self {
+            rows: rows.as_(),
+            cols: cols.as_(),
+            data,
+        }
     }
 
     pub fn rows(&self) -> usize {
@@ -37,7 +42,11 @@ impl<T> Matrix<T> {
                 data.push(generator(r, c))
             }
         }
-        Matrix { rows: rows.as_(), cols: cols.as_(), data }
+        Matrix {
+            rows: rows.as_(),
+            cols: cols.as_(),
+            data,
+        }
     }
 
     pub fn get_ref(&self, row: usize, col: usize) -> Option<&T> {
@@ -57,7 +66,7 @@ impl<T> Matrix<T> {
             true
         }
     }
-    
+
     pub fn valid<U: Into<usize>>(&self, row: U, col: U) -> bool {
         row.into() < self.rows() && col.into() < self.cols()
     }
@@ -88,7 +97,11 @@ where
 {
     pub fn zeros<U: AsPrimitive<usize>>(rows: U, cols: U) -> Self {
         let data = vec![T::zero(); rows.as_() * cols.as_()];
-        Self { rows: rows.as_(), cols: cols.as_(), data }
+        Self {
+            rows: rows.as_(),
+            cols: cols.as_(),
+            data,
+        }
     }
 }
 
@@ -98,7 +111,11 @@ where
 {
     pub fn ones<U: AsPrimitive<usize>>(rows: U, cols: U) -> Self {
         let data = vec![T::one(); rows.as_() * cols.as_()];
-        Self { rows: rows.as_(), cols: cols.as_(), data }
+        Self {
+            rows: rows.as_(),
+            cols: cols.as_(),
+            data,
+        }
     }
 }
 
@@ -142,8 +159,82 @@ impl<T> IndexMut<usize> for Matrix<T> {
         &mut self.data[start..start + self.cols]
     }
 }
+
+impl<T> Mul<T> for &Matrix<T>
+where
+    T: Mul<Output = T> + Zero + Copy,
+{
+    type Output = Matrix<T>;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        let mut m: Matrix<T> = Matrix::fill(self.rows(), self.cols(), zero());
+        for r in 0..self.rows() {
+            for c in 0..self.cols() {
+                m[r][c] = self[r][c] * rhs;
+            }
+        }
+        m
+    }
+}
+
+impl<T> Mul<&Vec<T>> for &Matrix<T>
+where
+    T: Add<Output = T> + Mul<Output = T> + Zero + Copy,
+{
+    type Output = Vec<T>;
+
+    fn mul(self, rhs: &Vec<T>) -> Self::Output {
+        assert_eq!(self.cols(), rhs.len());
+        let mut v: Vec<T> = vec![];
+        for r in 0..self.rows() {
+            v.push(
+                self[r]
+                    .iter()
+                    .zip(rhs)
+                    .fold(zero(), |accum: T, item| accum + *item.0 * *item.1),
+            );
+        }
+        v
+    }
+}
+
+impl<T> Mul<&Matrix<T>> for &Matrix<T>
+where
+    T: Add<Output = T> + Mul<Output = T> + Zero + Copy,
+{
+    type Output = Matrix<T>;
+
+    fn mul(self, rhs: &Matrix<T>) -> Self::Output {
+        assert_eq!(self.cols(), rhs.rows());
+        let mut m: Matrix<T> = Matrix::fill(self.rows(), rhs.cols(), zero());
+        for r in 0..self.rows() {
+            for c in 0..rhs.cols() {
+                let mut a = zero();
+                for i in 0..self.cols() {
+                    a = a + self[r][i] * rhs[i][c];
+                }
+                m[r][c] = a;
+            }
+        }
+        m
+    }
+}
+
+impl<T> PartialEq for Matrix<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.rows == other.rows && self.cols == other.cols && self.data == other.data
+    }
+}
+
+impl<T> Eq for Matrix<T> where T: Eq {}
+
 #[cfg(test)]
 mod tests {
+    use std::vec;
+
     use super::*;
     #[test]
     fn gen_test() {
@@ -200,5 +291,24 @@ mod tests {
         let c = m.convolve(&k);
         assert_eq!(c[0][0], 1.0);
         assert_eq!(c[1][1], 9.0);
+    }
+
+    #[test]
+    fn mul_test() {
+        let m = Matrix::new(2, 2, vec![1, 2, 3, 4]);
+        assert_eq!(&m * &vec![5, 10], vec![25, 55]);
+    }
+
+    #[test]
+    fn mul_mat_test() {
+        let m1 = Matrix::new(3, 2, vec![1, 2, 3, 4, 5, 6]);
+        let m2 = Matrix::new(2, 2, vec![5, 10, 50, 100]);
+        assert_eq!((&m1 * &m2).data, vec![105, 210, 215, 430, 325, 650,]);
+    }
+
+    #[test]
+    fn mul_scalar_test() {
+        let m = Matrix::new(2, 2, vec![1, 2, 3, 4]);
+        assert_eq!((&m * 2).data, vec![2, 4, 6, 8]);
     }
 }

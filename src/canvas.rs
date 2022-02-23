@@ -101,6 +101,22 @@ impl Canvas {
         img.save_with_format(path, ImageFormat::Tiff)
             .expect("Error writing tiff");
     }
+
+    pub fn w_f32(&self) -> f32 {
+        self.0.width() as f32
+    }
+
+    pub fn h_f32(&self) -> f32 {
+        self.0.height() as f32
+    }
+
+    pub fn w_usize(&self) -> usize {
+        self.0.width() as usize
+    }
+
+    pub fn h_usize(&self) -> usize {
+        self.0.height() as usize
+    }
 }
 
 pub fn paint_solid<'a>(color: Color) -> Paint<'a> {

@@ -1,4 +1,4 @@
-use crate::prelude::{pt, TAU, Trail, chaiken, Rand};
+use crate::prelude::{chaiken, pt, Rand, Trail, TAU};
 use num_traits::AsPrimitive;
 use tiny_skia::*;
 
@@ -410,7 +410,15 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    pub fn pearl(mut self, center: Point, a: f32, b: f32, sides: u32, rng: &mut Rand) -> Self {
+    pub fn pearl(
+        mut self,
+        center: Point,
+        a: f32,
+        b: f32,
+        sides: u32,
+        iterations: u32,
+        rng: &mut Rand,
+    ) -> Self {
         self.shape = ShapeType::Poly;
         let mut points = vec![];
         for i in 0..sides {
@@ -421,7 +429,10 @@ impl<'a> ShapeBuilder<'a> {
             let y1 = b * u.sin() + center.y + dy;
             points.push(pt(x1, y1));
         }
-        self.points = chaiken(points, 6, Trail::Closed).into_iter().map(|p| TaggedPoint::new(p)).collect();
+        self.points = chaiken(points, iterations, Trail::Closed)
+            .into_iter()
+            .map(TaggedPoint::new)
+            .collect();
         self
     }
 

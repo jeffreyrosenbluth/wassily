@@ -15,25 +15,26 @@ use std::{
 };
 use tiny_skia::{Point, PremultipliedColorU8};
 
-type ViewFn = fn(sketch: &mut Sketch);
+pub type ViewFn<Model> = fn(canvas: &mut Canvas, model: &Model);
+// pub type UpdateFn<Model, Update> = fn(model: &mut Model, update: &Update);
 
-pub struct Sketch {
-    pub width: u32,
-    pub height: u32,
+pub struct Sketch<M> {
     dir: &'static str,
     name: &'static str,
     ext: &'static str,
-    view_fn: ViewFn,
+    view_fn: ViewFn<M>,
     pub canvas: Canvas,
     pub source: Option<&'static str>,
 }
 
-impl Sketch {
-    pub fn new(width: u32, height: u32, view_fn: ViewFn) -> Self {
+impl<M> Sketch<M> {
+    pub fn new(
+        width: u32,
+        height: u32,
+        view_fn: ViewFn<M>,
+    ) -> Self {
         let canvas = Canvas::new(width, height);
         Self {
-            width,
-            height,
             dir: "./",
             name: "sketch",
             ext: "png",
@@ -55,14 +56,6 @@ impl Sketch {
         Self { ext, ..self }
     }
 
-    pub fn w_f32(&self) -> f32 {
-        self.width as f32
-    }
-
-    pub fn h_f32(&self) -> f32 {
-        self.height as f32
-    }
-
     pub fn source(self, source: &'static str) -> Self {
         Self {
             source: Some(source),
@@ -70,9 +63,10 @@ impl Sketch {
         }
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self, model: &M) {
         self.canvas.fill(*WHITE);
-        (self.view_fn)(self);
+        // (self.update_fn)(&mut self.model, &self.update);
+        (self.view_fn)(&mut self.canvas, model);
     }
 
     pub fn save(&mut self) {
@@ -114,7 +108,7 @@ impl Sketch {
         let mut toml = String::new();
         let _ = cargo.read_to_string(&mut toml);
         let data = encode_png(&mut self.canvas, contents, toml).unwrap();
-        write(&sketch, data).unwrap();
+        write(&sketch, data).expect(format!("{:?}", &sketch).as_str());
     }
 }
 
@@ -225,13 +219,13 @@ pub enum Trail {
 
 pub fn chaiken(mut pts: Vec<Point>, n: u32, trail: Trail) -> Vec<Point> {
     const RATIO: f32 = 0.25;
-    if n == 0 {
+    if n == 0 || pts.len() < 3 {
         if trail == Trail::Closed {
             pts.push(pts[0])
         }
         return pts;
     }
-    if pts.len() > 2 && trail == Trail::Closed {
+    if trail == Trail::Closed {
         pts.push(pts[0]);
     }
     let mut c: Vec<Point> = pts

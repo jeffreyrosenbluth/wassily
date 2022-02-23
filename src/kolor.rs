@@ -422,6 +422,10 @@ impl Palette {
     pub fn len(&self) -> usize {
         self.colors.len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.colors.is_empty()
+    }
 }
 
 /// Allow colors to be accessed as if `Palette` was an array, e.g. `palette[42]`.
