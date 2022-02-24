@@ -2,7 +2,7 @@
 /// Allows acces to elements of matrix A by A[i][j]
 ///
 use num_traits::{zero, AsPrimitive, Float, One, Zero};
-use std::ops::{Add, Index, IndexMut, Mul};
+use std::ops::{Add, Div, Index, IndexMut, Mul};
 
 #[derive(Debug)]
 pub struct Matrix<T> {
@@ -89,6 +89,20 @@ where
             None
         }
     }
+
+    /// Insert a column at position n.
+    pub fn insert_col(&self, n: usize, column: Vec<T>) -> Self {
+        assert_eq!(column.len(), self.rows());
+        Matrix::generate(self.rows(), self.cols() + 1, |r, c| {
+            if c < n {
+                self[r][c]
+            } else if c == n {
+                column[r]
+            } else {
+                self[r][c - 1]
+            }
+        })
+    }
 }
 
 impl<T> Matrix<T>
@@ -171,6 +185,23 @@ where
         for r in 0..self.rows() {
             for c in 0..self.cols() {
                 m[r][c] = self[r][c] * rhs;
+            }
+        }
+        m
+    }
+}
+
+impl<T> Div<T> for &Matrix<T>
+where
+    T: Div<Output = T> + Zero + Copy,
+{
+    type Output = Matrix<T>;
+
+    fn div(self, rhs: T) -> Self::Output {
+        let mut m: Matrix<T> = Matrix::fill(self.rows(), self.cols(), zero());
+        for r in 0..self.rows() {
+            for c in 0..self.cols() {
+                m[r][c] = self[r][c] / rhs;
             }
         }
         m
@@ -310,5 +341,12 @@ mod tests {
     fn mul_scalar_test() {
         let m = Matrix::new(2, 2, vec![1, 2, 3, 4]);
         assert_eq!((&m * 2).data, vec![2, 4, 6, 8]);
+    }
+
+    #[test]
+    fn insert_col_test() {
+        let m = Matrix::new(2, 2, vec![1, 2, 3, 4]);
+        let m1 = m.insert_col(1, vec![5, 5]);
+        assert_eq!(m1.data, vec![1, 5, 2, 3, 5, 4]);
     }
 }
