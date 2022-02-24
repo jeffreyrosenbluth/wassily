@@ -117,6 +117,12 @@ where
             }
         })
     }
+
+    pub fn transpose(&self) -> Self {
+        Matrix::generate(self.cols(), self.rows(), |r, c| {
+            self[c][r]
+        })
+    }
 }
 
 impl<T> Matrix<T>
@@ -365,9 +371,16 @@ mod tests {
     }
 
     #[test]
-    fn insert_row() {
+    fn insert_row_test() {
         let m = Matrix::new(2, 2, vec![1, 2, 3, 4]);
         let m1 = m.insert_row(1, vec![5, 5]);
         assert_eq!(m1.data, vec![1, 2, 5, 5, 3, 4]);
+    }
+
+    #[test]
+    fn transpose_test() {
+        let m = Matrix::new(2, 2, vec![1, 2, 3, 4]);
+        let m1 = m.transpose();
+        assert_eq!(m1.data, vec![1, 3, 2, 4]);
     }
 }
