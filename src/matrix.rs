@@ -103,6 +103,20 @@ where
             }
         })
     }
+
+    /// Insert a row at position n.
+    pub fn insert_row(&self, n: usize, row: Vec<T>) -> Self {
+        assert_eq!(row.len(), self.cols());
+        Matrix::generate(self.rows() + 1, self.cols(), |r, c| {
+            if r < n {
+                self[r][c]
+            } else if r == n {
+                row[c]
+            } else {
+                self[r - 1][c]
+            }
+        })
+    }
 }
 
 impl<T> Matrix<T>
@@ -348,5 +362,12 @@ mod tests {
         let m = Matrix::new(2, 2, vec![1, 2, 3, 4]);
         let m1 = m.insert_col(1, vec![5, 5]);
         assert_eq!(m1.data, vec![1, 5, 2, 3, 5, 4]);
+    }
+
+    #[test]
+    fn insert_row() {
+        let m = Matrix::new(2, 2, vec![1, 2, 3, 4]);
+        let m1 = m.insert_row(1, vec![5, 5]);
+        assert_eq!(m1.data, vec![1, 2, 5, 5, 3, 4]);
     }
 }
