@@ -6,7 +6,7 @@ use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    Alpha, FromColor, Hsluva, Hue, IntoColor, Laba, Mix, Srgba,
+    Alpha, FromColor, Hsluva, Hue, IntoColor, Laba, Lchuva, Mix, Srgba,
 };
 use rand::prelude::*;
 use rand_distr::Normal;
@@ -33,6 +33,7 @@ pub trait Colorful {
     fn tone(&self, t: f32) -> Self;
     fn shade(&self, t: f32) -> Self;
     fn to_hsluva(&self) -> Hsluva;
+    fn to_lchuva(&self) -> Lchuva;
     fn to_srgba(&self) -> Srgba;
     fn from_image_rgba(p: image::Rgba<u8>) -> Self;
     fn from_srgba(rgb: Srgba) -> Self;
@@ -150,6 +151,12 @@ impl Colorful for Color {
         srgb.into_color()
     }
 
+    fn to_lchuva(&self) -> Lchuva {
+        let (r, g, b, a) = self.as_f32s();
+        let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
+        srgb.into_color()
+    }
+
     fn to_srgba(&self) -> Srgba {
         let (r, g, b, a) = self.as_f32s();
         let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
@@ -247,7 +254,6 @@ impl Jiggle {
         Color::from_srgba(rgba)
     }
 }
-
 
 /// A Palette of colors and functions to manage them.
 #[derive(Clone, Debug)]
@@ -347,11 +353,7 @@ impl Palette {
 
     /// Rotate the [palette::LabHue] of each color.
     pub fn rotate_hue(&mut self, degrees: f32) {
-        self.colors = self
-            .colors
-            .iter()
-            .map(|c| c.rotate_hue(degrees))
-            .collect();
+        self.colors = self.colors.iter().map(|c| c.rotate_hue(degrees)).collect();
     }
 
     /// Sort the colors by hue using the CIELCh color space.
@@ -375,6 +377,13 @@ impl Palette {
         self.colors.sort_by_cached_key(|c| {
             let hsluva = c.to_hsluva();
             (1000.0 * hsluva.l) as u32
+        })
+    }
+
+    pub fn sort_by_chroma(&mut self) {
+        self.colors.sort_by_cached_key(|c| {
+            let lchuva = c.to_lchuva();
+            (1000.0 * lchuva.chroma) as u32
         })
     }
 
