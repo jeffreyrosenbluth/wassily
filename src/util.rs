@@ -121,7 +121,10 @@ pub fn encode_png(
     // Demultiply alpha.
     for pixel in tmp_pixmap.pixels_mut() {
         let c = pixel.demultiply();
-        *pixel = PremultipliedColorU8::from_rgba(c.red(), c.green(), c.blue(), c.alpha()).unwrap();
+        // Need to insure that alpha is greater than all color components
+        // because tiny_skia does not export `PremultipliedColrU8::from_rgba_unchecked().
+        let m = c.red().max(c.green()).max(c.blue()).max(c.alpha());
+        *pixel = PremultipliedColorU8::from_rgba(c.red(), c.green(), c.blue(), m).unwrap();
     }
 
     let mut data = Vec::new();
