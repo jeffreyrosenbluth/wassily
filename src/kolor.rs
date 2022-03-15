@@ -32,6 +32,7 @@ pub trait Colorful {
     fn tint(&self, t: f32) -> Self;
     fn tone(&self, t: f32) -> Self;
     fn shade(&self, t: f32) -> Self;
+    fn saturate(&self, t: f32) -> Self;
     fn to_hsluva(&self) -> Hsluva;
     fn to_lchuva(&self) -> Lchuva;
     fn to_srgba(&self) -> Srgba;
@@ -135,6 +136,13 @@ impl Colorful for Color {
 
     fn shade(&self, t: f32) -> Color {
         self.lerp(&rgb8(0, 0, 0), t)
+    }
+
+    fn saturate(&self, saturation: f32) -> Color {
+        let mut hsluva: Hsluva = self.to_hsluva();
+        hsluva.saturation = saturation;
+        let c: Srgba = hsluva.into_color();
+        Color::from_srgba(c)
     }
 
     fn lerp(&self, color2: &Color, t: f32) -> Color {
@@ -603,6 +611,58 @@ impl Default for CosColor {
         g.phase = 0.2 * PI;
         b.phase = 0.4 * PI;
         Self { r, g, b }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CosColorXY {
+    pub rx: CosChannel,
+    pub ry: CosChannel,
+    pub gx: CosChannel,
+    pub gy: CosChannel,
+    pub bx: CosChannel,
+    pub by: CosChannel,
+}
+
+impl CosColorXY {
+    pub fn new(
+        rx: CosChannel,
+        ry: CosChannel,
+        gx: CosChannel,
+        gy: CosChannel,
+        bx: CosChannel,
+        by: CosChannel,
+    ) -> Self {
+        Self {
+            rx,
+            ry,
+            gx,
+            gy,
+            bx,
+            by,
+        }
+    }
+
+    pub fn cos_color_xy(&self, x: f32, y: f32) -> Color {
+        let rx = self.rx;
+        let ry = self.ry;
+        let gx = self.gx;
+        let gy = self.gy;
+        let bx = self.bx;
+        let by = self.by;
+        let red = (rx.a + rx.b * (rx.freq * x + rx.phase).cos())
+            * (ry.a + ry.b * (ry.freq * y + ry.phase).cos());
+        let green = (gx.a + gx.b * (gx.freq * x + gx.phase).cos())
+            * (gy.a + gy.b * (gy.freq * y + gy.phase).cos());
+        let blue = (bx.a + bx.b * (bx.freq * x + bx.phase).cos())
+            * (by.a + by.b * (by.freq * y + by.phase).cos());
+        Color::from_rgba(
+            red.clamp(0.0, 1.0),
+            green.clamp(0.0, 1.0),
+            blue.clamp(0.0, 1.0),
+            1.0,
+        )
+        .unwrap()
     }
 }
 
