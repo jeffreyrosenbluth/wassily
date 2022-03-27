@@ -6,7 +6,7 @@ use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    Alpha, FromColor, Hsluva, Hue, IntoColor, Laba, Mix, Srgba, Lcha,
+    Alpha, FromColor, Hsluva, Hue, IntoColor, Laba, Lcha, Mix, Saturate, Shade, Srgba,
 };
 use rand::prelude::*;
 use rand_distr::Normal;
@@ -34,8 +34,34 @@ pub trait Colorful {
     fn tint(&self, t: f32) -> Self;
     fn tone(&self, t: f32) -> Self;
     fn shade(&self, t: f32) -> Self;
-    fn saturate(&self, t: f32) -> Self;
-    fn lighten(&self, t: f32) -> Self;
+    fn lighten(&self, factor: f32) -> Self;
+    fn lighten_fixed(&self, amount: f32) -> Self;
+    fn darken(&self, factor: f32) -> Self
+    where
+        Self: Sized,
+    {
+        self.lighten(-factor)
+    }
+    fn darken_fixed(&self, amount: f32) -> Self
+    where
+        Self: Sized,
+    {
+        self.lighten_fixed(-amount)
+    }
+    fn saturate(&self, factor: f32) -> Self;
+    fn saturate_fixed(&self, amount: f32) -> Self;
+    fn desaturate(&self, factor: f32) -> Self
+    where
+        Self: Sized,
+    {
+        self.saturate(-factor)
+    }
+    fn desaturate_fixed(&self, amount: f32) -> Self
+    where
+        Self: Sized,
+    {
+        self.saturate_fixed(-amount)
+    }
     fn to_hsluva(&self) -> Hsluva;
     fn to_lcha(&self) -> Lcha;
     fn to_srgba(&self) -> Srgba;
@@ -141,17 +167,27 @@ impl Colorful for Color {
         self.lerp(&rgb8(0, 0, 0), t)
     }
 
-    fn saturate(&self, saturation: f32) -> Color {
-        let mut hsluva: Hsluva = self.to_hsluva();
-        hsluva.saturation = saturation;
-        let c: Srgba = hsluva.into_color();
+    fn saturate(&self, factor: f32) -> Color {
+        let lcha: Lcha = self.to_lcha();
+        let c = lcha.saturate(factor).into_color();
         Color::from_srgba(c)
     }
 
-    fn lighten(&self, t: f32) -> Color {
-        let mut lcha: Lcha = self.to_lcha();
-        lcha.l = t * 100.0;
-        let c: Srgba = lcha.into_color();
+    fn saturate_fixed(&self, amount: f32) -> Self {
+        let lcha: Lcha = self.to_lcha();
+        let c = lcha.saturate_fixed(amount).into_color();
+        Color::from_srgba(c)
+    }
+
+    fn lighten(&self, factor: f32) -> Self {
+        let lcha: Lcha = self.to_lcha();
+        let c = lcha.lighten(factor).into_color();
+        Color::from_srgba(c)
+    }
+
+    fn lighten_fixed(&self, amount: f32) -> Self {
+        let lcha: Lcha = self.to_lcha();
+        let c = lcha.lighten_fixed(amount).into_color();
         Color::from_srgba(c)
     }
 
