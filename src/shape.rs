@@ -355,6 +355,18 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
+    pub fn rect_cwh(mut self, c: Point, wh: Point) -> Self {
+        self.shape = ShapeType::Rect;
+        let w2 = wh.x / 2.0;
+        let h2 = wh.y / 2.0;
+        let p = pt(c.x - w2, c.y - h2);
+        self.points = vec![
+            TaggedPoint::new(p),
+            TaggedPoint::new(Point::from_xy(p.x + wh.x, p.y + wh.y)),
+        ];
+        self
+    }
+
     pub fn circle(mut self, center: Point, radius: f32) -> Self {
         self.shape = ShapeType::Circle;
         self.points = vec![

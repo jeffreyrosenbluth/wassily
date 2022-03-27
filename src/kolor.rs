@@ -6,7 +6,7 @@ use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    Alpha, FromColor, Hsluva, Hue, IntoColor, Laba, Lchuva, Mix, Srgba,
+    Alpha, FromColor, Hsluva, Hue, IntoColor, Laba, Mix, Srgba, Lcha,
 };
 use rand::prelude::*;
 use rand_distr::Normal;
@@ -16,6 +16,8 @@ use tiny_skia::{Color, Point};
 
 const PI: f32 = std::f32::consts::PI;
 
+/// The 'Colorful' trait exists primarily to add methods to tiny-skia's 'Color'
+/// type.
 pub trait Colorful {
     fn opacity(&self, alpha: f32) -> Self;
     fn as_f32s(&self) -> (f32, f32, f32, f32);
@@ -33,8 +35,9 @@ pub trait Colorful {
     fn tone(&self, t: f32) -> Self;
     fn shade(&self, t: f32) -> Self;
     fn saturate(&self, t: f32) -> Self;
+    fn lighten(&self, t: f32) -> Self;
     fn to_hsluva(&self) -> Hsluva;
-    fn to_lchuva(&self) -> Lchuva;
+    fn to_lcha(&self) -> Lcha;
     fn to_srgba(&self) -> Srgba;
     fn from_image_rgba(p: image::Rgba<u8>) -> Self;
     fn from_srgba(rgb: Srgba) -> Self;
@@ -145,6 +148,13 @@ impl Colorful for Color {
         Color::from_srgba(c)
     }
 
+    fn lighten(&self, t: f32) -> Color {
+        let mut lcha: Lcha = self.to_lcha();
+        lcha.l = t * 100.0;
+        let c: Srgba = lcha.into_color();
+        Color::from_srgba(c)
+    }
+
     fn lerp(&self, color2: &Color, t: f32) -> Color {
         let s = t.clamp(0.0, 1.0);
         let c1 = self.to_srgba().into_linear();
@@ -159,7 +169,7 @@ impl Colorful for Color {
         srgb.into_color()
     }
 
-    fn to_lchuva(&self) -> Lchuva {
+    fn to_lcha(&self) -> Lcha {
         let (r, g, b, a) = self.as_f32s();
         let srgb: Alpha<Rgb, f32> = Rgba::new(r, g, b, a);
         srgb.into_color()
@@ -390,8 +400,8 @@ impl Palette {
 
     pub fn sort_by_chroma(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let lchuva = c.to_lchuva();
-            (1000.0 * lchuva.chroma) as u32
+            let lcha = c.to_lcha();
+            (1000.0 * lcha.chroma) as u32
         })
     }
 
@@ -615,47 +625,47 @@ impl Default for CosColor {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct CosChannelXY {
+    pub a: f32,
+    pub b: f32,
+    pub freq_x: f32,  // radians
+    pub phase_x: f32, // radians
+    pub freq_y: f32,  // radians
+    pub phase_y: f32, // radians
+}
+
+impl Default for CosChannelXY {
+    fn default() -> Self {
+        Self {
+            a: 0.5,
+            b: 0.5,
+            freq_x: 1.0,
+            phase_x: 0.0,
+            freq_y: 1.0,
+            phase_y: 0.0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct CosColorXY {
-    pub rx: CosChannel,
-    pub ry: CosChannel,
-    pub gx: CosChannel,
-    pub gy: CosChannel,
-    pub bx: CosChannel,
-    pub by: CosChannel,
+    pub r: CosChannelXY,
+    pub g: CosChannelXY,
+    pub b: CosChannelXY,
 }
 
 impl CosColorXY {
-    pub fn new(
-        rx: CosChannel,
-        ry: CosChannel,
-        gx: CosChannel,
-        gy: CosChannel,
-        bx: CosChannel,
-        by: CosChannel,
-    ) -> Self {
-        Self {
-            rx,
-            ry,
-            gx,
-            gy,
-            bx,
-            by,
-        }
+    pub fn new(r: CosChannelXY, g: CosChannelXY, b: CosChannelXY) -> Self {
+        Self { r, g, b }
     }
 
     pub fn cos_color_xy(&self, x: f32, y: f32) -> Color {
-        let rx = self.rx;
-        let ry = self.ry;
-        let gx = self.gx;
-        let gy = self.gy;
-        let bx = self.bx;
-        let by = self.by;
-        let red = (rx.a + rx.b * (rx.freq * x + rx.phase).cos())
-            * (ry.a + ry.b * (ry.freq * y + ry.phase).cos());
-        let green = (gx.a + gx.b * (gx.freq * x + gx.phase).cos())
-            * (gy.a + gy.b * (gy.freq * y + gy.phase).cos());
-        let blue = (bx.a + bx.b * (bx.freq * x + bx.phase).cos())
-            * (by.a + by.b * (by.freq * y + by.phase).cos());
+        let r = self.r;
+        let g = self.g;
+        let b = self.b;
+        let red = r.a + r.b * (r.freq_x * x + r.phase_x).cos() * (r.freq_y * y + r.phase_y).cos();
+        let green = g.a + g.b * (g.freq_x * x + g.phase_x).cos() * (g.freq_y * y + g.phase_y).cos();
+        let blue = b.a + b.b * (b.freq_x * x + b.phase_x).cos() * (b.freq_y * y + b.phase_y).cos();
         Color::from_rgba(
             red.clamp(0.0, 1.0),
             green.clamp(0.0, 1.0),
@@ -663,6 +673,21 @@ impl CosColorXY {
             1.0,
         )
         .unwrap()
+    }
+}
+
+impl Default for CosColorXY {
+    fn default() -> Self {
+        let mut r = CosChannelXY::default();
+        let mut g = CosChannelXY::default();
+        let mut b = CosChannelXY::default();
+        r.phase_y = 0.1 * PI;
+        g.phase_x = 0.2 * PI;
+        g.phase_y = 0.3 * PI;
+        b.phase_x = 0.4 * PI;
+        b.phase_y = 0.5 * PI;
+
+        Self { r, g, b }
     }
 }
 
