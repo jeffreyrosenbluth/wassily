@@ -82,10 +82,10 @@ impl Colorful for Color {
     }
 
     fn as_u8s(&self) -> (u8, u8, u8, u8) {
-        let r = self.red() * 255.0;
-        let g = self.green() * 255.0;
-        let b = self.blue() * 255.0;
-        let a = self.alpha() * 255.0;
+        let r = self.red() * 255.0 + 0.5;
+        let g = self.green() * 255.0 + 0.5;
+        let b = self.blue() * 255.0 + 0.5;
+        let a = self.alpha() * 255.0 + 0.5;
         (r as u8, g as u8, b as u8, a as u8)
     }
 
@@ -222,10 +222,10 @@ impl Colorful for Color {
     }
 
     fn to_image_rgba(&self) -> image::Rgba<u8> {
-        let r = self.red() * 255.0;
-        let g = self.green() * 255.0;
-        let b = self.blue() * 255.0;
-        let a = self.alpha() * 255.0;
+        let r = self.red() * 255.0 + 0.5;
+        let g = self.green() * 255.0 + 0.5;
+        let b = self.blue() * 255.0 + 0.5;
+        let a = self.alpha() * 255.0 + 0.5;
         image::Rgba([r as u8, g as u8, b as u8, a as u8])
     }
 
@@ -288,7 +288,7 @@ impl Jiggle {
     }
 
     pub fn jiggle_lightness(&mut self, color: Color) -> Color {
-        let mut l: Hsluva = color.to_hsluva();
+        let mut l: Lcha = color.to_lcha();
         l.l += self.normal.sample(&mut self.rng) * 100.0;
         let rgba = Srgba::from_color(l);
         Color::from_srgba(rgba)
@@ -302,7 +302,7 @@ impl Jiggle {
     }
 
     pub fn jiggle_hue(&mut self, color: Color) -> Color {
-        let mut l: Hsluva = color.to_hsluva();
+        let mut l: Lcha = color.to_lcha();
         l.hue += self.normal.sample(&mut self.rng) * 360.0;
         let rgba = Srgba::from_color(l);
         Color::from_srgba(rgba)
@@ -408,6 +408,39 @@ impl Palette {
     /// Rotate the [palette::LabHue] of each color.
     pub fn rotate_hue(&mut self, degrees: f32) {
         self.colors = self.colors.iter().map(|c| c.rotate_hue(degrees)).collect();
+    }
+
+    pub fn saturate(&mut self, factor: f32) {
+        self.colors = self.colors.iter().map(|c| c.saturate(factor)).collect();
+    }
+
+    pub fn saturate_fixed(&mut self, amount: f32) {
+        self.colors = self.colors.iter().map(|c| c.saturate_fixed(amount)).collect();
+    }
+
+    pub fn desaturate(&mut self, factor: f32) {
+        self.colors = self.colors.iter().map(|c| c.desaturate(factor)).collect();
+    }
+
+    pub fn desaturate_fixed(&mut self, amount: f32) {
+        self.colors = self.colors.iter().map(|c| c.desaturate_fixed(amount)).collect();
+    }
+
+    pub fn lighten(&mut self, factor: f32) {
+        self.colors = self.colors.iter().map(|c| c.lighten(factor)).collect();
+    }
+
+    pub fn lighten_fixed(&mut self, amount: f32) {
+        self.colors = self.colors.iter().map(|c| c.lighten_fixed(amount)).collect();
+    }
+
+
+    pub fn darken(&mut self, factor: f32) {
+        self.colors = self.colors.iter().map(|c| c.darken(factor)).collect();
+    }
+
+    pub fn darken_fixed(&mut self, amount: f32) {
+        self.colors = self.colors.iter().map(|c| c.darken_fixed(amount)).collect();
     }
 
     /// Sort the colors by hue using the CIELCh color space.
@@ -566,13 +599,11 @@ impl CosColor {
         let red = r.a + r.b * (r.freq * theta + r.phase).cos();
         let green = g.a + g.b * (g.freq * theta + g.phase).cos();
         let blue = b.a + b.b * (b.freq * theta + b.phase).cos();
-        Color::from_rgba(
+        rgb(
             red.clamp(0.0, 1.0),
             green.clamp(0.0, 1.0),
             blue.clamp(0.0, 1.0),
-            1.0,
         )
-        .unwrap()
     }
 
     pub fn rainbow() -> Self {
@@ -702,13 +733,11 @@ impl CosColorXY {
         let red = r.a + r.b * (r.freq_x * x + r.phase_x).cos() * (r.freq_y * y + r.phase_y).cos();
         let green = g.a + g.b * (g.freq_x * x + g.phase_x).cos() * (g.freq_y * y + g.phase_y).cos();
         let blue = b.a + b.b * (b.freq_x * x + b.phase_x).cos() * (b.freq_y * y + b.phase_y).cos();
-        Color::from_rgba(
+        rgb(
             red.clamp(0.0, 1.0),
             green.clamp(0.0, 1.0),
             blue.clamp(0.0, 1.0),
-            1.0,
         )
-        .unwrap()
     }
 }
 

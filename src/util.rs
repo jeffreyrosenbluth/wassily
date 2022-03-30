@@ -28,11 +28,7 @@ pub struct Sketch<M> {
 }
 
 impl<M> Sketch<M> {
-    pub fn new(
-        width: u32,
-        height: u32,
-        view_fn: ViewFn<M>,
-    ) -> Self {
+    pub fn new(width: u32, height: u32, view_fn: ViewFn<M>) -> Self {
         let canvas = Canvas::new(width, height);
         Self {
             dir: "./",
@@ -99,7 +95,6 @@ impl<M> Sketch<M> {
             sketch = PathBuf::from(format!(r"{}_{}", path, num));
             sketch.set_extension(self.ext);
         }
-        sketch.set_extension(self.ext);
         let file = Path::new(file);
         let mut source = File::open(file).unwrap();
         let mut contents = String::new();
@@ -126,7 +121,6 @@ pub fn encode_png(
         let m = c.red().max(c.green()).max(c.blue()).max(c.alpha());
         *pixel = PremultipliedColorU8::from_rgba(c.red(), c.green(), c.blue(), m).unwrap();
     }
-
     let mut data = Vec::new();
     {
         let mut encoder = png::Encoder::new(&mut data, canvas.width(), canvas.height());
@@ -139,7 +133,6 @@ pub fn encode_png(
         let mut writer = encoder.write_header()?;
         writer.write_image_data(tmp_pixmap.data())?;
     }
-
     Ok(data)
 }
 
