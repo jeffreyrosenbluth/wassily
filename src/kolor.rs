@@ -92,9 +92,9 @@ impl Colorful for Color {
     fn jiggle_xy(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
         let (r, g, b, a) = self.as_f32s();
         Color::from_rgba(
-            (r + (std * normal_xy(0, x, y) as f32 + mean)).clamp(0.0, 1.0),
-            (g + (std * normal_xy(1, x, y) as f32 + mean)).clamp(0.0, 1.0),
-            (b + (std * normal_xy(2, x, y) as f32 + mean)).clamp(0.0, 1.0),
+            (r + (std * normal_xy(x as f64, y as f64) as f32 + mean)).clamp(0.0, 1.0),
+            (g + (std * normal_xy(x as f64 + 1.0, y as f64) as f32 + mean)).clamp(0.0, 1.0),
+            (b + (std * normal_xy(x as f64, y as f64 + 1.0) as f32 + mean)).clamp(0.0, 1.0),
             a,
         )
         .unwrap()
@@ -102,21 +102,21 @@ impl Colorful for Color {
 
     fn jiggle_xy_lightness(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
         let mut l: Hsluva = self.to_hsluva();
-        l.l += (std * normal_xy(0, x, y) as f32 + mean) * 100.0;
+        l.l += (std * normal_xy(x as f64, y as f64) as f32 + mean) * 100.0;
         let rgba = Srgba::from_color(l);
         Color::from_srgba(rgba)
     }
 
     fn jiggle_xy_saturation(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
         let mut l: Hsluva = self.to_hsluva();
-        l.saturation += (std * normal_xy(0, x, y) as f32 + mean) * 100.0;
+        l.saturation += (std * normal_xy(x as f64, y as f64) as f32 + mean) * 100.0;
         let rgba = Srgba::from_color(l);
         Color::from_srgba(rgba)
     }
 
     fn jiggle_xy_hue(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
         let mut l: Hsluva = self.to_hsluva();
-        l.hue += (std * normal_xy(0, x, y) as f32 + mean) * 360.0;
+        l.hue += (std * normal_xy(x as f64, y as f64) as f32 + mean) * 360.0;
         let rgba = Srgba::from_color(l);
         Color::from_srgba(rgba)
     }
