@@ -201,6 +201,18 @@ pub fn gain(g: f32, t: f32) -> f32 {
     }
 }
 
+pub fn smooth_step(t: f32) -> f32
+{
+    let s = t.clamp(0.0, 1.0);
+    s * s * (3.0 - 2.0 * s)
+}
+
+pub fn smoother_step(t: f32) -> f32
+{
+    let s = t.clamp(0.0, 1.0);
+    s * s * s * (6.0 * s * s - 15.0 * s + 10.0)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Orientation {
     Horizontal,
@@ -233,4 +245,28 @@ pub fn chaiken(mut pts: Vec<Point>, n: u32, trail: Trail) -> Vec<Point> {
         c.push(pts[pts.len() - 1]);
     }
     chaiken(c, n - 1, trail)
+}
+
+#[cfg(test)]
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn smooth_step_test() {
+        assert_eq!(smooth_step(0.0), 0.0);
+        assert_eq!(smooth_step(1.0), 1.0);
+        assert_eq!(smooth_step(0.5), 0.5);
+        assert_eq!(smooth_step(0.25), 0.15625);
+        assert_eq!(smooth_step(0.75), 0.84375);
+    }
+
+    #[test]
+    fn smoother_step_test() {
+        assert_eq!(smoother_step(0.0), 0.0);
+        assert_eq!(smoother_step(1.0), 1.0);
+        assert_eq!(smoother_step(0.5), 0.5);
+        assert_eq!(smoother_step(0.25), 0.103515625);
+        assert_eq!(smoother_step(0.75), 0.8964844);
+    }
 }

@@ -1,8 +1,4 @@
-use std::cell::RefCell;
-
 use noise::NoiseFn;
-use rand::{Rng, SeedableRng};
-use rand_pcg::Pcg64;
 
 /// Stateless pseudrandom number generators. These are often usefull when
 /// parallelizing an algorithm where you want to avoid mutable state.
@@ -86,17 +82,16 @@ pub fn fnv01_64(n: u64) -> f64 {
     rng_u64_to_f64(hash)
 }
 
-pub fn prf(m: f64, n: f64) -> f64 {
+// Author @patriciogv - 2015
+// http://patriciogonzalezvivo.com
+pub fn prf(x: f64, y: f64) -> f64 {
     fn dot(a: (f64, f64), b: (f64, f64)) -> f64 {
         a.0 * b.0 + a.1 * b.1
     }
-    let k1 = (127.1_f64, 311.7_f64);
-    let k2 = (269.6_f64, 183.3_f64);
-    let k3 = (12.9898, 78.233);
-    let mn = (m, n);
-    let x = dot(mn, k1);
-    let y = dot(mn, k2);
-    (dot((x, y), k3) * 43758.5453123).sin().fract()
+    let k = (12.9898, 78.233);
+    let xy = (x, y);
+    let z = dot(xy, k).sin() * 43758.5453123;
+    z.fract()
 }
 
 pub fn box_muller(x: f64, y: f64) -> (f64, f64) {
