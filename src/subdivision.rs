@@ -153,6 +153,70 @@ pub fn quad_divide_vec(
     sub
 }
 
+/// Make a list of quadrilaterals from a list of lines.
+pub fn lines_to_quads(lines: Vec<Vec<Point>>) -> Vec<Quad> {
+    let mut quads: Vec<Quad> = Vec::new();
+    for pair in lines.windows(2) {
+        assert_eq!(pair[0].len(), pair[1].len());
+        for p in pair[0]
+            .iter()
+            .zip(pair[1].clone())
+            .collect::<Vec<(&Point, Point)>>()
+            .windows(2)
+        {
+            quads.push(Quad::new(p[0].1, *p[0].0, *p[1].0, p[1].1))
+        }
+    }
+    quads
+}
+
+/// stops should be between 0 and 1.
+pub fn ray_points(start: Point, end: Point, stops: &[f32]) -> Vec<Point> {
+    let mut ps: Vec<Point> = Vec::new();
+    let dir = end - start;
+    for s in stops {
+        ps.push(start + dir.scale(*s));
+    }
+    ps
+}
+
+pub fn ray_points_perspective(
+    start: Point,
+    middle: Point,
+    end: Point,
+    stops1: &[f32],
+    stops2: &[f32],
+) -> Vec<Point> {
+    let mut ps = ray_points(start, middle, stops1);
+    let mut qs = ray_points(end, middle, stops2);
+    qs.reverse();
+    ps.extend(qs[1..].into_iter());
+    ps
+}
+
+pub fn perspective_quads(
+    start: Point,
+    top: Point,
+    bottom: Point,
+    end: Point,
+    stops_left: &[f32],
+    stops_right: &[f32],
+    stops_vert: &[f32],
+) -> Vec<Quad> {
+    let mut lines: Vec<Vec<Point>> = Vec::new();
+    let vs = ray_points(top, bottom, stops_vert);
+    for v in vs {
+        lines.push(ray_points_perspective(
+            start,
+            v,
+            end,
+            stops_left,
+            stops_right,
+        ));
+    }
+    lines_to_quads(lines)
+}
+
 #[derive(Debug, Clone, Copy)]
 /// A Triangle
 pub struct Tri {

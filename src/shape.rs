@@ -95,9 +95,7 @@ impl<'a> Shape<'a> {
         }
         let path = pb.finish().unwrap();
         if let Some(fp) = *self.fill_paint.clone() {
-            canvas
-                .fill_path(&path, &fp, self.fillrule, self.transform, None)
-                .expect("cannot draw poly")
+            canvas.fill_path(&path, &fp, self.fillrule, self.transform, None);
         }
         if let Some(sp) = *self.stroke_paint.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
@@ -119,9 +117,7 @@ impl<'a> Shape<'a> {
         }
         let path = pb.finish().unwrap();
         if let Some(fp) = *self.fill_paint.clone() {
-            canvas
-                .fill_path(&path, &fp, self.fillrule, self.transform, None)
-                .expect("cannot draw quad")
+            canvas.fill_path(&path, &fp, self.fillrule, self.transform, None);
         }
         if let Some(sp) = *self.stroke_paint.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
@@ -144,9 +140,7 @@ impl<'a> Shape<'a> {
         }
         let path = pb.finish().unwrap();
         if let Some(fp) = *self.fill_paint.clone() {
-            canvas
-                .fill_path(&path, &fp, self.fillrule, self.transform, None)
-                .expect("cannot draw cubic")
+            canvas.fill_path(&path, &fp, self.fillrule, self.transform, None);
         }
         if let Some(sp) = *self.stroke_paint.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
@@ -164,9 +158,7 @@ impl<'a> Shape<'a> {
         let rect = Rect::from_ltrb(left, top, right, bottom).unwrap();
         let path = PathBuilder::from_rect(rect);
         if let Some(fp) = *self.fill_paint.clone() {
-            canvas
-                .fill_path(&path, &fp, self.fillrule, self.transform, None)
-                .expect("cannot draw rect")
+            canvas.fill_path(&path, &fp, self.fillrule, self.transform, None);
         }
         if let Some(sp) = *self.stroke_paint.clone() {
             canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
@@ -183,9 +175,7 @@ impl<'a> Shape<'a> {
         let _h = self.points[1].point.y;
         let circle = PathBuilder::from_circle(cx, cy, w).unwrap();
         if let Some(fp) = *self.fill_paint.clone() {
-            canvas
-                .fill_path(&circle, &fp, self.fillrule, self.transform, None)
-                .expect("cannot draw circle")
+            canvas.fill_path(&circle, &fp, self.fillrule, self.transform, None);
         }
         if let Some(sp) = *self.stroke_paint.clone() {
             canvas.stroke_path(&circle, &sp, &self.stroke, self.transform, None);
@@ -203,9 +193,7 @@ impl<'a> Shape<'a> {
         let rect = Rect::from_xywh(cx - w / 2.0, cy - h / 2.0, w, h).unwrap();
         let ellipse = PathBuilder::from_oval(rect).unwrap();
         if let Some(fp) = *self.fill_paint.clone() {
-            canvas
-                .fill_path(&ellipse, &fp, self.fillrule, self.transform, None)
-                .expect("cannot draw circle")
+            canvas.fill_path(&ellipse, &fp, self.fillrule, self.transform, None);
         }
         if let Some(sp) = *self.stroke_paint.clone() {
             canvas.stroke_path(&ellipse, &sp, &self.stroke, self.transform, None);
