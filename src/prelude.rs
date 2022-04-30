@@ -18,6 +18,7 @@ pub use crate::shape::*;
 pub use crate::sphere::*;
 pub use crate::stipple::*;
 pub use crate::subdivision::*;
+pub use crate::textures::*;
 pub use crate::util::*;
 pub use crate::warp::*;
 pub use image::*;

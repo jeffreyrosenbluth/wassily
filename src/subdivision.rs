@@ -20,7 +20,9 @@
 //! }
 //! ```
 
-use crate::prelude::{Algebra, Orientation};
+use crate::prelude::{Algebra, Orientation, NoiseOpts, pt};
+use crate::noises::*;
+use noise::{Perlin, Seedable};
 use tiny_skia::Point;
 
 /// A Quadrilateral.
@@ -170,6 +172,18 @@ pub fn lines_to_quads(lines: Vec<Vec<Point>>) -> Vec<Quad> {
     quads
 }
 
+pub fn warp_points(points: &[Point], scale:f32, factor: f32) -> Vec<Point> {
+    let nfx = Perlin::default().set_seed(0);
+    let nfy = Perlin::default().set_seed(1);
+    let opts = NoiseOpts::new(1.0, 1.0, scale, scale, scale, factor);
+    let qs = points.iter().map(|p| {
+        let dx = noise2d(&nfx, &opts, p.x, p.y );
+        let dy = noise2d(&nfy, &opts, p.x, p.y );
+        pt(p.x + dx, p.y + dy)
+    });
+    qs.collect()
+}
+
 /// stops should be between 0 and 1.
 pub fn ray_points(start: Point, end: Point, stops: &[f32]) -> Vec<Point> {
     let mut ps: Vec<Point> = Vec::new();
@@ -202,9 +216,12 @@ pub fn perspective_quads(
     stops_left: &[f32],
     stops_right: &[f32],
     stops_vert: &[f32],
+    noise_scale: f32,
+    noise_factor: f32,
 ) -> Vec<Quad> {
     let mut lines: Vec<Vec<Point>> = Vec::new();
     let vs = ray_points(top, bottom, stops_vert);
+    let vs = warp_points(&vs, noise_scale, noise_factor);
     for v in vs {
         lines.push(ray_points_perspective(
             start,

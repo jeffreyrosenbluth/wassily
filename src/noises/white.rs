@@ -95,8 +95,8 @@ pub fn prf(x: f64, y: f64) -> f64 {
 }
 
 pub fn box_muller(x: f64, y: f64) -> (f64, f64) {
-    let u1 = prf(x, y);
-    let u2 = prf(x + 1.0, y + 1.0);
+    let u1 = 0.5 * (prf(x, y) + 1.0);
+    let u2 = 0.5 * (prf(x + 1.0, y + 1.0));
     let r = (-2.0 * u1.ln()).sqrt();
     (
         r * (u2 * std::f64::consts::TAU).cos(),

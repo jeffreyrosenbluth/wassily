@@ -13,7 +13,7 @@ use std::{
     hash::{Hash, Hasher},
     path::{Path, PathBuf},
 };
-use tiny_skia::{Point, PremultipliedColorU8};
+use tiny_skia::{Point, PremultipliedColorU8, Rect};
 
 pub type ViewFn<Model> = fn(canvas: &mut Canvas, model: &Model);
 // pub type UpdateFn<Model, Update> = fn(model: &mut Model, update: &Update);
@@ -127,9 +127,9 @@ pub fn encode_png(
         encoder.set_color(png::ColorType::Rgba);
         encoder.set_depth(png::BitDepth::Eight);
         encoder
-            .add_text_chunk("source".to_string(), source)
+            .add_text_chunk("Source".to_string(), source)
             .unwrap();
-        encoder.add_text_chunk("cargo".to_string(), cargo).unwrap();
+        encoder.add_text_chunk("Software".to_string(), cargo).unwrap();
         let mut writer = encoder.write_header()?;
         writer.write_image_data(tmp_pixmap.data())?;
     }
@@ -201,16 +201,38 @@ pub fn gain(g: f32, t: f32) -> f32 {
     }
 }
 
-pub fn smooth_step(t: f32) -> f32
-{
+pub fn smooth_step(t: f32) -> f32 {
     let s = t.clamp(0.0, 1.0);
     s * s * (3.0 - 2.0 * s)
 }
 
-pub fn smoother_step(t: f32) -> f32
-{
+pub fn smoother_step(t: f32) -> f32 {
     let s = t.clamp(0.0, 1.0);
     s * s * s * (6.0 * s * s - 15.0 * s + 10.0)
+}
+
+pub fn bounding_box(points: &[Point], min_size: f32) -> Rect {
+    let (left, top, right, bottom) =
+        points
+            .iter()
+            .fold((f32::MAX, f32::MAX, f32::MIN, f32::MIN), |mut acc, p| {
+                if p.x < acc.0 {
+                    acc.0 = p.x
+                }; 
+                if p.x > acc.2 {
+                    acc.2 = p.x
+                };
+                if p.y < acc.1 {
+                    acc.1 = p.y
+                }; 
+                if p.y > acc.3 {
+                    acc.3 = p.y
+                };
+                acc
+            });
+    let right = right.max(left + min_size);
+    let bottom = bottom.max(top + min_size);
+    Rect::from_ltrb(left, top, right, bottom).unwrap()
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -251,6 +273,7 @@ pub fn chaiken(mut pts: Vec<Point>, n: u32, trail: Trail) -> Vec<Point> {
 
 mod tests {
     use super::*;
+    use crate::prelude::pt;
 
     #[test]
     fn smooth_step_test() {
@@ -268,5 +291,17 @@ mod tests {
         assert_eq!(smoother_step(0.5), 0.5);
         assert_eq!(smoother_step(0.25), 0.103515625);
         assert_eq!(smoother_step(0.75), 0.8964844);
+    }
+
+    #[test]
+    fn bounding_box_test() {
+        let points = vec![
+            pt(10, 10),
+            pt(-100, 90),
+            pt(100, -80),
+            pt(80, 100),
+        ];
+        let bbox = bounding_box(&points, 0.0);
+        assert_eq!(bbox, Rect::from_ltrb(-100.0, -80.0, 100.0, 100.0).unwrap());
     }
 }

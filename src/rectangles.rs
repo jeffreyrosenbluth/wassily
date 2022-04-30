@@ -1,7 +1,6 @@
-use crate::prelude::pt;
 use crate::noises::*;
+use crate::prelude::pt;
 use crate::shape::*;
-use crate::util::*;
 use noise::Perlin;
 use tiny_skia::Paint;
 use tiny_skia::{Color, Pixmap, Point, Rect, Transform};
@@ -15,14 +14,21 @@ pub struct SandBox {
 }
 
 impl SandBox {
-    pub fn new(xy: Point, wh: Point) -> Self {
+    pub fn new(
+        xy: Point,
+        wh: Point,
+        bg_color: Color,
+        color1: Color,
+        color2: Color,
+        scales: f32,
+    ) -> Self {
         Self {
             xy,
             wh,
-            bg_color: Color::WHITE,
-            color1: Color::BLACK,
-            color2: Color::BLACK,
-            scales: 1.0,
+            bg_color,
+            color1,
+            color2,
+            scales,
         }
     }
 
@@ -54,13 +60,7 @@ impl SandBox {
         for i in 0..self.wh.x as u32 {
             let from = pt(self.xy.x + i as f32, self.xy.y);
             let to = pt(self.xy.x + i as f32, self.xy.y + self.wh.y);
-            let alpha = map_range(
-                noise2d(nf, &noise_opts, from.x, from.y),
-                -1.0,
-                1.0,
-                0.0,
-                1.0,
-            );
+            let alpha = noise2d_01(nf, &noise_opts, from.x, from.y);
             let mut color1 = self.color1;
             color1.set_alpha(alpha);
             ShapeBuilder::new()
@@ -72,13 +72,7 @@ impl SandBox {
         for i in 0..self.wh.y as u32 {
             let from = pt(self.xy.x, self.xy.y + i as f32);
             let to = pt(self.xy.x + self.wh.x, self.xy.y + i as f32);
-            let alpha = map_range(
-                noise2d(nf, &noise_opts, from.x, from.y),
-                -1.0,
-                1.0,
-                0.0,
-                1.0,
-            );
+            let alpha = noise2d_01(nf, &noise_opts, from.x, from.y);
             let mut color2 = self.color2;
             color2.set_alpha(alpha);
             ShapeBuilder::new()
@@ -86,6 +80,19 @@ impl SandBox {
                 .stroke_color(color2)
                 .build()
                 .draw(canvas);
+        }
+    }
+}
+
+impl Default for SandBox {
+    fn default() -> Self {
+        Self {
+            xy: pt(0, 0),
+            wh: pt(300, 300),
+            bg_color: Color::WHITE,
+            color1: Color::BLACK,
+            color2: Color::BLACK,
+            scales: 1.0,
         }
     }
 }

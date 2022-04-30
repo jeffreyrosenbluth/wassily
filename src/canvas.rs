@@ -1,5 +1,5 @@
 use image::imageops::rotate180;
-use image::{ImageFormat, RgbaImage};
+use image::{ImageFormat, RgbaImage, RgbImage};
 use std::ops::{Deref, DerefMut};
 use tiny_skia::*;
 
@@ -21,17 +21,48 @@ impl DerefMut for Canvas {
 
 impl From<&RgbaImage> for Canvas {
     fn from(ib: &RgbaImage) -> Self {
-        let ib = rotate180(ib);
+        // let ib = rotate180(ib);
         let w = ib.width();
         let h = ib.height();
-        let data = ib.into_vec();
+        let data = ib.clone().into_vec();
         let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
+        Canvas(pixmap.to_owned())
+    }
+}
+
+impl From<&RgbImage> for Canvas {
+    fn from(ib: &RgbImage) -> Self {
+        let w = ib.width();
+        let h = ib.height();
+        let mut data4: Vec<u8>  = Vec::new();
+        let data = ib.clone().into_vec();
+        for d in data.chunks(3) {
+            data4.extend(d);
+            data4.push(255)
+        }
+        let pixmap = PixmapRef::from_bytes(&data4, w, h).unwrap();
         Canvas(pixmap.to_owned())
     }
 }
 
 impl From<RgbaImage> for Canvas {
     fn from(ib: RgbaImage) -> Self {
+        let ib = rotate180(&ib);
+        let w = ib.width();
+        let h = ib.height();
+        let mut data4: Vec<u8>  = Vec::new();
+        let data = ib.into_vec();
+        for d in data.chunks(3) {
+            data4.extend(d);
+            data4.push(255)
+        }
+        let pixmap = PixmapRef::from_bytes(&data4, w, h).unwrap();
+        Canvas(pixmap.to_owned())
+    }
+}
+
+impl From<RgbImage> for Canvas {
+    fn from(ib: RgbImage) -> Self {
         let ib = rotate180(&ib);
         let w = ib.width();
         let h = ib.height();
