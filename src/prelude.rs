@@ -4,6 +4,7 @@ pub use crate::canvas::*;
 pub use crate::color_names::*;
 pub use crate::flow::*;
 pub use crate::grain::*;
+pub use crate::grid::*;
 pub use crate::kolor::*;
 pub use crate::lines::*;
 pub use crate::math::*;

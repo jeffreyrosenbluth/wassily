@@ -1,5 +1,7 @@
-use crate::prelude::{chaiken, pt, Rand, Trail, TAU};
+use crate::prelude::{chaiken, pt, Trail, TAU};
 use num_traits::AsPrimitive;
+use rand::rngs::SmallRng;
+use rand_distr::{Distribution, Normal};
 use tiny_skia::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -417,19 +419,20 @@ impl<'a> ShapeBuilder<'a> {
         b: f32,
         sides: u32,
         iterations: u32,
-        rng: &mut Rand,
+        rng: &mut SmallRng,
     ) -> Self {
         self.shape = ShapeType::Poly;
         let mut points = vec![];
         for i in 0..sides {
-            let dx = rng.rand_normal(0.0, 0.25 * a.min(b));
-            let dy = rng.rand_normal(0.0, 0.25 * a.min(b));
+            let normal = Normal::new(0.0, 0.25 * a.min(b)).unwrap();
+            let dx = normal.sample(rng); 
+            let dy = normal.sample(rng); 
             let u = TAU * i as f32 / sides as f32;
             let x1 = a * u.cos() + center.x + dx;
             let y1 = b * u.sin() + center.y + dy;
             points.push(pt(x1, y1));
         }
-        self.points = chaiken(points, iterations, Trail::Closed)
+        self.points = chaiken(&points, iterations, Trail::Closed)
             .into_iter()
             .map(TaggedPoint::new)
             .collect();

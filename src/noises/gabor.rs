@@ -1,5 +1,6 @@
-use crate::util::Rand;
 use noise::NoiseFn;
+use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 
 // Gabor Noise
 //
@@ -122,17 +123,17 @@ impl Gabor {
     }
 
     fn cell(&self, i: i32, j: i32, x: f64, y: f64) -> f64 {
-        let mut rnd = Rand::new(morton(i as u32, j as u32) as u64);
+        let mut rnd = SmallRng::seed_from_u64(morton(i as u32, j as u32) as u64);
         let mut noise = 0.0;
         for _ in 0..self.impulses_per_cell {
-            let xi = rnd.rand_range(0.0, 1.0);
-            let yi = rnd.rand_range(0.0, 1.0);
-            let wi: f64 = rnd.rand_rademacher();
+            let xi:f64 = rnd.gen();
+            let yi:f64 = rnd.gen();
+            let wi: f64 = rnd.gen::<f64>() * 2.0 - 1.0;
             let omega0i: f64;
             if let Some(o) = self.omega0 {
                 omega0i = o;
             } else {
-                omega0i = rnd.rand_range(0.0, TAU64);
+                omega0i = rnd.gen_range(0.0..TAU64);
             }
             let xix = x - xi;
             let yiy = y - yi;

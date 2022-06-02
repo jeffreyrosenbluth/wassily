@@ -8,9 +8,9 @@ use palette::{
     rgb::{Rgb, Rgba},
     Alpha, FromColor, Hsluva, Hue, IntoColor, Laba, Lcha, Mix, Saturate, Shade, Srgba,
 };
-use rand::prelude::*;
-use rand_distr::Normal;
-use rand_pcg::Pcg64;
+use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
+use rand_distr::{Distribution, Normal};
 use std::{ops::Index, ops::IndexMut, path::Path, usize};
 use tiny_skia::{Color, Point};
 
@@ -260,7 +260,7 @@ pub fn gray(n: u8) -> Color {
 
 /// Perturb a `Color` value.
 pub struct Jiggle {
-    rng: Pcg64,
+    rng: SmallRng,
     normal: Normal<f32>,
 }
 
@@ -269,7 +269,7 @@ impl Jiggle {
     /// Larger standard deviations will produce colors very far from the input
     /// color.
     pub fn new(seed: u64, std_dev: f32) -> Self {
-        let rng = Pcg64::seed_from_u64(seed);
+        let rng = SmallRng::seed_from_u64(seed);
         let normal = Normal::new(0.0, std_dev).unwrap();
         Self { rng, normal }
     }
@@ -313,7 +313,7 @@ impl Jiggle {
 #[derive(Clone, Debug)]
 pub struct Palette {
     pub colors: Vec<Color>,
-    rng: Pcg64,
+    rng: SmallRng,
     pub current: usize,
 }
 
@@ -326,7 +326,7 @@ impl Default for Palette {
 impl Palette {
     /// Generate a palatte from a vector of 'Color's
     pub fn new(colors: Vec<Color>) -> Self {
-        let rng = Pcg64::seed_from_u64(0);
+        let rng = SmallRng::seed_from_u64(0);
         let colors = colors;
         Palette {
             colors,
@@ -338,7 +338,7 @@ impl Palette {
     /// Set the seed of the random number generator used in all of the random
     /// color functions.
     pub fn set_seed(&mut self, seed: u64) {
-        self.rng = Pcg64::seed_from_u64(seed);
+        self.rng = SmallRng::seed_from_u64(seed);
     }
 
     /// The index of the color list.
@@ -415,7 +415,11 @@ impl Palette {
     }
 
     pub fn saturate_fixed(&mut self, amount: f32) {
-        self.colors = self.colors.iter().map(|c| c.saturate_fixed(amount)).collect();
+        self.colors = self
+            .colors
+            .iter()
+            .map(|c| c.saturate_fixed(amount))
+            .collect();
     }
 
     pub fn desaturate(&mut self, factor: f32) {
@@ -423,7 +427,11 @@ impl Palette {
     }
 
     pub fn desaturate_fixed(&mut self, amount: f32) {
-        self.colors = self.colors.iter().map(|c| c.desaturate_fixed(amount)).collect();
+        self.colors = self
+            .colors
+            .iter()
+            .map(|c| c.desaturate_fixed(amount))
+            .collect();
     }
 
     pub fn lighten(&mut self, factor: f32) {
@@ -431,9 +439,12 @@ impl Palette {
     }
 
     pub fn lighten_fixed(&mut self, amount: f32) {
-        self.colors = self.colors.iter().map(|c| c.lighten_fixed(amount)).collect();
+        self.colors = self
+            .colors
+            .iter()
+            .map(|c| c.lighten_fixed(amount))
+            .collect();
     }
-
 
     pub fn darken(&mut self, factor: f32) {
         self.colors = self.colors.iter().map(|c| c.darken(factor)).collect();

@@ -13,6 +13,7 @@ pub struct Matrix<T> {
 
 impl<T> Matrix<T> {
     pub fn new<U: AsPrimitive<usize>>(rows: U, cols: U, data: Vec<T>) -> Self {
+        assert_eq!(rows.as_() * cols.as_(), data.len());
         Self {
             rows: rows.as_(),
             cols: cols.as_(),

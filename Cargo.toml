@@ -9,7 +9,7 @@ edition = "2021"
 [dependencies]
 tiny-skia = {git = "https://github.com/RazrFalcon/tiny-skia.git", branch = "master" }
 noise = { git = "https://github.com/Razaekel/noise-rs.git", branch = "develop" }
-rand = "0.8.3"
+rand = {version = "0.8.5", features = ["small_rng"]}
 rand_distr = "0.4"
 rand_pcg = "0.3"
 palette = "0.6"

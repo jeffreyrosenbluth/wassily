@@ -8,7 +8,7 @@ use tiny_skia::Point;
 
 pub type Cell = (u32, u32);
 pub type Curve = Vec<Vertex>;
-pub type Grid = Matrix<Vec<Vertex>>;
+pub type FlowGrid = Matrix<Vec<Vertex>>;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Vertex {
@@ -39,7 +39,7 @@ impl Vertex {
         (self.x - other.x) * (self.x - other.x) + (self.y - other.y) * (self.y - other.y)
     }
 
-    pub fn distance(&self, width: u32, height: u32, grid: &Grid) -> f32 {
+    pub fn distance(&self, width: u32, height: u32, grid: &FlowGrid) -> f32 {
         let mut min_dist = std::f32::MAX;
         let i = self.cell.0;
         let j = self.cell.1;
@@ -98,7 +98,7 @@ impl Default for Obstacle {
 }
 
 pub struct FlowField {
-    pub grid: Grid,
+    pub grid: FlowGrid,
     pub noise_function: Box<dyn NoiseFn<f64, 2>>,
     pub noise_opts: NoiseOpts,
     pub sepration: f32,
@@ -111,7 +111,7 @@ pub struct FlowField {
 
 impl FlowField {
     pub fn new(
-        grid: Grid,
+        grid: FlowGrid,
         noise_function: Box<dyn NoiseFn<f64, 2>>,
         noise_opts: NoiseOpts,
         sepration: f32,

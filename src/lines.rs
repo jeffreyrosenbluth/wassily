@@ -1,12 +1,12 @@
 use crate::canvas::Canvas;
 use crate::prelude::paint_solid;
-use crate::util::Rand;
 use crate::{
     prelude::{Algebra, pt},
     noises::*,
 };
 use noise::OpenSimplex;
-use rand::prelude::*;
+use rand::{Rng, SeedableRng};
+use rand::rngs::SmallRng;
 use rand_distr::{Distribution, Normal};
 use tiny_skia::{Color, Point};
 
@@ -14,22 +14,21 @@ pub struct SandLine {
     pub start: Point,
     pub end: Point,
     g: f32,
-    rando: Rand,
+    rng: SmallRng,
     grains: u32,
     thickness: f32,
     color: Color,
 }
 
 impl SandLine {
-    pub fn new(start: Point, end: Point) -> Self {
-        let seed: u64 = random();
-        let mut rando = Rand::new(seed);
-        let g = rando.rand_range(0.05, 0.95);
+    pub fn new(start: Point, end: Point, seed: u64) -> Self {
+        let mut rng = SmallRng::seed_from_u64(seed);
+        let g = rng.gen_range(0.05..0.95);
         Self {
             start,
             end,
             g,
-            rando,
+            rng,
             grains: 64,
             thickness: 40.0,
             color: Color::BLACK,
@@ -59,7 +58,7 @@ impl SandLine {
             let t = t as f32 / length;
             let x = self.start.x + t * v.x;
             let y = self.start.y + t * v.y;
-            self.g += self.rando.rand_range(-0.05, 0.05);
+            self.g += self.rng.gen_range(-0.05..0.05);
             // clamp g to 0..1 with a 0.05 in the opposite direction
             if self.g < 0.0 {
                 self.g = 0.05
@@ -89,17 +88,19 @@ pub struct DotLine {
     pub start: Point,
     pub end: Point,
     noise_strength: f32,
+    rng: SmallRng,
     stdev: f32,
     color: Color,
     weight: u32,
 }
 
 impl DotLine {
-    pub fn new(start: Point, end: Point) -> Self {
+    pub fn new(start: Point, end: Point, seed: u64) -> Self {
         Self {
             start,
             end,
             noise_strength: 20.0,
+            rng: SmallRng::seed_from_u64(seed),
             stdev: 1.0,
             color: Color::BLACK,
             weight: 25,
@@ -126,7 +127,7 @@ impl DotLine {
         self
     }
 
-    pub fn draw(&self, canvas: &mut Canvas) {
+    pub fn draw(&mut self, canvas: &mut Canvas) {
         let noise_opts = NoiseOpts::new(
             canvas.width() as f32,
             canvas.height() as f32,
@@ -138,7 +139,6 @@ impl DotLine {
         let nf = OpenSimplex::default();
         let v: Point = self.end - self.start;
         let n: Point = (pt(v.y, -v.x)).normalize(); // n . v == 0, n is the normal.
-        let mut rng = thread_rng();
         let normal = Normal::new(0.0, self.stdev).unwrap();
         let length = v.mag();
         let mut c = self.color;
@@ -148,7 +148,7 @@ impl DotLine {
             let nx = noise3d(nf, &noise_opts, p.x, p.y, 0.0);
             let ny = noise3d(nf, &noise_opts, p.x, p.y, 10.3711);
             for _ in 0..self.weight {
-                let r = normal.sample(&mut rng);
+                let r = normal.sample(&mut self.rng);
                 let mut a = 1.0 / (20.0 + r.abs());
                 a = a.clamp(0.0, 1.0);
                 c.set_alpha(a);

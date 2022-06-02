@@ -20,8 +20,8 @@
 //! }
 //! ```
 
-use crate::prelude::{Algebra, Orientation, NoiseOpts, pt};
 use crate::noises::*;
+use crate::prelude::{pt, Algebra, NoiseOpts, Orientation};
 use noise::{Perlin, Seedable};
 use tiny_skia::Point;
 
@@ -172,13 +172,13 @@ pub fn lines_to_quads(lines: Vec<Vec<Point>>) -> Vec<Quad> {
     quads
 }
 
-pub fn warp_points(points: &[Point], scale:f32, factor: f32) -> Vec<Point> {
+pub fn warp_points(points: &[Point], scale: f32, factor: f32) -> Vec<Point> {
     let nfx = Perlin::default().set_seed(0);
     let nfy = Perlin::default().set_seed(1);
     let opts = NoiseOpts::new(1.0, 1.0, scale, scale, scale, factor);
     let qs = points.iter().map(|p| {
-        let dx = noise2d(&nfx, &opts, p.x, p.y );
-        let dy = noise2d(&nfy, &opts, p.x, p.y );
+        let dx = noise2d(&nfx, &opts, p.x, p.y);
+        let dy = noise2d(&nfy, &opts, p.x, p.y);
         pt(p.x + dx, p.y + dy)
     });
     qs.collect()
@@ -232,6 +232,22 @@ pub fn perspective_quads(
         ));
     }
     lines_to_quads(lines)
+}
+
+pub fn neighbor_quads(quad: Quad, quads: &[Quad]) -> Vec<Quad> {
+    let f = |q: &Quad| {
+        let r = if (q.bl == quad.tl && q.br == quad.tr)
+            || (q.bl == quad.br && q.tl == quad.tr)
+            || (q.tl == quad.bl && q.tr == quad.br)
+            || (q.tr == quad.tl && q.br == quad.bl)
+        {
+            Some(q.clone())
+        } else {
+            None
+        };
+        r
+    };
+    quads.iter().filter_map(f).collect()
 }
 
 #[derive(Debug, Clone, Copy)]

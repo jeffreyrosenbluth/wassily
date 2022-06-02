@@ -43,6 +43,7 @@ where
 }
 
 pub trait Algebra: Copy {
+    const ZERO: Self;
     fn scale(self, k: f32) -> Self;
     fn lerp(self, other: Self, t: f32) -> Self;
     fn mag2(self) -> f32;
@@ -67,6 +68,8 @@ pub trait Algebra: Copy {
 }
 
 impl Algebra for Point {
+    const ZERO: Self = Point {x: 0.0, y: 0.0};
+
     fn mag2(self) -> f32 {
         self.x * self.x + self.y * self.y
     }
@@ -111,6 +114,8 @@ pub struct Point3 {
 }
 
 impl Algebra for Point3 {
+    const ZERO: Self = Point3 {x: 0.0, y: 0.0, z: 0.0};
+
     fn scale(self, k: f32) -> Self {
         self * k
     }

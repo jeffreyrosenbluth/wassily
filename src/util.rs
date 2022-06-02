@@ -1,11 +1,7 @@
 use crate::canvas::Canvas;
 use crate::color_names::WHITE;
 use crate::math::Algebra;
-use num_traits::FromPrimitive;
 use png;
-use rand::{Rng, SeedableRng};
-use rand_distr::{uniform::SampleUniform, Distribution, Normal};
-use rand_pcg::Pcg64;
 use std::io::Read;
 use std::{
     collections::hash_map::DefaultHasher,
@@ -142,39 +138,6 @@ pub fn calculate_hash<T: Hash>(t: T) -> u64 {
     s.finish()
 }
 
-pub struct Rand {
-    pub rng: Pcg64,
-}
-
-impl Rand {
-    pub fn new(seed: u64) -> Self {
-        let rng = Pcg64::seed_from_u64(seed);
-        Self { rng }
-    }
-
-    pub fn rand_range<U: SampleUniform + PartialOrd>(&mut self, low: U, high: U) -> U {
-        self.rng.gen_range(low..high)
-    }
-
-    pub fn rand_normal(&mut self, mean: f32, std_dev: f32) -> f32 {
-        let normal = Normal::new(mean, std_dev).unwrap();
-        normal.sample(&mut self.rng)
-    }
-
-    pub fn rand_bool(&mut self, p: f32) -> bool {
-        self.rng.gen_bool(p as f64)
-    }
-
-    pub fn rand_rademacher<T: FromPrimitive>(&mut self) -> T {
-        let b = self.rng.gen_bool(0.5);
-        if b {
-            T::from_i8(1).unwrap()
-        } else {
-            T::from_i8(-1i8).unwrap()
-        }
-    }
-}
-
 pub fn map_range(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
     (x - in_min) / (in_max - in_min) * (out_max - out_min) + out_min
 }
@@ -247,7 +210,8 @@ pub enum Trail {
     Closed,
 }
 
-pub fn chaiken(mut pts: Vec<Point>, n: u32, trail: Trail) -> Vec<Point> {
+pub fn chaiken(pts: &[Point], n: u32, trail: Trail) -> Vec<Point> {
+    let mut pts = pts.to_vec();
     const RATIO: f32 = 0.25;
     if n == 0 || pts.len() < 3 {
         if trail == Trail::Closed {
@@ -266,7 +230,7 @@ pub fn chaiken(mut pts: Vec<Point>, n: u32, trail: Trail) -> Vec<Point> {
         c.insert(0, pts[0]);
         c.push(pts[pts.len() - 1]);
     }
-    chaiken(c, n - 1, trail)
+    chaiken(&c, n - 1, trail)
 }
 
 #[cfg(test)]
