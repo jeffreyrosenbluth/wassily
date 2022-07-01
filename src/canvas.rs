@@ -1,5 +1,4 @@
-use image::imageops::rotate180;
-use image::{ImageFormat, RgbaImage, RgbImage};
+use image::{ImageFormat, RgbImage, RgbaImage};
 use std::ops::{Deref, DerefMut};
 use tiny_skia::*;
 
@@ -21,7 +20,6 @@ impl DerefMut for Canvas {
 
 impl From<&RgbaImage> for Canvas {
     fn from(ib: &RgbaImage) -> Self {
-        // let ib = rotate180(ib);
         let w = ib.width();
         let h = ib.height();
         let data = ib.clone().into_vec();
@@ -34,7 +32,7 @@ impl From<&RgbImage> for Canvas {
     fn from(ib: &RgbImage) -> Self {
         let w = ib.width();
         let h = ib.height();
-        let mut data4: Vec<u8>  = Vec::new();
+        let mut data4: Vec<u8> = Vec::new();
         let data = ib.clone().into_vec();
         for d in data.chunks(3) {
             data4.extend(d);
@@ -47,23 +45,16 @@ impl From<&RgbImage> for Canvas {
 
 impl From<RgbaImage> for Canvas {
     fn from(ib: RgbaImage) -> Self {
-        let ib = rotate180(&ib);
         let w = ib.width();
         let h = ib.height();
-        let mut data4: Vec<u8>  = Vec::new();
         let data = ib.into_vec();
-        for d in data.chunks(3) {
-            data4.extend(d);
-            data4.push(255)
-        }
-        let pixmap = PixmapRef::from_bytes(&data4, w, h).unwrap();
+        let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
         Canvas(pixmap.to_owned())
     }
 }
 
 impl From<RgbImage> for Canvas {
     fn from(ib: RgbImage) -> Self {
-        let ib = rotate180(&ib);
         let w = ib.width();
         let h = ib.height();
         let data = ib.into_vec();
@@ -77,7 +68,7 @@ impl From<Canvas> for RgbaImage {
         let w = canvas.width();
         let h = canvas.height();
         let data = canvas.data().to_vec();
-        rotate180(&RgbaImage::from_vec(w, h, data).unwrap())
+        RgbaImage::from_vec(w, h, data).unwrap()
     }
 }
 
@@ -86,7 +77,7 @@ impl From<&Canvas> for RgbaImage {
         let w = canvas.width();
         let h = canvas.height();
         let data = canvas.data().to_vec();
-        rotate180(&RgbaImage::from_vec(w, h, data).unwrap())
+        RgbaImage::from_vec(w, h, data).unwrap()
     }
 }
 
@@ -105,7 +96,10 @@ impl Canvas {
     }
 
     pub fn stroke_path(&mut self, path: &Path, weight: f32, paint: &Paint) {
-        let stroke = Stroke {width: weight, ..Default::default()};
+        let stroke = Stroke {
+            width: weight,
+            ..Default::default()
+        };
         self.0
             .stroke_path(path, paint, &stroke, Transform::identity(), None);
     }
@@ -151,11 +145,18 @@ impl Canvas {
 }
 
 pub fn paint_solid<'a>(color: Color) -> Paint<'a> {
-    let mut paint = Paint {anti_alias: true, ..Default::default() };
+    let mut paint = Paint {
+        anti_alias: true,
+        ..Default::default()
+    };
     paint.set_color(color);
     paint
 }
 
 pub fn paint_shader<'a>(shader: Shader<'a>) -> Paint<'a> {
-    Paint {anti_alias: true, shader, ..Default::default() }
+    Paint {
+        anti_alias: true,
+        shader,
+        ..Default::default()
+    }
 }

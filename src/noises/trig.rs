@@ -1,7 +1,4 @@
 use noise::NoiseFn;
-
-// XXX Use a macro to remove boilerplate for FMSynth and friends.
-
 #[derive(Clone, Copy, Debug)]
 pub struct Trig {
     pub phases: [f64; 3],
@@ -51,7 +48,7 @@ impl NoiseFn<f64, 2> for Trig {
     fn get(&self, point: [f64; 2]) -> f64 {
         let x = std::f64::consts::TAU * self.frequencies[0] * (point[0] + self.phases[0]);
         let y = std::f64::consts::TAU * self.frequencies[1] * (point[1] + self.phases[1]);
-        x.sin() * y.sin()
+        0.5 * (x.sin() + y.sin())
     }
 }
 
@@ -60,7 +57,7 @@ impl NoiseFn<f64, 3> for Trig {
         let x = std::f64::consts::TAU * self.frequencies[0] * (point[0] + self.phases[0]);
         let y = std::f64::consts::TAU * self.frequencies[1] * (point[1] + self.phases[1]);
         let z = std::f64::consts::TAU * self.frequencies[2] * (point[2] + self.phases[2]);
-        x.sin() * y.sin() * z.sin()
+        (x.sin() + y.sin() + z.sin()) / 3.0
     }
 }
 
@@ -179,7 +176,7 @@ impl NoiseFn<f64, 2> for FMSynth {
         let ym =
             std::f64::consts::TAU * self.carrier_freqs[1] * point[1] + self.indices[1] * fy.sin();
 
-        xm.sin() * ym.sin()
+        0.5 * (xm.sin() + ym.sin())
     }
 }
 
@@ -197,7 +194,7 @@ impl NoiseFn<f64, 3> for FMSynth {
         let zm =
             std::f64::consts::TAU * self.carrier_freqs[2] * point[2] + self.indices[2] * fz.sin();
 
-        xm.sin() * ym.sin() * zm.sin()
+        (xm.sin() + ym.sin() + zm.sin()) / 3.0
     }
 }
 
@@ -316,7 +313,7 @@ impl NoiseFn<f64, 2> for FMCross {
         let ym =
             std::f64::consts::TAU * self.carrier_freqs[1] * point[1] + self.indices[1] * fy.sin();
 
-        xm.sin() * ym.sin()
+        0.5 * (xm.sin() + ym.sin())
     }
 }
 
@@ -333,6 +330,6 @@ impl NoiseFn<f64, 3> for FMCross {
         let zm =
             std::f64::consts::TAU * self.carrier_freqs[2] * point[2] + self.indices[2] * fz.sin();
 
-        xm.sin() * ym.sin() * zm.sin()
+        (xm.sin() + ym.sin() + zm.sin()) / 3.0
     }
 }
