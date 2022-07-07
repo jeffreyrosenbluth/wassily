@@ -22,6 +22,7 @@ pub use crate::subdivision::*;
 pub use crate::textures::*;
 pub use crate::util::*;
 pub use crate::warp::*;
+pub use crate::okcolor::*;
 pub use image::*;
 pub use noise::*;
 pub use palette;

@@ -18,8 +18,44 @@ use tiny_skia::{Color, Point};
 const PI: f32 = std::f32::consts::PI;
 const TAU: f32 = std::f32::consts::TAU;
 
-#[derive(Clone)]
+pub struct ColorMap {
+    pub red_fn: Box<dyn Fn(f32) -> f32>,
+    pub green_fn: Box<dyn Fn(f32) -> f32>,
+    pub blue_fn: Box<dyn Fn(f32) -> f32>,
+    pub color_grad: Box<dyn Fn(f32, f32) -> f32>,
+}
 
+impl ColorMap {
+    pub fn new(
+        red_fn: Box<dyn Fn(f32) -> f32>,
+        green_fn: Box<dyn Fn(f32) -> f32>,
+        blue_fn: Box<dyn Fn(f32) -> f32>,
+        color_grad: Box<dyn Fn(f32, f32) -> f32>,
+    ) -> Self {
+        Self {
+            red_fn,
+            green_fn,
+            blue_fn,
+            color_grad,
+        }
+    }
+
+    pub fn get(&self, x: f32, y: f32) -> Color {
+        let t = (self.color_grad)(x, y);
+        let r = (self.red_fn)(t);
+        let g = (self.green_fn)(t);
+        let b = (self.blue_fn)(t);
+        Color::from_rgba(
+            r.clamp(0.0, 1.0),
+            g.clamp(0.0, 1.0),
+            b.clamp(0.0, 1.0),
+            1.0,
+        )
+        .unwrap()
+    }
+}
+
+#[derive(Clone)]
 pub struct ColorWheel {
     pub octaves: usize,
     pub base_color: [f32; 3],
@@ -156,6 +192,7 @@ pub trait Colorful {
     fn to_srgba(&self) -> Srgba;
     fn from_image_rgba(p: image::Rgba<u8>) -> Self;
     fn from_srgba(rgb: Srgba) -> Self;
+    fn from_tuple(rgb: (f32, f32, f32)) -> Self;
     fn to_image_rgba(&self) -> image::Rgba<u8>;
 }
 
@@ -321,6 +358,13 @@ impl Colorful for Color {
     fn from_srgba(rgb: Srgba) -> Color {
         let c = rgb.into_components();
         Color::from_rgba(c.0, c.1, c.2, c.3).unwrap()
+    }
+
+    fn from_tuple(rgb: (f32, f32, f32)) -> Self {
+        let r = rgb.0.clamp(0.0, 1.0);
+        let g = rgb.1.clamp(0.0, 1.0);
+        let b = rgb.2.clamp(0.0, 1.0);
+        Color::from_rgba(r, g, b, 1.0).unwrap()
     }
 }
 
@@ -659,150 +703,74 @@ impl IntoIterator for Palette {
 /// Each color channel's (red, green, and blue) value is a function of some
 /// angle (theta). c(theta) = a + b * cos(freq * theta + phase).
 #[derive(Debug, Clone, Copy)]
-pub struct CosChannel {
+pub struct Sinusoid {
     pub a: f32,
     pub b: f32,
     pub freq: f32,  // radians
-    pub phase: f32, // radians
 }
 
-impl CosChannel {
-    pub fn new(a: f32, b: f32, phase: f32) -> Self {
+impl Sinusoid {
+    pub fn new(a: f32, b: f32) -> Self {
         let freq = 1.0;
-        Self { a, b, freq, phase }
+        Self { a, b, freq }
     }
 }
 
-impl Default for CosChannel {
+impl Default for Sinusoid {
     fn default() -> Self {
         Self {
             a: 0.5,
             b: 0.5,
             freq: 1.0,
-            phase: 0.0,
         }
     }
 }
 
 /// [Procedural Color Palettess](https://iquilezles.org/www/articles/palettes/palettes.htm).
 #[derive(Debug, Clone, Copy)]
-pub struct CosColor {
-    pub r: CosChannel,
-    pub g: CosChannel,
-    pub b: CosChannel,
+pub struct ProcColor {
+    pub c1: Perlin,
+    pub scale: f32,
+    pub seed: f32,
+    pub c2: Sinusoid,
+    pub c3: Sinusoid,
 }
 
-impl CosColor {
-    pub fn new(r: CosChannel, g: CosChannel, b: CosChannel) -> Self {
-        Self { r, g, b }
+impl ProcColor {
+    pub fn new(scale: f32, seed: f32, c2: Sinusoid, c3: Sinusoid) -> Self {
+        Self { c1: Perlin::default(), scale, seed, c2, c3 }
     }
 
     /// Create a procedural color as a function of the angle `theta` (radians).
-    pub fn cos_color(&self, theta: f32) -> Color {
-        let r = self.r;
-        let g = self.g;
-        let b = self.b;
-        let mut red = r.a + r.b * (r.freq * theta + r.phase).cos();
-        let mut green = g.a + g.b * (g.freq * theta + g.phase).cos();
-        let mut blue = b.a + b.b * (b.freq * theta + b.phase).cos();
-        if red.is_nan() {
-            red = 0.0
+    pub fn proc_color(&self, theta: f32) -> (f32, f32, f32) {
+        let c1 = self.c1;
+        let c2 = self.c2;
+        let c3 = self.c3;
+        let arg = (theta * self.scale) as f64;
+        let mut channel1 =  0.5 + 0.5 * c1.get([arg, self.seed as f64]) as f32;
+        let mut channel2 = c2.a + c2.b * (c2.freq * theta).cos();
+        let mut channel3 = c3.a + c3.b * (c3.freq * theta).cos();
+        if channel1.is_nan() {
+            channel1 = 0.0
         };
-        if green.is_nan() {
-            green = 0.0
+        if channel2.is_nan() {
+            channel2 = 0.0
         };
-        if blue.is_nan() {
-            blue = 0.0
+        if channel3.is_nan() {
+            channel3 = 0.0
         };
-        rgb(
-            red.clamp(0.0, 1.0),
-            green.clamp(0.0, 1.0),
-            blue.clamp(0.0, 1.0),
-        )
-    }
-
-    pub fn rainbow() -> Self {
-        let r = CosChannel::default();
-        let mut g = CosChannel::default();
-        let mut b = CosChannel::default();
-        g.phase = 0.33 * 2.0 * PI;
-        b.phase = 0.66 * 2.0 * PI;
-        Self { r, g, b }
-    }
-
-    pub fn berry() -> Self {
-        let mut r = CosChannel::default();
-        let mut g = CosChannel::default();
-        let mut b = CosChannel::default();
-        r.phase = 0.3 * 2.0 * PI;
-        g.phase = 0.2 * 2.0 * PI;
-        b.phase = 0.2 * 2.0 * PI;
-        Self { r, g, b }
-    }
-
-    pub fn rain_forest() -> Self {
-        let mut r = CosChannel::default();
-        let mut g = CosChannel::default();
-        let mut b = CosChannel::default();
-        r.phase = 0.8 * 2.0 * PI;
-        g.phase = 0.9 * 2.0 * PI;
-        b.freq = 0.5;
-        b.phase = 0.3 * 2.0 * PI;
-        Self { r, g, b }
-    }
-
-    pub fn pink_gold() -> Self {
-        let r = CosChannel::default();
-        let mut g = CosChannel::default();
-        let mut b = CosChannel::default();
-        g.freq = 0.7;
-        g.phase = 0.15 * 2.0 * PI;
-        b.freq = 0.4;
-        b.phase = 0.2 * 2.0 * PI;
-        Self { r, g, b }
-    }
-
-    pub fn fuschia() -> Self {
-        let mut r = CosChannel::default();
-        let mut g = CosChannel::default();
-        let mut b = CosChannel::default();
-        r.freq = 1.0;
-        r.phase = 0.5 * 2.0 * PI;
-        g.freq = 1.0;
-        g.phase = 0.2 * 2.0 * PI;
-        b.freq = 0.0;
-        b.phase = 0.25 * 2.0 * PI;
-        Self { r, g, b }
-    }
-
-    pub fn watermelon() -> Self {
-        let mut r = CosChannel::default();
-        let mut g = CosChannel::default();
-        let mut b = CosChannel::default();
-        r.a = 0.8;
-        r.b = 0.2;
-        r.freq = 2.0;
-        r.phase = 0.0;
-        g.a = 0.5;
-        g.b = 0.4;
-        g.freq = 1.0;
-        g.phase = 0.25 * 2.0 * PI;
-        b.a = 0.4;
-        b.b = 0.2;
-        b.freq = 1.0;
-        b.phase = 0.25 * 2.0 * PI;
-        Self { r, g, b }
+        (channel1, channel2, channel3)
     }
 }
 
-impl Default for CosColor {
+impl Default for ProcColor {
     fn default() -> Self {
-        let r = CosChannel::default();
-        let mut g = CosChannel::default();
-        let mut b = CosChannel::default();
-        g.phase = 0.2 * PI;
-        b.phase = 0.4 * PI;
-        Self { r, g, b }
+        let r = Perlin::default();
+        let scale = 0.2;
+        let seed = 0.0;
+        let g = Sinusoid::default();
+        let b = Sinusoid::default();
+        Self { c1: r, scale, seed,  c2: g, c3: b }
     }
 }
 
