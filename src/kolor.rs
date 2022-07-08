@@ -714,6 +714,10 @@ impl Sinusoid {
         let freq = 1.0;
         Self { a, b, freq }
     }
+
+    pub fn eval(&self, theta: f32) -> f32 {
+        self.a + self.b * (self.freq * theta).cos()
+    }
 }
 
 impl Default for Sinusoid {
@@ -748,8 +752,8 @@ impl ProcColor {
         let c3 = self.c3;
         let arg = (theta * self.scale) as f64;
         let mut channel1 =  0.5 + 0.5 * c1.get([arg, self.seed as f64]) as f32;
-        let mut channel2 = c2.a + c2.b * (c2.freq * theta).cos();
-        let mut channel3 = c3.a + c3.b * (c3.freq * theta).cos();
+        let mut channel2 = c2.eval(theta);
+        let mut channel3 = c3.eval(theta);
         if channel1.is_nan() {
             channel1 = 0.0
         };
@@ -759,7 +763,7 @@ impl ProcColor {
         if channel3.is_nan() {
             channel3 = 0.0
         };
-        (channel1, channel2, channel3)
+        (channel1.clamp(0.0, 1.0), channel2.clamp(0.0, 1.0), channel3.clamp(0.0, 1.0))
     }
 }
 
