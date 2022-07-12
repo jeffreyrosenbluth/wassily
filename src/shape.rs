@@ -1,4 +1,7 @@
-use crate::prelude::{chaiken, pt, Trail, TAU};
+use crate::{
+    kolor::ConvertColor,
+    prelude::{chaiken, pt, Trail, TAU},
+};
 use num_traits::AsPrimitive;
 use rand::rngs::SmallRng;
 use rand_distr::{Distribution, Normal};
@@ -258,12 +261,12 @@ impl<'a> ShapeBuilder<'a> {
         Self::default()
     }
 
-    pub fn fill_color(mut self, color: Color) -> Self {
+    pub fn fill_color(mut self, color: impl ConvertColor) -> Self {
         let mut paint = Paint {
             anti_alias: true,
             ..Default::default()
         };
-        paint.set_color(color);
+        paint.set_color(color.to_color());
         self.fill_paint = Some(paint);
         self
     }
@@ -283,12 +286,12 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    pub fn stroke_color(mut self, color: Color) -> Self {
+    pub fn stroke_color(mut self, color: impl ConvertColor) -> Self {
         let mut paint = Paint {
             anti_alias: true,
             ..Default::default()
         };
-        paint.set_color(color);
+        paint.set_color(color.to_color());
         self.stroke_paint = Some(paint);
         self
     }
@@ -425,8 +428,8 @@ impl<'a> ShapeBuilder<'a> {
         let mut points = vec![];
         for i in 0..sides {
             let normal = Normal::new(0.0, 0.25 * a.min(b)).unwrap();
-            let dx = normal.sample(rng); 
-            let dy = normal.sample(rng); 
+            let dx = normal.sample(rng);
+            let dy = normal.sample(rng);
             let u = TAU * i as f32 / sides as f32;
             let x1 = a * u.cos() + center.x + dx;
             let y1 = b * u.sin() + center.y + dy;

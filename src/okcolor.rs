@@ -1,7 +1,4 @@
-// This file is based on code by Sami Perttu. Which is based on code by Björn 
-// Ottosson.
-// Here is the original copyright notice:
-//
+// The conversion routines in this file is based on code by Björn Ottosson.
 // Copyright(c) 2021 Björn Ottosson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -20,12 +17,103 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use crate::kolor::{Colorful, ConvertColor};
+use tiny_skia::Color;
+
+/// all values in [0, 1]
+pub struct Oklab {
+    l: f32,
+    a: f32,
+    b: f32,
+}
+
+impl ConvertColor for Oklab {
+    fn to_color(&self) -> Color {
+        let (r, g, b) = oklab_to_linear_srgb(self.l, self.a, self.b);
+        Color::from_rgba(
+            srgb_transfer_function(r),
+            srgb_transfer_function(g),
+            srgb_transfer_function(b),
+            1.0,
+        )
+        .unwrap()
+    }
+    fn from_color(color: &Color) -> Self {
+        let (mut r, mut g, mut b, _) = color.as_f32s();
+        r = srgb_transfer_function_inv(r);
+        g = srgb_transfer_function_inv(g);
+        b = srgb_transfer_function_inv(b);
+        let o = linear_srgb_to_oklab(r, g, b);
+        Oklab {
+            l: o.0,
+            a: o.1,
+            b: o.2,
+        }
+    }
+}
+
+/// all values in [0, 1]
+pub struct Okhsl {
+    pub h: f32,
+    pub s: f32,
+    pub l: f32,
+}
+
+impl ConvertColor for Okhsl {
+    fn to_color(&self) -> Color {
+        let (r, g, b) = okhsl_to_srgb(self.h, self.s, self.l);
+        Color::from_rgba(r, g, b, 1.0).unwrap()
+    }
+
+    fn from_color(color: &Color) -> Self {
+        let (r, g, b, _) = color.as_f32s();
+        let o = srgb_to_okhsl(r, g, b);
+        Okhsl {
+            h: o.0,
+            s: o.1,
+            l: o.2,
+        }
+    }
+}
+
+pub struct Okhsv {
+    h: f32,
+    s: f32,
+    v: f32,
+}
+
+impl ConvertColor for Okhsv {
+    fn to_color(&self) -> Color {
+        let (r, g, b) = okhsv_to_srgb(self.h, self.s, self.v);
+        Color::from_rgba(r, g, b, 1.0).unwrap()
+    }
+
+    fn from_color(color: &Color) -> Self {
+        let (r, g, b, _) = color.as_f32s();
+        let o = srgb_to_okhsv(r, g, b);
+        Okhsv {
+            h: o.0,
+            s: o.1,
+            v: o.2,
+        }
+    }
+}
+
 pub fn srgb_transfer_function(a: f32) -> f32 {
     let a = a.clamp(0.0, 1.0);
     if 0.0031308 >= a {
         12.92 * a
     } else {
         1.055 * a.powf(0.4166666666666667) - 0.055
+    }
+}
+
+pub fn srgb_transfer_function_inv(a: f32) -> f32 {
+    let a = a.clamp(0.0, 1.0);
+    if a >= 0.04045 {
+        ((a + 0.055) / (1.0 + 0.055)).powf(2.4)
+    } else {
+        a / 12.92
     }
 }
 
@@ -110,6 +198,22 @@ fn oklab_to_linear_srgb(l: f32, a: f32, b: f32) -> (f32, f32, f32) {
     )
 }
 
+fn linear_srgb_to_oklab(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
+    let l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
+    let m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
+    let s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+
+    let l_ = l.powf(1.0 / 3.0);
+    let m_ = m.powf(1.0 / 3.0);
+    let s_ = s.powf(1.0 / 3.0);
+
+    (
+        0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_,
+        1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_,
+        0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_,
+    )
+}
+
 // returns (L, C)
 fn find_cusp(a: f32, b: f32) -> (f32, f32) {
     let s_cusp = compute_max_saturation(a, b);
@@ -191,7 +295,6 @@ fn find_gamut_intersection(
                 let t_g = if u_g >= 0.0 { t_g } else { std::f32::INFINITY };
                 let t_b = if u_b >= 0.0 { t_b } else { std::f32::INFINITY };
                 t + t_r.min(t_g.min(t_b))
-
             }
         }
     }
@@ -239,7 +342,9 @@ fn get_cs(l: f32, a_: f32, b_: f32) -> (f32, f32, f32) {
         let c_a = l * st_mid_s;
         let c_b = (1.0 - l) * st_mid_t;
         0.9 * k
-            * (1.0 / (1.0 / (c_a * c_a * c_a * c_a) + 1.0 / (c_b * c_b * c_b * c_b))).sqrt().sqrt()
+            * (1.0 / (1.0 / (c_a * c_a * c_a * c_a) + 1.0 / (c_b * c_b * c_b * c_b)))
+                .sqrt()
+                .sqrt()
     };
 
     let c_0 = {
@@ -250,6 +355,13 @@ fn get_cs(l: f32, a_: f32, b_: f32) -> (f32, f32, f32) {
     };
 
     (c_0, c_mid, c_max)
+}
+
+fn toe(x: f32) -> f32 {
+    let k_1 = 0.206;
+    let k_2 = 0.03;
+    let k_3 = (1.0 + k_1) / (1.0 + k_2);
+    0.5 * (k_3 * x - k_1 + ((k_3 * x - k_1) * (k_3 * x - k_1) + 4.0 * k_2 * k_3 * x)).sqrt()
 }
 
 fn toe_inv(x: f32) -> f32 {
@@ -307,6 +419,50 @@ pub fn okhsl_to_srgb(h: f32, s: f32, l: f32) -> (f32, f32, f32) {
     )
 }
 
+pub fn srgb_to_okhsl(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
+    let lab = linear_srgb_to_oklab(
+        srgb_transfer_function_inv(r),
+        srgb_transfer_function_inv(g),
+        srgb_transfer_function_inv(b),
+    );
+
+    let c = (lab.1 * lab.1 + lab.2 * lab.2).sqrt();
+    let a_ = lab.1 / c;
+    let b_ = lab.2 / c;
+
+    let l = lab.0;
+    let h = 0.5 + 0.5 * (-lab.2).atan2(-lab.1) / std::f32::consts::PI;
+
+    let cs = get_cs(l, a_, b_);
+    let c_0 = cs.0;
+    let c_mid = cs.1;
+    let c_max = cs.2;
+
+    // Inverse of the interpolation in okhsl_to_srgb:
+
+    let mid = 0.8;
+    let mid_inv = 1.25;
+
+    let s: f32;
+    if c < c_mid {
+        let k_1 = mid * c_0;
+        let k_2 = 1.0 - k_1 / c_mid;
+
+        let t = c / (k_1 + k_2 * c);
+        s = t * mid;
+    } else {
+        let k_0 = c_mid;
+        let k_1 = (1.0 - mid) * c_mid * c_mid * mid_inv * mid_inv / c_0;
+        let k_2 = 1.0 - (k_1) / (c_max - c_mid);
+
+        let t = (c - k_0) / (k_1 + k_2 * (c - k_0));
+        s = mid + (1.0 - mid) * t;
+    }
+
+    let l = toe(l);
+    (h, s, l)
+}
+
 pub fn okhsv_to_srgb(h: f32, s: f32, v: f32) -> (f32, f32, f32) {
     let a_ = (2.0 * std::f32::consts::PI * h).cos();
     let b_ = (2.0 * std::f32::consts::PI * h).sin();
@@ -341,4 +497,46 @@ pub fn okhsv_to_srgb(h: f32, s: f32, v: f32) -> (f32, f32, f32) {
         srgb_transfer_function(g),
         srgb_transfer_function(b),
     )
+}
+
+pub fn srgb_to_okhsv(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
+    let lab = linear_srgb_to_oklab(
+        srgb_transfer_function_inv(r),
+        srgb_transfer_function_inv(g),
+        srgb_transfer_function_inv(b),
+    );
+
+    let c = (lab.1 * lab.1 + lab.2 * lab.2).sqrt();
+    let a_ = lab.1 / c;
+    let b_ = lab.2 / c;
+
+    let mut l = lab.0;
+    let h = 0.5 + 0.5 * (-lab.2).atan2(-lab.1) / std::f32::consts::PI;
+
+    let cusp = find_cusp(a_, b_);
+    let st_max = to_st(cusp.0, cusp.1);
+    let s_max = st_max.0;
+    let t_max = st_max.1;
+    let s_0 = 0.5;
+    let k = 1.0 - s_0 / s_max;
+
+    // first we find L_v, C_v, L_vt and C_vt
+
+    let t = t_max / (c + l * t_max);
+    let l_v = t * l;
+    let c_v = t * c;
+
+    let l_vt = toe_inv(l_v);
+    let c_vt = c_v * l_vt / l_v;
+
+    // we can then use these to invert the step that compensates for the toe and the curved top part of the triangle:
+    let rgb_scale = oklab_to_linear_srgb(l_vt, a_ * c_vt, b_ * c_vt);
+    let scale_l = (1.0 / (rgb_scale.0.max(rgb_scale.1).max(rgb_scale.2.max(0.0)))).powf(1.0 / 3.0);
+    l = l / scale_l;
+    l = toe(l);
+
+    // we can now compute v and s:
+    let v = l / l_v;
+    let s = (s_0 + t_max) * c_v / ((t_max * s_0) + t_max * k * c_v);
+    (h, s, v)
 }

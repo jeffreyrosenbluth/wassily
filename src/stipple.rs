@@ -2,12 +2,12 @@ use crate::math::{center, pt, Algebra};
 use crate::matrix::Matrix;
 use num_traits::AsPrimitive;
 use rand::{Rng, SeedableRng};
-use rand_pcg::Pcg64;
+use rand::rngs::SmallRng;
 use std::f32::consts::PI;
 use tiny_skia::Point;
 
 pub fn uniform<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> Vec<Point> {
-    let mut rng = Pcg64::seed_from_u64(seed);
+    let mut rng = SmallRng::seed_from_u64(seed);
     let vals: Vec<Point> = (0..n)
         .map(|_| {
             pt(
@@ -33,7 +33,7 @@ pub fn halton(index: u32, base: u32) -> f32 {
 }
 
 pub fn halton_23<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> Vec<Point> {
-    let mut rng = Pcg64::seed_from_u64(seed);
+    let mut rng = SmallRng::seed_from_u64(seed);
     let k: u32 = rng.gen();
     let xs = (k..n + k).map(|i| halton(i, 2));
     let ys = (k..n + k).map(|i| halton(i, 3));
@@ -48,7 +48,7 @@ pub fn poisson_disk(width: f32, height: f32, radius: f32, seed: u64) -> Vec<Poin
     const K: usize = 11; // maximum number of samples before rejection
     const M: f32 = 4.0; // a number mutually prime to k
     const EPS: f32 = 0.0000001;
-    let mut rng = Pcg64::seed_from_u64(seed);
+    let mut rng = SmallRng::seed_from_u64(seed);
     let cell_size = radius / 2f32.sqrt();
     let cols = (width / cell_size).ceil() as usize;
     let rows = (height / cell_size).ceil() as usize;

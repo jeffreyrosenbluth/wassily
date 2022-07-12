@@ -1,5 +1,3 @@
-use rand::rngs::SmallRng;
-use rand::SeedableRng;
 use wassily::prelude::*;
 const WIDTH: u32 = 7200;
 const HEIGHT: u32 = 9600;
