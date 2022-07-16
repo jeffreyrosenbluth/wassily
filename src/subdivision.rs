@@ -90,6 +90,23 @@ impl Quad {
         vec![self.bl, self.tl, self.tr, self.br]
     }
 
+    pub fn bounds(&self) -> (Point, Point) {
+        let v = self.to_vec();
+        let xs = v.iter().map(|p| p.x);
+        let ys = v.iter().map(|p| p.y);
+        let min_x = xs
+            .clone()
+            .min_by(|a, b| a.partial_cmp(&b).unwrap())
+            .unwrap();
+        let max_x = xs.max_by(|a, b| a.partial_cmp(&b).unwrap()).unwrap();
+        let min_y = ys
+            .clone()
+            .min_by(|a, b| a.partial_cmp(&b).unwrap())
+            .unwrap();
+        let max_y = ys.max_by(|a, b| a.partial_cmp(&b).unwrap()).unwrap();
+        (pt(min_x, min_y), pt(max_x, max_y))
+    }
+
     /// Find the direction of the longest length.
     pub fn best_dir(&self) -> Orientation {
         let x0 = if self.bl.x < self.tl.x {
