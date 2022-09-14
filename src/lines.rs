@@ -1,12 +1,12 @@
 use crate::canvas::Canvas;
-use crate::prelude::paint_solid;
 use crate::{
-    prelude::{Algebra, pt},
     noises::*,
+    prelude::{paint_solid, pt, Algebra},
+    shape::ShapeBuilder,
 };
 use noise::OpenSimplex;
-use rand::{Rng, SeedableRng};
 use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 use rand_distr::{Distribution, Normal};
 use tiny_skia::{Color, Point};
 
@@ -78,7 +78,11 @@ impl SandLine {
                 let mut color = self.color;
                 color.set_alpha(a);
                 let paint = paint_solid(color);
-                canvas.fill_rect(x, y, 1.0, 1.0, &paint)
+                ShapeBuilder::new()
+                    .rect_xywh(pt(x, y), pt(1, 1))
+                    .fill_paint(&paint)
+                    .build()
+                    .draw(canvas);
             }
         }
     }

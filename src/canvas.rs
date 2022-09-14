@@ -1,22 +1,7 @@
 use image::{ImageFormat, RgbImage, RgbaImage};
-use std::ops::{Deref, DerefMut};
 use tiny_skia::*;
 
 pub struct Canvas(pub Pixmap);
-
-impl Deref for Canvas {
-    type Target = Pixmap;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Canvas {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 impl From<&RgbaImage> for Canvas {
     fn from(ib: &RgbaImage) -> Self {
@@ -67,7 +52,7 @@ impl From<Canvas> for RgbaImage {
     fn from(canvas: Canvas) -> Self {
         let w = canvas.width();
         let h = canvas.height();
-        let data = canvas.data().to_vec();
+        let data = canvas.0.data().to_vec();
         RgbaImage::from_vec(w, h, data).unwrap()
     }
 }
@@ -76,7 +61,7 @@ impl From<&Canvas> for RgbaImage {
     fn from(canvas: &Canvas) -> Self {
         let w = canvas.width();
         let h = canvas.height();
-        let data = canvas.data().to_vec();
+        let data = canvas.0.data().to_vec();
         RgbaImage::from_vec(w, h, data).unwrap()
     }
 }
@@ -86,27 +71,55 @@ impl Canvas {
         Canvas(Pixmap::new(width, height).unwrap())
     }
 
-    pub fn fill_path(&mut self, path: &Path, paint: &Paint) {
-        self.0
-            .fill_path(path, paint, FillRule::Winding, Transform::identity(), None);
-    }
-    pub fn fill_rect(&mut self, x: f32, y: f32, w: f32, h: f32, paint: &Paint) {
-        let rect = Rect::from_xywh(x, y, w, h).unwrap();
-        self.0.fill_rect(rect, paint, Transform::identity(), None);
+    pub fn width(&self) -> u32 {
+        self.0.width()
     }
 
-    pub fn stroke_path(&mut self, path: &Path, weight: f32, paint: &Paint) {
-        let stroke = Stroke {
-            width: weight,
-            ..Default::default()
-        };
+    pub fn height(&self) -> u32 {
+        self.0.height()
+    }
+
+    pub fn fill(&mut self, color: Color) {
+        self.0.fill(color);
+    }
+
+    pub fn fill_path(
+        &mut self,
+        path: &Path,
+        paint: &Paint,
+        fill_rule: FillRule,
+        transform: Transform,
+        clip_mask: Option<&ClipMask>,
+    ) {
         self.0
-            .stroke_path(path, paint, &stroke, Transform::identity(), None);
+            .fill_path(path, paint, fill_rule, transform, clip_mask);
+    }
+
+    pub fn fill_rect(
+        &mut self,
+        rect: Rect,
+        paint: &Paint,
+        transform: Transform,
+        clip_mask: Option<&ClipMask>,
+    ) {
+        self.0.fill_rect(rect, paint, transform, clip_mask);
+    }
+
+    pub fn stroke_path(
+        &mut self,
+        path: &Path,
+        paint: &Paint,
+        stroke: &Stroke,
+        transform: Transform,
+        clip_mask: Option<&ClipMask>,
+    ) {
+        self.0
+            .stroke_path(path, paint, &stroke, transform, clip_mask);
     }
 
     pub fn dot(&mut self, x: f32, y: f32, color: Color) {
         let width = self.width();
-        let pixel_map = self.pixels_mut();
+        let pixel_map = self.0.pixels_mut();
         let k = y as usize * width as usize + x as usize;
         pixel_map[k] = color.premultiply().to_color_u8();
     }

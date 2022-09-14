@@ -18,7 +18,8 @@ fn main() {
         ],
         SpreadMode::Pad,
         Transform::identity(),
-    ).unwrap();
+    )
+    .unwrap();
     let linear = paint_shader(lg);
 
     let rg = RadialGradient::new(
@@ -31,7 +32,8 @@ fn main() {
         ],
         SpreadMode::Pad,
         Transform::identity(),
-    ).unwrap();
+    )
+    .unwrap();
     let radial = paint_shader(rg);
 
     ShapeBuilder::new()

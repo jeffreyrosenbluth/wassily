@@ -1,9 +1,10 @@
+use crate::canvas::*;
 use crate::noises::*;
 use crate::prelude::pt;
 use crate::shape::*;
 use noise::Perlin;
 use tiny_skia::Paint;
-use tiny_skia::{Color, Pixmap, Point, Rect, Transform};
+use tiny_skia::{Color, Point, Rect, Transform};
 pub struct SandBox {
     xy: Point,
     wh: Point,
@@ -47,7 +48,7 @@ impl SandBox {
         self
     }
 
-    pub fn draw(&mut self, canvas: &mut Pixmap) {
+    pub fn draw(&mut self, canvas: &mut Canvas) {
         let noise_opts = NoiseOpts::default()
             .width(self.wh.x)
             .height(self.wh.y)
@@ -56,7 +57,9 @@ impl SandBox {
         let rect = Rect::from_xywh(self.xy.x, self.xy.y, self.wh.x, self.wh.y).unwrap();
         let mut paint = Paint::default();
         paint.set_color(self.bg_color);
-        canvas.fill_rect(rect, &paint, Transform::identity(), None);
+        canvas
+            .0
+            .fill_rect(rect, &paint, Transform::identity(), None);
         for i in 0..self.wh.x as u32 {
             let from = pt(self.xy.x + i as f32, self.xy.y);
             let to = pt(self.xy.x + i as f32, self.xy.y + self.wh.y);
