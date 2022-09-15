@@ -29,7 +29,7 @@ pub fn horizontal_stripe(
 ) -> Canvas {
     let mut canvas = Canvas::new(width, height);
     let mut l = 0.0;
-    canvas.0.fill(color1);
+    canvas.pixmap.fill(color1);
     while l < height as f32 {
         ShapeBuilder::new()
             .line(pt(0.0, l), pt(width, l))
@@ -229,16 +229,16 @@ pub fn pattern<'a>(
 ) -> Paint<'a> {
     let x = bbox.x();
     let y = bbox.y();
-    pattern_canvas.0.draw_pixmap(
+    pattern_canvas.pixmap.draw_pixmap(
         x as i32,
         y as i32,
-        texture_canvas.0.as_ref(),
+        texture_canvas.pixmap.as_ref(),
         &PixmapPaint::default(),
         Transform::identity(),
         None,
     );
     let pattern = Pattern::new(
-        pattern_canvas.0.as_ref(),
+        pattern_canvas.pixmap.as_ref(),
         SpreadMode::Pad,
         FilterQuality::Bicubic,
         1.0,

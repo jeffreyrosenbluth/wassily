@@ -76,11 +76,11 @@ impl<'a> Shape<'a> {
             pb.close();
         }
         let path = pb.finish().unwrap();
-        if let Some(fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&path, &fp, self.fillrule, self.transform, None);
+        if let Some(mut fp) = *self.fill_paint.clone() {
+            canvas.fill_path(&path, &mut fp, self.fillrule, self.transform, None);
         }
-        if let Some(sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
+        if let Some(mut sp) = *self.stroke_paint.clone() {
+            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
         }
     }
 
@@ -98,11 +98,11 @@ impl<'a> Shape<'a> {
             pb.close();
         }
         let path = pb.finish().unwrap();
-        if let Some(fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&path, &fp, self.fillrule, self.transform, None);
+        if let Some(mut fp) = *self.fill_paint.clone() {
+            canvas.fill_path(&path, &mut fp, self.fillrule, self.transform, None);
         }
-        if let Some(sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
+        if let Some(mut sp) = *self.stroke_paint.clone() {
+            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
         }
     }
 
@@ -121,11 +121,11 @@ impl<'a> Shape<'a> {
             pb.close();
         }
         let path = pb.finish().unwrap();
-        if let Some(fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&path, &fp, self.fillrule, self.transform, None);
+        if let Some(mut fp) = *self.fill_paint.clone() {
+            canvas.fill_path(&path, &mut fp, self.fillrule, self.transform, None);
         }
-        if let Some(sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
+        if let Some(mut sp) = *self.stroke_paint.clone() {
+            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
         }
     }
 
@@ -139,11 +139,11 @@ impl<'a> Shape<'a> {
         let bottom = self.points[1].y;
         let rect = Rect::from_ltrb(left, top, right, bottom).unwrap();
         let path = PathBuilder::from_rect(rect);
-        if let Some(fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&path, &fp, self.fillrule, self.transform, None);
+        if let Some(mut fp) = *self.fill_paint.clone() {
+            canvas.fill_path(&path, &mut fp, self.fillrule, self.transform, None);
         }
-        if let Some(sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
+        if let Some(mut sp) = *self.stroke_paint.clone() {
+            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
         }
     }
 
@@ -156,11 +156,11 @@ impl<'a> Shape<'a> {
         let w = self.points[1].x;
         let _h = self.points[1].y;
         let circle = PathBuilder::from_circle(cx, cy, w).unwrap();
-        if let Some(fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&circle, &fp, self.fillrule, self.transform, None);
+        if let Some(mut fp) = *self.fill_paint.clone() {
+            canvas.fill_path(&circle, &mut fp, self.fillrule, self.transform, None);
         }
-        if let Some(sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&circle, &sp, &self.stroke, self.transform, None);
+        if let Some(mut sp) = *self.stroke_paint.clone() {
+            canvas.stroke_path(&circle, &mut sp, &self.stroke, self.transform, None);
         }
     }
 
@@ -174,11 +174,11 @@ impl<'a> Shape<'a> {
         let h = self.points[1].y;
         let rect = Rect::from_xywh(cx - w / 2.0, cy - h / 2.0, w, h).unwrap();
         let ellipse = PathBuilder::from_oval(rect).unwrap();
-        if let Some(fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&ellipse, &fp, self.fillrule, self.transform, None);
+        if let Some(mut fp) = *self.fill_paint.clone() {
+            canvas.fill_path(&ellipse, &mut fp, self.fillrule, self.transform, None);
         }
-        if let Some(sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&ellipse, &sp, &self.stroke, self.transform, None);
+        if let Some(mut sp) = *self.stroke_paint.clone() {
+            canvas.stroke_path(&ellipse, &mut sp, &self.stroke, self.transform, None);
         }
     }
 
@@ -194,8 +194,8 @@ impl<'a> Shape<'a> {
         pb.move_to(x0, y0);
         pb.line_to(x1, y1);
         let path = pb.finish().unwrap();
-        if let Some(sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &sp, &self.stroke, self.transform, None);
+        if let Some(mut sp) = *self.stroke_paint.clone() {
+            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
         }
     }
 }

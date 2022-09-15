@@ -53,7 +53,7 @@ impl<M> Sketch<M> {
     }
 
     pub fn run(&mut self, model: &M) {
-        self.canvas.0.fill(*WHITE);
+        self.canvas.pixmap.fill(*WHITE);
         // (self.update_fn)(&mut self.model, &self.update);
         (self.view_fn)(&mut self.canvas, model);
     }
@@ -105,7 +105,7 @@ pub fn encode_png(
     source: String,
     cargo: String,
 ) -> Result<Vec<u8>, png::EncodingError> {
-    let mut tmp_pixmap = canvas.0.to_owned();
+    let mut tmp_pixmap = canvas.pixmap.to_owned();
     // Demultiply alpha.
     for pixel in tmp_pixmap.pixels_mut() {
         let c = pixel.demultiply();

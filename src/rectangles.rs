@@ -58,7 +58,7 @@ impl SandBox {
         let mut paint = Paint::default();
         paint.set_color(self.bg_color);
         canvas
-            .0
+            .pixmap
             .fill_rect(rect, &paint, Transform::identity(), None);
         for i in 0..self.wh.x as u32 {
             let from = pt(self.xy.x + i as f32, self.xy.y);

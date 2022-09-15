@@ -34,7 +34,7 @@ impl Grain {
 
     pub fn grain(&self) -> Paint {
         let pattern = Pattern::new(
-            (self.0).0.as_ref(),
+            (self.0).pixmap.as_ref(),
             SpreadMode::Repeat,
             FilterQuality::Bicubic,
             1.0,
