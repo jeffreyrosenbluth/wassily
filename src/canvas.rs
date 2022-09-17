@@ -3,6 +3,8 @@ use tiny_skia::*;
 
 pub struct Canvas {
     pub pixmap: Pixmap,
+    pub width: u32,
+    pub height: u32,
     pub scale: f32,
 }
 
@@ -10,6 +12,8 @@ impl Canvas {
     pub fn new(width: u32, height: u32) -> Canvas {
         Canvas {
             pixmap: Pixmap::new(width, height).unwrap(),
+            width,
+            height,
             scale: 1.0,
         }
     }
@@ -19,16 +23,18 @@ impl Canvas {
         let h = scale * height as f32;
         Canvas {
             pixmap: Pixmap::new(w as u32, h as u32).unwrap(),
+            width,
+            height,
             scale,
         }
     }
 
     pub fn width(&self) -> u32 {
-        self.pixmap.width()
+        self.width
     }
 
     pub fn height(&self) -> u32 {
-        self.pixmap.height()
+        self.height
     }
 
     pub fn fill(&mut self, color: Color) {
@@ -43,9 +49,10 @@ impl Canvas {
         transform: Transform,
         clip_mask: Option<&ClipMask>,
     ) {
-        let ts = Transform::from_scale(self.scale, self.scale);
-        let path = path.clone().transform(ts).unwrap();
-        paint.shader.transform(ts);
+        let mut transform = transform;
+        transform.tx = self.scale * transform.tx;
+        transform.ty = self.scale * transform.ty;
+        transform = transform.pre_scale(self.scale, self.scale);
         self.pixmap
             .fill_path(&path, paint, fill_rule, transform, clip_mask);
     }
@@ -57,15 +64,10 @@ impl Canvas {
         transform: Transform,
         clip_mask: Option<&ClipMask>,
     ) {
-        let rect = Rect::from_ltrb(
-            self.scale * rect.left(),
-            self.scale * rect.top(),
-            self.scale * rect.right(),
-            self.scale * rect.bottom(),
-        )
-        .unwrap();
-        let ts = Transform::from_scale(self.scale, self.scale);
-        paint.shader.transform(ts);
+        let mut transform = transform;
+        transform.tx = self.scale * transform.tx;
+        transform.ty = self.scale * transform.ty;
+        transform = transform.pre_scale(self.scale, self.scale);
         self.pixmap.fill_rect(rect, paint, transform, clip_mask);
     }
 
@@ -77,9 +79,10 @@ impl Canvas {
         transform: Transform,
         clip_mask: Option<&ClipMask>,
     ) {
-        let ts = Transform::from_scale(self.scale, self.scale);
-        let path = path.clone().transform(ts).unwrap();
-        paint.shader.transform(ts);
+        let mut transform = transform;
+        transform.tx = self.scale * transform.tx;
+        transform.ty = self.scale * transform.ty;
+        transform = transform.pre_scale(self.scale, self.scale);
         self.pixmap
             .stroke_path(&path, paint, &stroke, transform, clip_mask);
     }
@@ -108,19 +111,19 @@ impl Canvas {
     }
 
     pub fn w_f32(&self) -> f32 {
-        self.pixmap.width() as f32
+        self.width as f32
     }
 
     pub fn h_f32(&self) -> f32 {
-        self.pixmap.height() as f32
+        self.height as f32
     }
 
     pub fn w_usize(&self) -> usize {
-        self.pixmap.width() as usize
+        self.width as usize
     }
 
     pub fn h_usize(&self) -> usize {
-        self.pixmap.height() as usize
+        self.height as usize
     }
 }
 
@@ -143,12 +146,14 @@ pub fn paint_shader<'a>(shader: Shader<'a>) -> Paint<'a> {
 
 impl From<&RgbaImage> for Canvas {
     fn from(ib: &RgbaImage) -> Self {
-        let w = ib.width();
-        let h = ib.height();
+        let width = ib.width();
+        let height = ib.height();
         let data = ib.clone().into_vec();
-        let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
+        let pixmap = PixmapRef::from_bytes(&data, width, height).unwrap();
         Canvas {
             pixmap: pixmap.to_owned(),
+            width,
+            height,
             scale: 1.0,
         }
     }
@@ -156,17 +161,19 @@ impl From<&RgbaImage> for Canvas {
 
 impl From<&RgbImage> for Canvas {
     fn from(ib: &RgbImage) -> Self {
-        let w = ib.width();
-        let h = ib.height();
+        let width = ib.width();
+        let height = ib.height();
         let mut data4: Vec<u8> = Vec::new();
         let data = ib.clone().into_vec();
         for d in data.chunks(3) {
             data4.extend(d);
             data4.push(255)
         }
-        let pixmap = PixmapRef::from_bytes(&data4, w, h).unwrap();
+        let pixmap = PixmapRef::from_bytes(&data4, width, height).unwrap();
         Canvas {
             pixmap: pixmap.to_owned(),
+            width,
+            height,
             scale: 1.0,
         }
     }
@@ -174,12 +181,14 @@ impl From<&RgbImage> for Canvas {
 
 impl From<RgbaImage> for Canvas {
     fn from(ib: RgbaImage) -> Self {
-        let w = ib.width();
-        let h = ib.height();
+        let width = ib.width();
+        let height = ib.height();
         let data = ib.into_vec();
-        let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
+        let pixmap = PixmapRef::from_bytes(&data, width, height).unwrap();
         Canvas {
             pixmap: pixmap.to_owned(),
+            width,
+            height,
             scale: 1.0,
         }
     }
@@ -187,12 +196,14 @@ impl From<RgbaImage> for Canvas {
 
 impl From<RgbImage> for Canvas {
     fn from(ib: RgbImage) -> Self {
-        let w = ib.width();
-        let h = ib.height();
+        let width = ib.width();
+        let height = ib.height();
         let data = ib.into_vec();
-        let pixmap = PixmapRef::from_bytes(&data, w, h).unwrap();
+        let pixmap = PixmapRef::from_bytes(&data, width, height).unwrap();
         Canvas {
             pixmap: pixmap.to_owned(),
+            width,
+            height,
             scale: 1.0,
         }
     }
