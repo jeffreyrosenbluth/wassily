@@ -3,7 +3,7 @@ use wassily::prelude::*;
 fn main() {
     let mut texture = Canvas::new(1080, 1080);
     checkered(&mut texture);
-    let mut canvas = Canvas::new(texture.height(), texture.height());
+    let mut canvas = Canvas::with_scale(texture.height(), texture.height(), 1.00);
     canvas.fill(*BLACK);
 
     let r = canvas.height() as f32;
@@ -39,6 +39,7 @@ fn checkered(texture: &mut Canvas) {
             ShapeBuilder::new()
                 .rect_xywh(pt(x, y), pt(swatch_width, swatch_width))
                 .fill_paint(&paint)
+                // .no_stroke()
                 .build()
                 .draw(texture);
         }

@@ -321,8 +321,7 @@ impl<'a> ShapeBuilder<'a> {
         let w2 = wh.x / 2.0;
         let h2 = wh.y / 2.0;
         let p = pt(c.x - w2, c.y - h2);
-        self.points = vec![p, pt(p.x + wh.x, p.y + wh.y)];
-        self
+        self.rect_xywh(p, wh)
     }
 
     pub fn circle(mut self, center: Point, radius: f32) -> Self {
