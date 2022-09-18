@@ -7,6 +7,7 @@ const PAD: f32 = 100.0;
 
 fn main() {
     let mut canvas = Canvas::with_scale(WIDTH as u32, HEIGHT as u32, 1.25);
+    // let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
     let mut palette = Palette::steal("fruit.png", 16);
     palette.set_seed(71731);
     canvas.fill(Color::from_rgba8(122, 122, 122, 255));

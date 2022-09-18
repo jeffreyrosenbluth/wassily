@@ -5,7 +5,7 @@ pub struct Canvas {
     pub pixmap: Pixmap,
     pub width: u32,
     pub height: u32,
-    pub scale: f32,
+    pub scale: Option<f32>,
 }
 
 impl Canvas {
@@ -14,18 +14,21 @@ impl Canvas {
             pixmap: Pixmap::new(width, height).unwrap(),
             width,
             height,
-            scale: 1.0,
+            scale: None,
         }
     }
 
     pub fn with_scale(width: u32, height: u32, scale: f32) -> Canvas {
+        if scale == 1.0 {
+            return Canvas::new(width, height);
+        }
         let w = scale * width as f32;
         let h = scale * height as f32;
         Canvas {
             pixmap: Pixmap::new(w as u32, h as u32).unwrap(),
             width,
             height,
-            scale,
+            scale: Some(scale),
         }
     }
 
@@ -44,15 +47,17 @@ impl Canvas {
     pub fn fill_path(
         &mut self,
         path: &Path,
-        paint: &mut Paint,
+        paint: &Paint,
         fill_rule: FillRule,
         transform: Transform,
         clip_mask: Option<&ClipMask>,
     ) {
         let mut transform = transform;
-        transform.tx = self.scale * transform.tx;
-        transform.ty = self.scale * transform.ty;
-        transform = transform.pre_scale(self.scale, self.scale);
+        if let Some(scale) = self.scale {
+            transform.tx = scale * transform.tx;
+            transform.ty = scale * transform.ty;
+            transform = transform.pre_scale(scale, scale);
+        }
         self.pixmap
             .fill_path(&path, paint, fill_rule, transform, clip_mask);
     }
@@ -60,29 +65,33 @@ impl Canvas {
     pub fn fill_rect(
         &mut self,
         rect: Rect,
-        paint: &mut Paint,
+        paint: &Paint,
         transform: Transform,
         clip_mask: Option<&ClipMask>,
     ) {
         let mut transform = transform;
-        transform.tx = self.scale * transform.tx;
-        transform.ty = self.scale * transform.ty;
-        transform = transform.pre_scale(self.scale, self.scale);
+        if let Some(scale) = self.scale {
+            transform.tx = scale * transform.tx;
+            transform.ty = scale * transform.ty;
+            transform = transform.pre_scale(scale, scale);
+        }
         self.pixmap.fill_rect(rect, paint, transform, clip_mask);
     }
 
     pub fn stroke_path(
         &mut self,
         path: &Path,
-        paint: &mut Paint,
+        paint: &Paint,
         stroke: &Stroke,
         transform: Transform,
         clip_mask: Option<&ClipMask>,
     ) {
         let mut transform = transform;
-        transform.tx = self.scale * transform.tx;
-        transform.ty = self.scale * transform.ty;
-        transform = transform.pre_scale(self.scale, self.scale);
+        if let Some(scale) = self.scale {
+            transform.tx = scale * transform.tx;
+            transform.ty = scale * transform.ty;
+            transform = transform.pre_scale(scale, scale);
+        }
         self.pixmap
             .stroke_path(&path, paint, &stroke, transform, clip_mask);
     }
@@ -154,7 +163,7 @@ impl From<&RgbaImage> for Canvas {
             pixmap: pixmap.to_owned(),
             width,
             height,
-            scale: 1.0,
+            scale: None,
         }
     }
 }
@@ -174,7 +183,7 @@ impl From<&RgbImage> for Canvas {
             pixmap: pixmap.to_owned(),
             width,
             height,
-            scale: 1.0,
+            scale: None,
         }
     }
 }
@@ -189,7 +198,7 @@ impl From<RgbaImage> for Canvas {
             pixmap: pixmap.to_owned(),
             width,
             height,
-            scale: 1.0,
+            scale: None,
         }
     }
 }
@@ -204,7 +213,7 @@ impl From<RgbImage> for Canvas {
             pixmap: pixmap.to_owned(),
             width,
             height,
-            scale: 1.0,
+            scale: None,
         }
     }
 }
