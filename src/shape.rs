@@ -63,6 +63,11 @@ impl Shape {
         }
     }
 
+    pub fn push(self, drawing: &mut Drawing) {
+        let cmds = self.draw();
+        drawing.add_cmds(cmds);
+    }
+
     fn draw_poly(self) -> DrawProgram {
         let mut cmds = Vec::new();
         let mut pb = Trail::new();

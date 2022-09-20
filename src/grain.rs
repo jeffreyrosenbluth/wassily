@@ -1,9 +1,5 @@
-use crate::canvas::paint_shader;
-use crate::dsl::DrawProgram;
 use crate::kolor::rgb;
 use crate::noises::{noise2d, NoiseOpts};
-use crate::prelude::pt;
-use crate::shape::ShapeBuilder;
 use noise::{Fbm, Perlin};
 use tiny_skia::{BlendMode, FilterQuality, Paint, Pattern, Pixmap, Rect, SpreadMode, Transform};
 
@@ -30,18 +26,18 @@ impl Grain {
         Grain(pixmap)
     }
 
-    pub fn grain(&self) -> Box<Paint> {
-        let pattern = Pattern::new(
-            self.0.as_ref(),
-            SpreadMode::Repeat,
-            FilterQuality::Bicubic,
-            1.0,
-            Transform::identity(),
-        );
-        let mut p = paint_shader(pattern);
-        p.blend_mode = BlendMode::Overlay;
-        p
-    }
+    // pub fn grain(&self) -> Box<Paint> {
+    //     let pattern = Pattern::new(
+    //         self.0.as_ref(),
+    //         SpreadMode::Repeat,
+    //         FilterQuality::Bicubic,
+    //         1.0,
+    //         Transform::identity(),
+    //     );
+    //     let mut p = paint_shader(pattern);
+    //     p.blend_mode = BlendMode::Overlay;
+    //     p
+    // }
 
     // pub fn canvas_grain(&self, width: f32, height: f32) -> DrawProgram {
     //     ShapeBuilder::new()

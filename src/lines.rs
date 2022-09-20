@@ -1,4 +1,3 @@
-use crate::canvas::Canvas;
 use crate::{
     dsl::{DrawProgram, Ink},
     noises::*,
@@ -136,34 +135,34 @@ impl DotLine {
         self
     }
 
-    pub fn draw(&mut self, canvas: &mut Canvas) {
-        let noise_opts = NoiseOpts::new(
-            canvas.width() as f32,
-            canvas.height() as f32,
-            1.0,
-            1.0,
-            1.0,
-            self.noise_strength,
-        );
-        let nf = OpenSimplex::default();
-        let v: Point = self.end - self.start;
-        let n: Point = (pt(v.y, -v.x)).normalize(); // n . v == 0, n is the normal.
-        let normal = Normal::new(0.0, self.stdev).unwrap();
-        let length = v.mag();
-        let mut c = self.color;
-        for t in 0..length as u32 {
-            let t = t as f32 / length;
-            let p = pt(self.start.x + t * v.x, self.start.y + t * v.y);
-            let nx = noise3d(nf, &noise_opts, p.x, p.y, 0.0);
-            let ny = noise3d(nf, &noise_opts, p.x, p.y, 10.3711);
-            for _ in 0..self.weight {
-                let r = normal.sample(&mut self.rng);
-                let mut a = 1.0 / (20.0 + r.abs());
-                a = a.clamp(0.0, 1.0);
-                c.set_alpha(a);
-                let q = pt(p.x + r * n.x + nx, p.y + r * n.y + ny);
-                canvas.dot(q.x, q.y, c);
-            }
-        }
-    }
+    // pub fn draw(&mut self, canvas: &mut Canvas) {
+    //     let noise_opts = NoiseOpts::new(
+    //         canvas.width() as f32,
+    //         canvas.height() as f32,
+    //         1.0,
+    //         1.0,
+    //         1.0,
+    //         self.noise_strength,
+    //     );
+    //     let nf = OpenSimplex::default();
+    //     let v: Point = self.end - self.start;
+    //     let n: Point = (pt(v.y, -v.x)).normalize(); // n . v == 0, n is the normal.
+    //     let normal = Normal::new(0.0, self.stdev).unwrap();
+    //     let length = v.mag();
+    //     let mut c = self.color;
+    //     for t in 0..length as u32 {
+    //         let t = t as f32 / length;
+    //         let p = pt(self.start.x + t * v.x, self.start.y + t * v.y);
+    //         let nx = noise3d(nf, &noise_opts, p.x, p.y, 0.0);
+    //         let ny = noise3d(nf, &noise_opts, p.x, p.y, 10.3711);
+    //         for _ in 0..self.weight {
+    //             let r = normal.sample(&mut self.rng);
+    //             let mut a = 1.0 / (20.0 + r.abs());
+    //             a = a.clamp(0.0, 1.0);
+    //             c.set_alpha(a);
+    //             let q = pt(p.x + r * n.x + nx, p.y + r * n.y + ny);
+    //             canvas.dot(q.x, q.y, c);
+    //         }
+    //     }
+    // }
 }

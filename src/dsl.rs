@@ -1,31 +1,44 @@
 use crate::math::pt;
+use image::{ImageFormat, RgbImage, RgbaImage};
 use tiny_skia::{
-    BlendMode, Color, FillRule, LinearGradient, Paint, Path, PathBuilder, Pixmap, Point,
+    BlendMode, Color, FillRule, LinearGradient, Paint, Path, PathBuilder, Pixmap, PixmapRef, Point,
     RadialGradient, Rect, Shader, Stroke, Transform,
 };
 
 pub type DrawProgram = Vec<DrawCmd>;
 
 pub struct Drawing {
-    cmds: Vec<DrawCmd>,
+    pub cmds: Vec<DrawCmd>,
     pub width: u32,
     pub height: u32,
-    scale: f32,
-    canvas: Pixmap,
+    pub scale: f32,
+    pub pixmap: Pixmap,
 }
 
 impl Drawing {
-    pub fn new(cmds: Vec<DrawCmd>, width: u32, height: u32, scale: f32) -> Self {
+    pub fn new(width: u32, height: u32, color: Color, scale: f32) -> Self {
         let w = (width as f32 * scale).floor() as u32;
         let h = (height as f32 * scale).floor() as u32;
         let canvas = Pixmap::new(w, h).unwrap();
         Self {
-            cmds,
+            cmds: vec![DrawCmd::Clear { color }],
             width,
             height,
             scale,
-            canvas,
+            pixmap: canvas,
         }
+    }
+
+    /// Scaling a drawing will clear any previous pixelmap
+    pub fn set_scale(&mut self, scale: f32) {
+        self.scale = scale;
+        let w = (self.width as f32 * scale).floor() as u32;
+        let h = (self.height as f32 * scale).floor() as u32;
+        self.pixmap = Pixmap::new(w, h).unwrap();
+    }
+
+    pub fn add_cmds(&mut self, cmds: Vec<DrawCmd>) {
+        self.cmds.extend(cmds);
     }
 
     pub fn w_f32(&self) -> f32 {
@@ -38,8 +51,111 @@ impl Drawing {
 
     pub fn render(&mut self) {
         for cmd in &self.cmds {
-            cmd.eval(&mut self.canvas, self.scale);
+            cmd.eval(&mut self.pixmap, self.scale);
         }
+    }
+
+    pub fn save_png<P: AsRef<std::path::Path>>(&self, path: P) {
+        self.pixmap.save_png(path).expect("Error writing png");
+    }
+
+    pub fn save_jpg<P: AsRef<std::path::Path>>(&self, path: P) {
+        let img: RgbaImage = self.into();
+        img.save_with_format(path, ImageFormat::Jpeg)
+            .expect("Error writing jpeg");
+    }
+
+    pub fn save_tiff<P: AsRef<std::path::Path>>(&self, path: P) {
+        let img: RgbaImage = self.into();
+        img.save_with_format(path, ImageFormat::Tiff)
+            .expect("Error writing tiff");
+    }
+}
+
+impl From<&RgbaImage> for Drawing {
+    fn from(ib: &RgbaImage) -> Self {
+        let width = ib.width();
+        let height = ib.height();
+        let data = ib.clone().into_vec();
+        let pixmap = PixmapRef::from_bytes(&data, width, height).unwrap();
+        Drawing {
+            cmds: Vec::new(),
+            width,
+            height,
+            scale: 1.0,
+            pixmap: pixmap.to_owned(),
+        }
+    }
+}
+
+impl From<&RgbImage> for Drawing {
+    fn from(ib: &RgbImage) -> Self {
+        let width = ib.width();
+        let height = ib.height();
+        let mut data4: Vec<u8> = Vec::new();
+        let data = ib.clone().into_vec();
+        for d in data.chunks(3) {
+            data4.extend(d);
+            data4.push(255)
+        }
+        let pixmap = PixmapRef::from_bytes(&data4, width, height).unwrap();
+        Drawing {
+            cmds: Vec::new(),
+            width,
+            height,
+            scale: 1.0,
+            pixmap: pixmap.to_owned(),
+        }
+    }
+}
+
+impl From<RgbaImage> for Drawing {
+    fn from(ib: RgbaImage) -> Self {
+        let width = ib.width();
+        let height = ib.height();
+        let data = ib.into_vec();
+        let pixmap = PixmapRef::from_bytes(&data, width, height).unwrap();
+        Drawing {
+            cmds: Vec::new(),
+            width,
+            height,
+            scale: 1.0,
+            pixmap: pixmap.to_owned(),
+        }
+    }
+}
+
+impl From<RgbImage> for Drawing {
+    fn from(ib: RgbImage) -> Self {
+        let width = ib.width();
+        let height = ib.height();
+        let data = ib.into_vec();
+        let pixmap = PixmapRef::from_bytes(&data, width, height).unwrap();
+        Drawing {
+            cmds: Vec::new(),
+            width,
+            height,
+            scale: 1.0,
+            pixmap: pixmap.to_owned(),
+        }
+    }
+}
+
+impl From<Drawing> for RgbaImage {
+    fn from(canvas: Drawing) -> Self {
+        let w = canvas.width;
+        let h = canvas.height;
+        let data = canvas.pixmap.data().to_vec();
+        RgbaImage::from_vec(w, h, data).unwrap()
+    }
+}
+
+impl From<&Drawing> for RgbaImage {
+    fn from(canvas: &Drawing) -> Self {
+        let w = canvas.width;
+        let h = canvas.height;
+        let data = canvas.pixmap.data().to_vec();
+        RgbaImage::from_vec(w, h, data).unwrap()
     }
 }
 

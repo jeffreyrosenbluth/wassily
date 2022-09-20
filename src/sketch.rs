@@ -1,4 +1,3 @@
-use crate::canvas::Canvas;
 use crate::color_names::WHITE;
 use png;
 use std::io::Read;

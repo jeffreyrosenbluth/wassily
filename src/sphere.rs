@@ -1,4 +1,3 @@
-use crate::canvas::Canvas;
 use crate::kolor::rgb8;
 use crate::math::*;
 use crate::prelude::{pt, PI};

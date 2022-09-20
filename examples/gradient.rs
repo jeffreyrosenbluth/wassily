@@ -6,18 +6,13 @@ const EDGE: f32 = 250.0;
 const PAD: f32 = 100.0;
 
 fn main() {
-    let mut canvas = Canvas::with_scale(WIDTH as u32, HEIGHT as u32, 1.25);
-    let mut program = vec![DrawCmd::Clear {
-        color: Color::from_rgba8(122, 122, 122, 155),
-    }];
-    // let mut canvas = Canvas::new(WIDTH as u32, HEIGHT as u32);
+    let mut drawing = Drawing::new(WIDTH as u32, HEIGHT as u32, *BLACK, 2.5);
     let mut palette = Palette::steal("fruit.png", 16);
     palette.set_seed(71731);
-    // canvas.fill(Color::from_rgba8(122, 122, 122, 255));
 
     let lg = LinearGradient::new(
-        pt(0f32, 0f32),
-        pt(0f32, HEIGHT),
+        pt(0, 0),
+        pt(0, HEIGHT),
         vec![
             GradientStop::new(0.0, *WHITE),
             GradientStop::new(1.0, *BLACK),
@@ -26,7 +21,7 @@ fn main() {
         Transform::identity(),
     )
     .unwrap();
-    let mut linear;
+    let mut linear = Ink::solid(*BLACK);
     if let Shader::LinearGradient(lg) = lg {
         linear = Ink::texture(Texture::LinearGradient(lg));
     }
@@ -37,26 +32,27 @@ fn main() {
         700.0,
         vec![
             GradientStop::new(0.0, *MAROON),
-            GradientStop::new(0.4, *ORANGE),
-            GradientStop::new(1.0, *BLUE),
+            GradientStop::new(0.3, *ORANGE),
+            GradientStop::new(0.8, *BLUE),
         ],
         SpreadMode::Pad,
         Transform::identity(),
     )
     .unwrap();
-    let mut radial;
+
+    let mut radial = Ink::solid(*BLACK);
     if let Shader::RadialGradient(rg) = rg {
-        linear = Ink::texture(Texture::RadialGradient(lg));
+        radial = Ink::texture(Texture::RadialGradient(rg));
     }
 
     ShapeBuilder::new()
-        .rect_xywh(pt(0f32, 0f32), pt(WIDTH, HEIGHT))
+        .rect_xywh(pt(0, 0), pt(WIDTH, HEIGHT))
         .fill_paint(linear)
         .no_stroke()
         .build()
-        .draw();
+        .push(&mut drawing);
 
-    let tr1 = Transform::from_rotate_at(30.0, canvas.w_f32() / 2.0, canvas.h_f32() / 2.0);
+    let tr1 = Transform::from_rotate_at(30.0, WIDTH / 2.0, HEIGHT / 2.0);
     let tr2 = Transform::from_scale(1.5, 0.5);
     let tr3 = Transform::from_translate(-310.0, 50.0);
     let transform = tr1.pre_concat(tr2);
@@ -66,32 +62,32 @@ fn main() {
             pt(WIDTH / 2.0 - EDGE / 2.0, HEIGHT / 2.0 - EDGE / 2.0),
             pt(EDGE, EDGE),
         )
-        .fill_paint(radial)
+        .fill_paint(radial.clone())
         .stroke_weight(4.0)
         .transform(&transform)
         .build()
-        .draw();
+        .push(&mut drawing);
 
     ShapeBuilder::new()
         .rect_xywh(pt(PAD, PAD), pt(EDGE, EDGE))
-        .fill_paint(radial)
-        .stroke_weight(2.5)
+        .fill_paint(radial.clone())
         .build()
-        .draw();
+        .push(&mut drawing);
     ShapeBuilder::new()
         .rect_xywh(pt(WIDTH - EDGE - PAD, PAD), pt(EDGE, EDGE))
-        .fill_paint(radial)
+        .fill_paint(radial.clone())
         .build()
-        .draw();
+        .push(&mut drawing);
     ShapeBuilder::new()
         .rect_xywh(pt(PAD, WIDTH - EDGE - PAD), pt(EDGE, EDGE))
-        .fill_paint(radial)
+        .fill_paint(radial.clone())
         .build()
-        .draw();
+        .push(&mut drawing);
     ShapeBuilder::new()
         .rect_xywh(pt(WIDTH - EDGE - PAD, HEIGHT - EDGE - PAD), pt(EDGE, EDGE))
-        .fill_paint(radial)
+        .fill_paint(radial.clone())
         .build()
-        .draw();
-    canvas.save_png("gradient.png");
+        .push(&mut drawing);
+    drawing.render();
+    drawing.save_png("gradient.png");
 }
