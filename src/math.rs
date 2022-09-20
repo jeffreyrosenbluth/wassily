@@ -1,6 +1,6 @@
 use num_traits::AsPrimitive;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
-use tiny_skia::Point;
+use tiny_skia::{Point, Rect};
 
 pub const TAU: f32 = std::f32::consts::TAU;
 pub const PI: f32 = std::f32::consts::PI;
@@ -42,6 +42,15 @@ where
     Point::from_xy(width.as_() / 2.0, height.as_() / 2.0)
 }
 
+pub fn rect_to_points(rect: Rect) -> Vec<Point> {
+    let mut points = Vec::new();
+    points.push(pt(rect.left(), rect.top()));
+    points.push(pt(rect.right(), rect.y()));
+    points.push(pt(rect.right(), rect.bottom()));
+    points.push(pt(rect.left(), rect.bottom()));
+    points
+}
+
 pub trait Algebra: Copy {
     const ZERO: Self;
     fn scale(self, k: f32) -> Self;
@@ -68,7 +77,7 @@ pub trait Algebra: Copy {
 }
 
 impl Algebra for Point {
-    const ZERO: Self = Point {x: 0.0, y: 0.0};
+    const ZERO: Self = Point { x: 0.0, y: 0.0 };
 
     fn mag2(self) -> f32 {
         self.x * self.x + self.y * self.y
@@ -114,7 +123,11 @@ pub struct Point3 {
 }
 
 impl Algebra for Point3 {
-    const ZERO: Self = Point3 {x: 0.0, y: 0.0, z: 0.0};
+    const ZERO: Self = Point3 {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
 
     fn scale(self, k: f32) -> Self {
         self * k

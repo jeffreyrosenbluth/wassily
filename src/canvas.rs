@@ -136,21 +136,21 @@ impl Canvas {
     }
 }
 
-pub fn paint_solid<'a>(color: Color) -> Paint<'a> {
+pub fn paint_solid<'a>(color: Color) -> Box<Paint<'a>> {
     let mut paint = Paint {
         anti_alias: true,
         ..Default::default()
     };
     paint.set_color(color);
-    paint
+    Box::new(paint)
 }
 
-pub fn paint_shader<'a>(shader: Shader<'a>) -> Paint<'a> {
-    Paint {
+pub fn paint_shader<'a>(shader: Shader<'a>) -> Box<Paint<'a>> {
+    Box::new(Paint {
         anti_alias: true,
         shader,
         ..Default::default()
-    }
+    })
 }
 
 impl From<&RgbaImage> for Canvas {

@@ -1,7 +1,8 @@
 use crate::canvas::Canvas;
 use crate::{
+    dsl::{DrawProgram, Ink},
     noises::*,
-    prelude::{paint_solid, pt, Algebra},
+    prelude::{pt, Algebra},
     shape::ShapeBuilder,
 };
 use noise::OpenSimplex;
@@ -50,7 +51,8 @@ impl SandLine {
         self
     }
 
-    pub fn draw(&mut self, canvas: &mut Canvas) {
+    pub fn draw(&mut self, width: f32, height: f32) -> DrawProgram {
+        let mut program = Vec::new();
         let v: Point = self.end - self.start;
         let n: Point = (pt(v.y, -v.x)).normalize(); // n . v == 0, n is the normal.
         let length = v.mag();
@@ -71,20 +73,23 @@ impl SandLine {
             for i in 0..self.grains {
                 let a = 0.1 - i as f32 / (10.0 * self.grains as f32);
                 let x = (x + delta * n.x * self.thickness / 2.0 * (i as f32 * w))
-                    .clamp(0.0, canvas.width() as f32 - 1.0);
+                    .clamp(0.0, width - 1.0);
                 let y = (y + delta * n.y * self.thickness / 2.0 * (i as f32 * w))
-                    .clamp(0.0, canvas.height() as f32 - 1.0);
+                    .clamp(0.0, height - 1.0);
                 delta *= -1.0;
                 let mut color = self.color;
                 color.set_alpha(a);
-                let paint = paint_solid(color);
-                ShapeBuilder::new()
-                    .rect_xywh(pt(x, y), pt(1, 1))
-                    .fill_paint(&paint)
-                    .build()
-                    .draw(canvas);
+                let ink = Ink::solid(color);
+                program.extend(
+                    ShapeBuilder::new()
+                        .rect_xywh(pt(x, y), pt(1, 1))
+                        .fill_paint(ink)
+                        .build()
+                        .draw(),
+                );
             }
         }
+        program
     }
 }
 

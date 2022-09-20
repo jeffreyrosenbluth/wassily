@@ -1,18 +1,21 @@
-use crate::math::Algebra;
+use crate::math::pt;
 use tiny_skia::{
-    ClipMask, Color, FillRule, Paint, Path, PathBuilder, Pixmap, Point, Rect, Stroke, Transform,
+    BlendMode, Color, FillRule, LinearGradient, Paint, Path, PathBuilder, Pixmap, Point,
+    RadialGradient, Rect, Shader, Stroke, Transform,
 };
 
-struct Drawing<'a> {
-    cmds: Vec<DrawCmd<'a>>,
-    width: u32,
-    height: u32,
+pub type DrawProgram = Vec<DrawCmd>;
+
+pub struct Drawing {
+    cmds: Vec<DrawCmd>,
+    pub width: u32,
+    pub height: u32,
     scale: f32,
     canvas: Pixmap,
 }
 
-impl<'a> Drawing<'a> {
-    fn new(cmds: Vec<DrawCmd<'a>>, width: u32, height: u32, scale: f32) -> Self {
+impl Drawing {
+    pub fn new(cmds: Vec<DrawCmd>, width: u32, height: u32, scale: f32) -> Self {
         let w = (width as f32 * scale).floor() as u32;
         let h = (height as f32 * scale).floor() as u32;
         let canvas = Pixmap::new(w, h).unwrap();
@@ -24,21 +27,81 @@ impl<'a> Drawing<'a> {
             canvas,
         }
     }
+
+    pub fn w_f32(&self) -> f32 {
+        self.width as f32
+    }
+
+    pub fn h_f32(&self) -> f32 {
+        self.height as f32
+    }
+
+    pub fn render(&mut self) {
+        for cmd in &self.cmds {
+            cmd.eval(&mut self.canvas, self.scale);
+        }
+    }
 }
 
-enum PathCmd {
+#[derive(Clone, Copy, Debug)]
+pub enum PathCmd {
     MoveTo(Point),
     LineTo(Point),
     QuadTo(Point, Point),
     CubicTo(Point, Point, Point),
     Close,
+    Ellipse(Point, Point),
+    Circle(Point, f32),
 }
 
-struct Trail {
-    path_cmds: Vec<PathCmd>,
+#[derive(Clone, Debug)]
+pub struct Trail {
+    pub path_cmds: Vec<PathCmd>,
 }
 
 impl Trail {
+    pub fn new() -> Self {
+        Self {
+            path_cmds: Vec::new(),
+        }
+    }
+
+    pub fn move_to(&mut self, x: f32, y: f32) {
+        let point = pt(x, y);
+        self.path_cmds.push(PathCmd::MoveTo(point));
+    }
+
+    pub fn line_to(&mut self, x: f32, y: f32) {
+        let point = pt(x, y);
+        self.path_cmds.push(PathCmd::LineTo(point));
+    }
+
+    pub fn quad_to(&mut self, cx: f32, cy: f32, x: f32, y: f32) {
+        let control = pt(cx, cy);
+        let point = pt(x, y);
+        self.path_cmds.push(PathCmd::QuadTo(control, point));
+    }
+
+    pub fn cubic_to(&mut self, c1x: f32, c1y: f32, c2x: f32, c2y: f32, x: f32, y: f32) {
+        let control1 = pt(c1x, c1y);
+        let control2 = pt(c2x, c2y);
+        let point = pt(x, y);
+        self.path_cmds
+            .push(PathCmd::CubicTo(control1, control2, point));
+    }
+
+    pub fn close(&mut self) {
+        self.path_cmds.push(PathCmd::Close);
+    }
+
+    pub fn ellipse(&mut self, cx: f32, cy: f32, w: f32, h: f32) {
+        self.path_cmds.push(PathCmd::Ellipse(pt(cx, cy), pt(w, h)));
+    }
+
+    pub fn circle(&mut self, cx: f32, cy: f32, r: f32) {
+        self.path_cmds.push(PathCmd::Circle(pt(cx, cy), r));
+    }
+
     fn to_path(&self) -> Path {
         let mut pb = PathBuilder::new();
         for cmd in &self.path_cmds {
@@ -48,94 +111,150 @@ impl Trail {
                 PathCmd::QuadTo(c, p) => pb.quad_to(c.x, c.y, p.x, p.y),
                 PathCmd::CubicTo(c1, c2, p) => pb.cubic_to(c1.x, c1.y, c2.x, c2.y, p.x, p.y),
                 PathCmd::Close => pb.close(),
+                PathCmd::Ellipse(c, wh) => {
+                    let oval =
+                        Rect::from_xywh(c.x - wh.x / 2.0, c.y - wh.y / 2.0, wh.x, wh.y).unwrap();
+                    pb.push_oval(oval)
+                }
+                PathCmd::Circle(p, r) => pb.push_circle(p.x, p.y, *r),
             }
         }
         pb.finish().unwrap()
     }
+}
 
-    fn scale(&self, s: f32) -> Self {
-        let path_cmds = self.path_cmds.iter().map(|cmd| match cmd {
-            PathCmd::MoveTo(p) => PathCmd::MoveTo(p.scale(s)),
-            PathCmd::LineTo(p) => PathCmd::LineTo(p.scale(s)),
-            PathCmd::QuadTo(c, p) => PathCmd::QuadTo(c.scale(s), p.scale(s)),
-            PathCmd::CubicTo(c1, c2, p) => PathCmd::CubicTo(c1.scale(s), c2.scale(s), p.scale(s)),
-            PathCmd::Close => PathCmd::Close,
-        });
-        Trail {
-            path_cmds: path_cmds.collect(),
+#[derive(Debug, Clone)]
+pub enum Texture {
+    SolidColor(Color),
+    LinearGradient(LinearGradient),
+    RadialGradient(RadialGradient),
+}
+
+#[derive(Debug, Clone)]
+pub struct Ink {
+    pub texture: Texture,
+    pub blend_mode: BlendMode,
+    pub anti_alias: bool,
+    pub force_hq_pipeline: bool,
+}
+
+impl Ink {
+    pub fn set_color(&mut self, color: Color) {
+        self.texture = Texture::SolidColor(color);
+    }
+
+    fn to_paint<'a>(self) -> Paint<'a> {
+        let mut paint = Paint::default();
+        paint.blend_mode = self.blend_mode;
+        paint.anti_alias = self.anti_alias;
+        paint.force_hq_pipeline = self.force_hq_pipeline;
+        match self.texture {
+            Texture::SolidColor(c) => paint.set_color(c),
+            Texture::LinearGradient(lg) => paint.shader = Shader::LinearGradient(lg),
+            Texture::RadialGradient(rg) => paint.shader = Shader::RadialGradient(rg),
+        }
+        paint
+    }
+
+    pub fn solid(color: Color) -> Self {
+        let mut ink = Ink::default();
+        ink.set_color(color);
+        ink
+    }
+
+    pub fn texture(texture: Texture) -> Self {
+        let mut ink = Ink::default();
+        ink.texture = texture;
+        ink
+    }
+}
+
+impl Default for Ink {
+    fn default() -> Self {
+        Ink {
+            texture: Texture::SolidColor(Color::BLACK),
+            blend_mode: BlendMode::default(),
+            anti_alias: true,
+            force_hq_pipeline: false,
         }
     }
 }
 
-enum DrawCmd<'a> {
+pub enum DrawCmd {
     Fill {
-        trail: &'a Trail,
-        paint: &'a Paint<'a>,
+        trail: Trail,
+        ink: Ink,
         fill_rule: FillRule,
         transform: Transform,
-        clip_mask: Option<&'a ClipMask>,
     },
     Stroke {
-        trail: &'a Trail,
-        paint: &'a Paint<'a>,
-        stroke: &'a Stroke,
+        trail: Trail,
+        ink: Ink,
+        stroke: Stroke,
         transform: Transform,
-        clip_mask: Option<&'a ClipMask>,
     },
     FillRect {
         rect: Rect,
-        paint: &'a Paint<'a>,
+        ink: Ink,
         transform: Transform,
-        clip_mask: Option<&'a ClipMask>,
     },
     Clear {
         color: Color,
     },
 }
 
-impl<'a> DrawCmd<'a> {
-    fn eval(self, canvas: &mut Pixmap, scale: f32) {
+impl DrawCmd {
+    fn eval(&self, canvas: &mut Pixmap, scale: f32) {
         match self {
             DrawCmd::Fill {
                 trail,
-                paint,
+                ink,
                 fill_rule,
                 transform,
-                clip_mask,
             } => {
-                let mut transform = transform;
+                let mut transform = *transform;
                 transform.tx = scale * transform.tx;
                 transform.ty = scale * transform.ty;
                 transform = transform.pre_scale(scale, scale);
-                canvas.fill_path(&trail.to_path(), paint, fill_rule, transform, clip_mask);
+                canvas.fill_path(
+                    &trail.to_path(),
+                    &ink.clone().to_paint(),
+                    *fill_rule,
+                    transform,
+                    None,
+                );
             }
             DrawCmd::Stroke {
                 trail,
-                paint,
+                ink,
                 stroke,
                 transform,
-                clip_mask,
             } => {
-                let mut transform = transform;
+                let mut transform = *transform;
                 transform.tx = scale * transform.tx;
                 transform.ty = scale * transform.ty;
                 transform = transform.pre_scale(scale, scale);
-                canvas.stroke_path(&trail.to_path(), paint, stroke, transform, clip_mask);
+                canvas.stroke_path(
+                    &trail.to_path(),
+                    &ink.clone().to_paint(),
+                    stroke,
+                    transform,
+                    None,
+                );
             }
             DrawCmd::FillRect {
                 rect,
-                paint,
+                ink,
                 transform,
-                clip_mask,
             } => {
-                let mut transform = transform;
+                let mut transform = *transform;
                 transform.tx = scale * transform.tx;
                 transform.ty = scale * transform.ty;
                 transform = transform.pre_scale(scale, scale);
-                canvas.fill_rect(rect, paint, transform, clip_mask);
+                canvas.fill_rect(*rect, &ink.clone().to_paint(), transform, None);
             }
             DrawCmd::Clear { color } => {
-                canvas.fill(color);
+                canvas.fill(*color);
             }
         }
     }

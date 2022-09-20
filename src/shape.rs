@@ -1,7 +1,8 @@
 use crate::{
-    canvas::Canvas,
+    dsl::*,
     kolor::ConvertColor,
-    prelude::{chaiken, pt, Trail, TAU},
+    prelude::{chaiken, pt, TAU},
+    util,
 };
 use num_traits::AsPrimitive;
 use rand::rngs::SmallRng;
@@ -13,29 +14,28 @@ pub(crate) enum ShapeType {
     Poly,
     PolyQuad,
     PolyCubic,
-    Rect,
     Circle,
     Line,
     Ellipse,
 }
 
 #[derive(Debug, Clone)]
-pub struct Shape<'a> {
+pub struct Shape {
     pub points: Vec<Point>,
-    pub fill_paint: Box<Option<Paint<'a>>>,
+    pub fill_paint: Option<Ink>,
     pub stroke: Stroke,
-    pub stroke_paint: Box<Option<Paint<'a>>>,
+    pub stroke_paint: Option<Ink>,
     shape: ShapeType,
     pub fillrule: FillRule,
     pub transform: Transform,
 }
 
-impl<'a> Shape<'a> {
+impl Shape {
     pub(crate) fn new(
         points: Vec<Point>,
-        fill_paint: Box<Option<Paint<'a>>>,
+        fill_paint: Option<Ink>,
         stroke: Stroke,
-        stroke_paint: Box<Option<Paint<'a>>>,
+        stroke_paint: Option<Ink>,
         shape: ShapeType,
         fillrule: FillRule,
         transform: Transform,
@@ -51,21 +51,21 @@ impl<'a> Shape<'a> {
         }
     }
 
-    pub fn draw(&self, canvas: &mut Canvas) {
+    pub fn draw(self) -> DrawProgram {
         let shape = self.shape;
         match shape {
-            ShapeType::Poly => self.draw_poly(canvas),
-            ShapeType::PolyQuad => self.draw_quad(canvas),
-            ShapeType::PolyCubic => self.draw_cubic(canvas),
-            ShapeType::Rect => self.draw_rect(canvas),
-            ShapeType::Circle => self.draw_circle(canvas),
-            ShapeType::Line => self.draw_line(canvas),
-            ShapeType::Ellipse => self.draw_ellipse(canvas),
+            ShapeType::Poly => self.draw_poly(),
+            ShapeType::PolyQuad => self.draw_quad(),
+            ShapeType::PolyCubic => self.draw_cubic(),
+            ShapeType::Circle => self.draw_circle(),
+            ShapeType::Line => self.draw_line(),
+            ShapeType::Ellipse => self.draw_ellipse(),
         }
     }
 
-    fn draw_poly(&self, canvas: &mut Canvas) {
-        let mut pb = PathBuilder::new();
+    fn draw_poly(self) -> DrawProgram {
+        let mut cmds = Vec::new();
+        let mut pb = Trail::new();
         let head = self.points[0];
         let tail = &self.points[1..];
         pb.move_to(head.x, head.y);
@@ -75,17 +75,28 @@ impl<'a> Shape<'a> {
         if self.fill_paint.is_some() {
             pb.close();
         }
-        let path = pb.finish().unwrap();
-        if let Some(mut fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&path, &mut fp, self.fillrule, self.transform, None);
+        if let Some(fp) = self.fill_paint {
+            cmds.push(DrawCmd::Fill {
+                trail: pb.clone(),
+                ink: fp,
+                fill_rule: self.fillrule,
+                transform: self.transform,
+            });
         }
-        if let Some(mut sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
+        if let Some(sp) = self.stroke_paint.clone() {
+            cmds.push(DrawCmd::Stroke {
+                trail: pb,
+                ink: sp,
+                stroke: self.stroke,
+                transform: self.transform,
+            });
         }
+        cmds
     }
 
-    fn draw_quad(&self, canvas: &mut Canvas) {
-        let mut pb = PathBuilder::new();
+    fn draw_quad(self) -> DrawProgram {
+        let mut cmds = Vec::new();
+        let mut pb = Trail::new();
         let head = self.points[0];
         pb.move_to(head.x, head.y);
         let tail = self.points[1..].chunks_exact(2);
@@ -97,17 +108,28 @@ impl<'a> Shape<'a> {
         if self.fill_paint.is_some() {
             pb.close();
         }
-        let path = pb.finish().unwrap();
-        if let Some(mut fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&path, &mut fp, self.fillrule, self.transform, None);
+        if let Some(fp) = self.fill_paint.clone() {
+            cmds.push(DrawCmd::Fill {
+                trail: pb.clone(),
+                ink: fp,
+                fill_rule: self.fillrule,
+                transform: self.transform,
+            });
         }
-        if let Some(mut sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
+        if let Some(sp) = self.stroke_paint.clone() {
+            cmds.push(DrawCmd::Stroke {
+                trail: pb,
+                ink: sp,
+                stroke: self.stroke,
+                transform: self.transform,
+            });
         }
+        cmds
     }
 
-    pub fn draw_cubic(&self, canvas: &mut Canvas) {
-        let mut pb = PathBuilder::new();
+    fn draw_cubic(self) -> DrawProgram {
+        let mut cmds = Vec::new();
+        let mut pb = Trail::new();
         let head = self.points[0];
         pb.move_to(head.x, head.y);
         let tail = self.points[1..].chunks_exact(3);
@@ -120,90 +142,112 @@ impl<'a> Shape<'a> {
         if self.fill_paint.is_some() {
             pb.close();
         }
-        let path = pb.finish().unwrap();
-        if let Some(mut fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&path, &mut fp, self.fillrule, self.transform, None);
+        if let Some(fp) = self.fill_paint.clone() {
+            cmds.push(DrawCmd::Fill {
+                trail: pb.clone(),
+                ink: fp,
+                fill_rule: self.fillrule,
+                transform: self.transform,
+            });
         }
-        if let Some(mut sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
+        if let Some(sp) = self.stroke_paint.clone() {
+            cmds.push(DrawCmd::Stroke {
+                trail: pb,
+                ink: sp,
+                stroke: self.stroke,
+                transform: self.transform,
+            });
         }
+        cmds
     }
 
-    fn draw_rect(&self, canvas: &mut Canvas) {
-        if self.points.len() < 2 {
-            panic!("Rectangle's points vector contains less than 2 points");
-        }
-        let left = self.points[0].x;
-        let top = self.points[0].y;
-        let right = self.points[1].x;
-        let bottom = self.points[1].y;
-        let rect = Rect::from_ltrb(left, top, right, bottom).unwrap();
-        let path = PathBuilder::from_rect(rect);
-        if let Some(mut fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&path, &mut fp, self.fillrule, self.transform, None);
-        }
-        if let Some(mut sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
-        }
-    }
-
-    fn draw_circle(&self, canvas: &mut Canvas) {
+    fn draw_circle(self) -> DrawProgram {
         if self.points.len() < 2 {
             panic!("Circle points vector contains less than 2 points");
         }
+        let mut cmds = Vec::new();
+        let mut pb = Trail::new();
         let cx = self.points[0].x;
         let cy = self.points[0].y;
-        let w = self.points[1].x;
-        let _h = self.points[1].y;
-        let circle = PathBuilder::from_circle(cx, cy, w).unwrap();
-        if let Some(mut fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&circle, &mut fp, self.fillrule, self.transform, None);
+        let r = self.points[1].x;
+        pb.circle(cx, cy, r);
+        if let Some(fp) = self.fill_paint.clone() {
+            cmds.push(DrawCmd::Fill {
+                trail: pb.clone(),
+                ink: fp,
+                fill_rule: self.fillrule,
+                transform: self.transform,
+            });
         }
-        if let Some(mut sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&circle, &mut sp, &self.stroke, self.transform, None);
+        if let Some(sp) = self.stroke_paint.clone() {
+            cmds.push(DrawCmd::Stroke {
+                trail: pb,
+                ink: sp,
+                stroke: self.stroke,
+                transform: self.transform,
+            });
         }
+        cmds
     }
 
-    fn draw_ellipse(&self, canvas: &mut Canvas) {
+    fn draw_ellipse(self) -> DrawProgram {
         if self.points.len() < 2 {
             panic!("Ellipse points vector contains less than 2 points");
         }
+        let mut cmds = Vec::new();
+        let mut pb = Trail::new();
         let cx = self.points[0].x;
         let cy = self.points[0].y;
         let w = self.points[1].x;
         let h = self.points[1].y;
-        let rect = Rect::from_xywh(cx - w / 2.0, cy - h / 2.0, w, h).unwrap();
-        let ellipse = PathBuilder::from_oval(rect).unwrap();
-        if let Some(mut fp) = *self.fill_paint.clone() {
-            canvas.fill_path(&ellipse, &mut fp, self.fillrule, self.transform, None);
+        pb.ellipse(cx, cy, w, h);
+        if let Some(fp) = self.fill_paint.clone() {
+            cmds.push(DrawCmd::Fill {
+                trail: pb.clone(),
+                ink: fp,
+                fill_rule: self.fillrule,
+                transform: self.transform,
+            });
         }
-        if let Some(mut sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&ellipse, &mut sp, &self.stroke, self.transform, None);
+        if let Some(sp) = self.stroke_paint.clone() {
+            cmds.push(DrawCmd::Stroke {
+                trail: pb,
+                ink: sp,
+                stroke: self.stroke,
+                transform: self.transform,
+            });
         }
+        cmds
     }
 
-    fn draw_line(&self, canvas: &mut Canvas) {
+    fn draw_line(self) -> DrawProgram {
         if self.points.len() < 2 {
             panic!("Line points vector contains less than 2 points");
         }
+        let mut cmds = Vec::new();
         let x0 = self.points[0].x;
         let y0 = self.points[0].y;
         let x1 = self.points[1].x;
         let y1 = self.points[1].y;
-        let mut pb = PathBuilder::new();
+        let mut pb = Trail::new();
         pb.move_to(x0, y0);
         pb.line_to(x1, y1);
-        let path = pb.finish().unwrap();
-        if let Some(mut sp) = *self.stroke_paint.clone() {
-            canvas.stroke_path(&path, &mut sp, &self.stroke, self.transform, None);
+        if let Some(sp) = self.stroke_paint.clone() {
+            cmds.push(DrawCmd::Stroke {
+                trail: pb,
+                ink: sp,
+                stroke: self.stroke,
+                transform: self.transform,
+            });
         }
+        cmds
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct ShapeBuilder<'a> {
-    fill_paint: Option<Paint<'a>>,
-    stroke_paint: Option<Paint<'a>>,
+pub struct ShapeBuilder {
+    fill_paint: Option<Ink>,
+    stroke_paint: Option<Ink>,
     stroke_width: f32,
     miter_limit: f32,
     line_cap: LineCap,
@@ -215,11 +259,11 @@ pub struct ShapeBuilder<'a> {
     transform: Transform,
 }
 
-impl<'a> Default for ShapeBuilder<'a> {
+impl Default for ShapeBuilder {
     fn default() -> Self {
         Self {
-            fill_paint: Some(Paint::default()),
-            stroke_paint: Some(Paint::default()),
+            fill_paint: Some(Ink::default()),
+            stroke_paint: Some(Ink::default()),
             stroke_width: 1.0,
             miter_limit: Default::default(),
             line_cap: Default::default(),
@@ -233,23 +277,20 @@ impl<'a> Default for ShapeBuilder<'a> {
     }
 }
 
-impl<'a> ShapeBuilder<'a> {
+impl ShapeBuilder {
     pub fn new() -> Self {
         Self::default()
     }
 
     pub fn fill_color(mut self, color: impl ConvertColor) -> Self {
-        let mut paint = Paint {
-            anti_alias: true,
-            ..Default::default()
-        };
-        paint.set_color(color.to_color());
-        self.fill_paint = Some(paint);
+        let mut ink = Ink::default();
+        ink.set_color(color.to_color());
+        self.fill_paint = Some(ink);
         self
     }
 
-    pub fn fill_paint(mut self, texture: &'a Paint) -> Self {
-        self.fill_paint = Some(texture.clone());
+    pub fn fill_paint(mut self, ink: Ink) -> Self {
+        self.fill_paint = Some(ink);
         self
     }
 
@@ -264,17 +305,14 @@ impl<'a> ShapeBuilder<'a> {
     }
 
     pub fn stroke_color(mut self, color: impl ConvertColor) -> Self {
-        let mut paint = Paint {
-            anti_alias: true,
-            ..Default::default()
-        };
-        paint.set_color(color.to_color());
-        self.stroke_paint = Some(paint);
+        let mut ink = Ink::default();
+        ink.set_color(color.to_color());
+        self.stroke_paint = Some(ink);
         self
     }
 
-    pub fn stroke_paint(mut self, pain: &'a Paint) -> Self {
-        self.stroke_paint = Some(pain.clone());
+    pub fn stroke_paint(mut self, ink: Ink) -> Self {
+        self.stroke_paint = Some(ink);
         self
     }
 
@@ -305,19 +343,24 @@ impl<'a> ShapeBuilder<'a> {
     }
 
     pub fn rect_ltrb(mut self, lt: Point, rb: Point) -> Self {
-        self.shape = ShapeType::Rect;
-        self.points = vec![lt, rb];
+        self.shape = ShapeType::Poly;
+        self.points = vec![lt, pt(rb.x, lt.y), rb, pt(lt.x, rb.y)];
         self
     }
 
     pub fn rect_xywh(mut self, xy: Point, wh: Point) -> Self {
-        self.shape = ShapeType::Rect;
-        self.points = vec![xy, pt(xy.x + wh.x, xy.y + wh.y)];
+        self.shape = ShapeType::Poly;
+        self.points = vec![
+            xy,
+            pt(xy.x + wh.x, xy.y),
+            pt(xy.x + wh.x, xy.y + wh.y),
+            pt(xy.x, xy.y + wh.y),
+        ];
         self
     }
 
     pub fn rect_cwh(mut self, c: Point, wh: Point) -> Self {
-        self.shape = ShapeType::Rect;
+        self.shape = ShapeType::Poly;
         let w2 = wh.x / 2.0;
         let h2 = wh.y / 2.0;
         let p = pt(c.x - w2, c.y - h2);
@@ -393,7 +436,7 @@ impl<'a> ShapeBuilder<'a> {
             let y1 = b * u.sin() + center.y + dy;
             points.push(pt(x1, y1));
         }
-        self.points = chaiken(&points, iterations, Trail::Closed)
+        self.points = chaiken(&points, iterations, util::Trail::Closed)
             .into_iter()
             .collect();
         self
@@ -435,14 +478,14 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> Shape<'a> {
-        let mut fill_paint: Box<Option<Paint<'a>>> = Box::new(None);
-        let mut stroke_paint: Box<Option<Paint<'a>>> = Box::new(None);
+    pub fn build(self) -> Shape {
+        let mut fill_paint = None;
+        let mut stroke_paint = None;
         if let Some(fs) = self.fill_paint {
-            fill_paint = Box::new(Some(fs));
+            fill_paint = Some(fs);
         };
         if let Some(ss) = self.stroke_paint {
-            stroke_paint = Box::new(Some(ss));
+            stroke_paint = Some(ss);
         };
         let stroke = Stroke {
             width: self.stroke_width,
