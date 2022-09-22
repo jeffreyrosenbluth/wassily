@@ -17,7 +17,7 @@ pub use crate::okcolor::*;
 pub use crate::rectangles::*;
 pub use crate::shape::*;
 // pub use crate::sketch::*;
-// pub use crate::sphere::*;
+pub use crate::sphere::*;
 pub use crate::stipple::*;
 pub use crate::subdivision::*;
 pub use crate::textures::*;

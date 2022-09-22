@@ -14,7 +14,7 @@ pub mod prelude;
 pub mod rectangles;
 pub mod shape;
 // pub mod sketch;
-// pub mod sphere;
+pub mod sphere;
 pub mod stipple;
 pub mod subdivision;
 pub mod textures;

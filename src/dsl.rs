@@ -16,12 +16,12 @@ pub struct Drawing {
 }
 
 impl Drawing {
-    pub fn new(width: u32, height: u32, color: Color, scale: f32) -> Self {
+    pub fn new(width: u32, height: u32, scale: f32) -> Self {
         let w = (width as f32 * scale).floor() as u32;
         let h = (height as f32 * scale).floor() as u32;
         let canvas = Pixmap::new(w, h).unwrap();
         Self {
-            cmds: vec![DrawCmd::Clear { color }],
+            cmds: Vec::new(),
             width,
             height,
             scale,
@@ -47,6 +47,36 @@ impl Drawing {
 
     pub fn h_f32(&self) -> f32 {
         self.height as f32
+    }
+
+    pub fn pixmap_width(&self) -> u32 {
+        self.pixmap.width()
+    }
+
+    pub fn pixmap_height(&self) -> u32 {
+        self.pixmap.height()
+    }
+
+    pub fn clear(&mut self, color: Color) {
+        self.cmds.push(DrawCmd::clear(color));
+    }
+
+    pub fn fill(&mut self, trail: Trail, ink: Ink, fill_rule: FillRule, transform: Transform) {
+        self.cmds
+            .push(DrawCmd::fill(trail, ink, fill_rule, transform));
+    }
+
+    pub fn stroke(&mut self, trail: Trail, ink: Ink, stroke: Stroke, transform: Transform) {
+        self.cmds
+            .push(DrawCmd::stroke(trail, ink, stroke, transform));
+    }
+
+    pub fn fill_rect(&mut self, rect: Rect, ink: Ink, transform: Transform) {
+        self.cmds.push(DrawCmd::fill_rect(rect, ink, transform));
+    }
+
+    pub fn dot(&mut self, x: u32, y: u32, color: Color) {
+        self.cmds.push(DrawCmd::dot(x, y, color));
     }
 
     pub fn render(&mut self) {
@@ -317,9 +347,48 @@ pub enum DrawCmd {
     Clear {
         color: Color,
     },
+    Dot {
+        x: u32,
+        y: u32,
+        color: Color,
+    },
 }
 
 impl DrawCmd {
+    pub fn fill(trail: Trail, ink: Ink, fill_rule: FillRule, transform: Transform) -> Self {
+        DrawCmd::Fill {
+            trail,
+            ink,
+            fill_rule,
+            transform,
+        }
+    }
+
+    pub fn stroke(trail: Trail, ink: Ink, stroke: Stroke, transform: Transform) -> Self {
+        DrawCmd::Stroke {
+            trail,
+            ink,
+            stroke,
+            transform,
+        }
+    }
+
+    pub fn fill_rect(rect: Rect, ink: Ink, transform: Transform) -> Self {
+        DrawCmd::FillRect {
+            rect,
+            ink,
+            transform,
+        }
+    }
+
+    pub fn clear(color: Color) -> Self {
+        DrawCmd::Clear { color }
+    }
+
+    pub fn dot(x: u32, y: u32, color: Color) -> Self {
+        DrawCmd::Dot { x, y, color }
+    }
+
     fn eval(&self, canvas: &mut Pixmap, scale: f32) {
         match self {
             DrawCmd::Fill {
@@ -371,6 +440,12 @@ impl DrawCmd {
             }
             DrawCmd::Clear { color } => {
                 canvas.fill(*color);
+            }
+            DrawCmd::Dot { x, y, color } => {
+                let width = canvas.width();
+                let pixel_map = canvas.pixels_mut();
+                let k = (*y * width + *x) as usize;
+                pixel_map[k] = color.premultiply().to_color_u8();
             }
         }
     }

@@ -1,8 +1,8 @@
 use crate::math::{center, pt, Algebra};
 use crate::matrix::Matrix;
 use num_traits::AsPrimitive;
-use rand::{Rng, SeedableRng};
 use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 use std::f32::consts::PI;
 use tiny_skia::Point;
 

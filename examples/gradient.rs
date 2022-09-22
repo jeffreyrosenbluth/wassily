@@ -6,7 +6,7 @@ const EDGE: f32 = 250.0;
 const PAD: f32 = 100.0;
 
 fn main() {
-    let mut drawing = Drawing::new(WIDTH as u32, HEIGHT as u32, *BLACK, 2.5);
+    let mut drawing = Drawing::new(WIDTH as u32, HEIGHT as u32, 2.5);
     let mut palette = Palette::steal("fruit.png", 16);
     palette.set_seed(71731);
 

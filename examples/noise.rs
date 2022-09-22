@@ -3,7 +3,7 @@ use wassily::prelude::*;
 const SIZE: u32 = 1080;
 
 fn main() {
-    let mut drawing = Drawing::new(SIZE, SIZE, *BLACK, 4.5);
+    let mut drawing = Drawing::new(SIZE, SIZE, 4.0);
     let opts = NoiseOpts::with_wh(SIZE, SIZE).factor(1.0).scales(10.0);
     let nf = FMCross::new2(1.0, 0.2, 10.0, 1.0, 0.2, 10.0);
     for x in 0..(2 * drawing.width) {
@@ -23,6 +23,10 @@ fn main() {
     drawing.render();
     drawing.save_png("./noise4.png");
     drawing.set_scale(1.0);
+    ShapeBuilder::new()
+        .circle(pt(drawing.w_f32() / 2.0, drawing.h_f32() / 2.0), 100.0)
+        .build()
+        .push(&mut drawing);
     drawing.render();
     drawing.save_png("./noise1.png");
 }

@@ -1,14 +1,14 @@
 use crate::kolor::rgb8;
 use crate::math::*;
-use crate::prelude::{pt, PI};
-use tiny_skia::Color;
+use crate::prelude::{pt, Drawing, PI};
+use tiny_skia::{Color, Pixmap};
 
 pub struct SphereScene<'a> {
     pub camera: Point3,
     pub focal_len: f32,
     pub center: Point3,
     pub radius: f32,
-    pub texture: &'a Canvas,
+    pub texture: &'a Pixmap,
     pub rotation_x: f32,
     pub rotation_y: f32,
     pub rotation_z: f32,
@@ -22,7 +22,7 @@ impl<'a> SphereScene<'a> {
         focal_len: f32,
         center: Point3,
         radius: f32,
-        texture: &'a Canvas,
+        texture: &'a Pixmap,
         rotation_x: f32,
         rotation_y: f32,
         rotation_z: f32,
@@ -43,7 +43,7 @@ impl<'a> SphereScene<'a> {
         }
     }
 
-    pub fn basic(center: Point3, texture: &'a Canvas) -> Self {
+    pub fn basic(center: Point3, texture: &'a Pixmap) -> Self {
         Self {
             camera: Point3::new(0.0, 0.0, 0.0),
             focal_len: texture.width() as f32,
@@ -69,7 +69,7 @@ impl<'a> SphereScene<'a> {
         let s = rot_point.to_spherical(self.center);
         let u = w / 2.0 * (s.phi / PI + 1.0);
         let v = h * (1.0 - s.theta / PI);
-        let c = self.texture.pixmap.pixel(u as u32, v as u32).unwrap();
+        let c = self.texture.pixel(u as u32, v as u32).unwrap();
         let mut illumination = if self.lights.is_empty() {
             1.0
         } else {
@@ -106,9 +106,9 @@ impl<'a> SphereScene<'a> {
         None
     }
 
-    pub fn on_sphere(&self, canvas: &mut Canvas) {
-        let cw2 = canvas.width() as i32 / 2;
-        let ch2 = canvas.height() as i32 / 2;
+    pub fn on_sphere(&self, drawing: &mut Drawing) {
+        let cw2 = drawing.pixmap_width() / 2;
+        let ch2 = drawing.pixmap_height() / 2;
         for x in 1 - cw2..cw2 {
             let x32 = x as f32;
             for y in 1 - ch2..ch2 {
@@ -116,10 +116,10 @@ impl<'a> SphereScene<'a> {
                 let d = Point3::new(x32, y32, self.focal_len) - self.camera;
                 if let Some(c) = self.trace_ray(d) {
                     let p = pt(
-                        canvas.width() as f32 / 2.0 + x32,
-                        canvas.height() as f32 / 2.0 - y32,
+                        drawing.pixmap_width() as f32 / 2.0 + x32,
+                        drawing.pixmap_height() as f32 / 2.0 - y32,
                     );
-                    canvas.dot(p.x, p.y, c);
+                    drawing.dot(p.x as u32, p.y as u32, c);
                 }
             }
         }
