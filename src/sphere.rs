@@ -70,7 +70,7 @@ impl<'a> SphereScene<'a> {
         let s = rot_point.to_spherical(self.center);
         let u = w / 2.0 * (s.phi / PI + 1.0);
         let v = h * (1.0 - s.theta / PI);
-        let c = self.texture.pixel(u as u32, v as u32).unwrap();
+        let c = self.texture.pixmap.pixel(u as u32, v as u32).unwrap();
         let mut illumination = if self.lights.is_empty() {
             1.0
         } else {

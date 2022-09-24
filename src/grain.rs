@@ -1,6 +1,8 @@
 use crate::canvas::{paint_shader, Canvas};
 use crate::kolor::rgb;
 use crate::noises::{noise2d, NoiseOpts};
+use crate::prelude::pt;
+use crate::shape::ShapeBuilder;
 use noise::{Fbm, Perlin};
 use tiny_skia::{BlendMode, FilterQuality, Paint, Pattern, SpreadMode, Transform};
 
@@ -20,7 +22,11 @@ impl Grain {
                 let mut paint = Paint::default();
                 paint.set_color(c);
                 paint.blend_mode = BlendMode::Overlay;
-                canvas.fill_rect(i as f32, j as f32, 1.0, 1.0, &paint);
+                ShapeBuilder::new()
+                    .rect_xywh(pt(i, j), pt(1, 1))
+                    .fill_paint(&paint)
+                    .build()
+                    .draw(&mut canvas);
             }
         }
         Grain(canvas)
@@ -28,7 +34,7 @@ impl Grain {
 
     pub fn grain(&self) -> Paint {
         let pattern = Pattern::new(
-            self.0.as_ref(),
+            (self.0).pixmap.as_ref(),
             SpreadMode::Repeat,
             FilterQuality::Bicubic,
             1.0,
@@ -41,12 +47,10 @@ impl Grain {
 
     pub fn canvas_grain(&self, canvas: &mut Canvas) {
         let paint = self.grain();
-        canvas.fill_rect(
-            0.0,
-            0.0,
-            canvas.width() as f32,
-            canvas.height() as f32,
-            &paint,
-        );
+        ShapeBuilder::new()
+            .rect_xywh(pt(0, 0), pt(canvas.w_f32(), canvas.h_f32()))
+            .fill_paint(&paint)
+            .build()
+            .draw(canvas);
     }
 }

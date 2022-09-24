@@ -29,7 +29,7 @@ pub fn horizontal_stripe(
 ) -> Canvas {
     let mut canvas = Canvas::new(width, height);
     let mut l = 0.0;
-    canvas.fill(color1);
+    canvas.pixmap.fill(color1);
     while l < height as f32 {
         ShapeBuilder::new()
             .line(pt(0.0, l), pt(width, l))
@@ -68,13 +68,16 @@ pub fn foam(
     let mut canvas = Canvas::new(width, height);
     let nf = Worley::default()
         .set_distance_function(euclidean_squared)
-        .set_return_type(ReturnType::Distance).set_seed(seed);
+        .set_return_type(ReturnType::Distance)
+        .set_seed(seed);
     let opts = NoiseOpts::with_wh(width, height).scales(scale);
     for i in 0..width {
         for j in 0..height {
             let a = noise2d_01(&nf, &opts, i as f32, j as f32);
             let mut c = color1.lerp(&color2, a);
-            if a > 0.48 && a < 0.52 { c = color3}
+            if a > 0.48 && a < 0.52 {
+                c = color3
+            }
             canvas.dot(i as f32, j as f32, c);
         }
     }
@@ -226,16 +229,16 @@ pub fn pattern<'a>(
 ) -> Paint<'a> {
     let x = bbox.x();
     let y = bbox.y();
-    pattern_canvas.draw_pixmap(
+    pattern_canvas.pixmap.draw_pixmap(
         x as i32,
         y as i32,
-        texture_canvas.as_ref(),
+        texture_canvas.pixmap.as_ref(),
         &PixmapPaint::default(),
         Transform::identity(),
         None,
     );
     let pattern = Pattern::new(
-        pattern_canvas.as_ref(),
+        pattern_canvas.pixmap.as_ref(),
         SpreadMode::Pad,
         FilterQuality::Bicubic,
         1.0,
