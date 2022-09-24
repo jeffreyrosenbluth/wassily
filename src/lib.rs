@@ -1,6 +1,5 @@
 pub mod canvas;
 pub mod color_names;
-pub mod dsl;
 pub mod flow;
 pub mod grain;
 pub mod grid;

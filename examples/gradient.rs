@@ -65,7 +65,6 @@ fn main() {
     ShapeBuilder::new()
         .rect_xywh(pt(PAD, PAD), pt(EDGE, EDGE))
         .fill_paint(&radial)
-        .stroke_weight(2.5)
         .build()
         .draw(&mut canvas);
     ShapeBuilder::new()
@@ -83,5 +82,5 @@ fn main() {
         .fill_paint(&radial)
         .build()
         .draw(&mut canvas);
-    canvas.save_png("gradient.png");
+    canvas.save_png("gradient2.png");
 }

@@ -50,9 +50,7 @@ impl Canvas {
         clip_mask: Option<&ClipMask>,
     ) {
         let mut transform = transform;
-        transform.tx = self.scale * transform.tx;
-        transform.ty = self.scale * transform.ty;
-        transform = transform.pre_scale(self.scale, self.scale);
+        transform = transform.post_scale(self.scale, self.scale);
         self.pixmap
             .fill_path(&path, paint, fill_rule, transform, clip_mask);
     }
@@ -65,9 +63,7 @@ impl Canvas {
         clip_mask: Option<&ClipMask>,
     ) {
         let mut transform = transform;
-        transform.tx = self.scale * transform.tx;
-        transform.ty = self.scale * transform.ty;
-        transform = transform.pre_scale(self.scale, self.scale);
+        transform = transform.post_scale(self.scale, self.scale);
         self.pixmap.fill_rect(rect, paint, transform, clip_mask);
     }
 
@@ -80,15 +76,13 @@ impl Canvas {
         clip_mask: Option<&ClipMask>,
     ) {
         let mut transform = transform;
-        transform.tx = self.scale * transform.tx;
-        transform.ty = self.scale * transform.ty;
-        transform = transform.pre_scale(self.scale, self.scale);
+        transform = transform.post_scale(self.scale, self.scale);
         self.pixmap
             .stroke_path(&path, paint, &stroke, transform, clip_mask);
     }
 
     pub fn dot(&mut self, x: f32, y: f32, color: Color) {
-        let width = self.width();
+        let width = self.pixmap.width();
         let pixel_map = self.pixmap.pixels_mut();
         let k = y as usize * width as usize + x as usize;
         pixel_map[k] = color.premultiply().to_color_u8();
