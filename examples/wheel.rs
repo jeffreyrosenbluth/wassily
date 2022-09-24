@@ -11,9 +11,8 @@ fn main() {
             let x = i as f32 / WIDTH as f32;
             let y = j as f32 / HEIGHT as f32;
             let c = color_wheel.get_color(&mut rng, x, y);
-            drawing.dot(i, j, c);
+            drawing.pixmap_dot(i, j, c);
         }
     }
-    drawing.render();
     drawing.save_png("./wheel6.png");
 }

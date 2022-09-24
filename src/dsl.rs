@@ -7,6 +7,7 @@ use tiny_skia::{
 
 pub type DrawProgram = Vec<DrawCmd>;
 
+#[derive(Clone)]
 pub struct Drawing {
     pub cmds: Vec<DrawCmd>,
     pub width: u32,
@@ -75,8 +76,12 @@ impl Drawing {
         self.cmds.push(DrawCmd::fill_rect(rect, ink, transform));
     }
 
-    pub fn dot(&mut self, x: u32, y: u32, color: Color) {
-        self.cmds.push(DrawCmd::dot(x, y, color));
+    /// Pixmap level function, i.e. x, and y are in Pixmap coordinates.
+    pub fn pixmap_dot(&mut self, x: u32, y: u32, color: Color) {
+        let width = self.pixmap_width();
+        let pixel_map = self.pixmap.pixels_mut();
+        let k = y as usize * width as usize + x as usize;
+        pixel_map[k] = color.premultiply().to_color_u8();
     }
 
     pub fn render(&mut self) {
@@ -326,6 +331,7 @@ impl Default for Ink {
     }
 }
 
+#[derive(Clone)]
 pub enum DrawCmd {
     Fill {
         trail: Trail,
@@ -345,11 +351,6 @@ pub enum DrawCmd {
         transform: Transform,
     },
     Clear {
-        color: Color,
-    },
-    Dot {
-        x: u32,
-        y: u32,
         color: Color,
     },
 }
@@ -383,10 +384,6 @@ impl DrawCmd {
 
     pub fn clear(color: Color) -> Self {
         DrawCmd::Clear { color }
-    }
-
-    pub fn dot(x: u32, y: u32, color: Color) -> Self {
-        DrawCmd::Dot { x, y, color }
     }
 
     fn eval(&self, canvas: &mut Pixmap, scale: f32) {
@@ -440,12 +437,6 @@ impl DrawCmd {
             }
             DrawCmd::Clear { color } => {
                 canvas.fill(*color);
-            }
-            DrawCmd::Dot { x, y, color } => {
-                let width = canvas.width();
-                let pixel_map = canvas.pixels_mut();
-                let k = (*y * width + *x) as usize;
-                pixel_map[k] = color.premultiply().to_color_u8();
             }
         }
     }

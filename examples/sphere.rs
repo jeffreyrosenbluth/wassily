@@ -16,8 +16,8 @@ fn main() {
     sphere.lights = vec![ambient, point, directional];
     sphere.specular = Some(100.0);
 
-    sphere.on_sphere(&mut drawing);
     drawing.render();
+    sphere.on_sphere(&mut drawing);
     drawing.save_png("./sphere0.png");
 }
 

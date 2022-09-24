@@ -1,11 +1,11 @@
-// pub mod canvas;
+pub mod canvas;
 pub mod color_names;
 pub mod dsl;
 pub mod flow;
 pub mod grain;
 pub mod grid;
 pub mod kolor;
-// pub mod lines;
+pub mod lines;
 pub mod math;
 pub mod matrix;
 pub mod noises;

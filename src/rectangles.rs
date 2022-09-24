@@ -1,7 +1,6 @@
-use crate::dsl::DrawProgram;
-use crate::noises::*;
 use crate::prelude::pt;
 use crate::shape::*;
+use crate::{dsl::Drawing, noises::*};
 use noise::Perlin;
 use tiny_skia::Paint;
 use tiny_skia::{Color, Point, Rect, Transform};
@@ -48,43 +47,43 @@ impl SandBox {
         self
     }
 
-    //     pub fn draw(&mut self, width: f32, height: f32) -> DrawProgram {
-    //         let noise_opts = NoiseOpts::default()
-    //             .width(self.wh.x)
-    //             .height(self.wh.y)
-    //             .scales(self.scales);
-    //         let nf = Perlin::default();
-    //         let rect = Rect::from_xywh(self.xy.x, self.xy.y, self.wh.x, self.wh.y).unwrap();
-    //         let mut paint = Paint::default();
-    //         paint.set_color(self.bg_color);
-    //         canvas
-    //             .pixmap
-    //             .fill_rect(rect, &paint, Transform::identity(), None);
-    //         for i in 0..self.wh.x as u32 {
-    //             let from = pt(self.xy.x + i as f32, self.xy.y);
-    //             let to = pt(self.xy.x + i as f32, self.xy.y + self.wh.y);
-    //             let alpha = noise2d_01(nf, &noise_opts, from.x, from.y);
-    //             let mut color1 = self.color1;
-    //             color1.set_alpha(alpha);
-    //             ShapeBuilder::new()
-    //                 .line(from, to)
-    //                 .stroke_color(color1)
-    //                 .build()
-    //                 .draw(canvas);
-    //         }
-    //         for i in 0..self.wh.y as u32 {
-    //             let from = pt(self.xy.x, self.xy.y + i as f32);
-    //             let to = pt(self.xy.x + self.wh.x, self.xy.y + i as f32);
-    //             let alpha = noise2d_01(nf, &noise_opts, from.x, from.y);
-    //             let mut color2 = self.color2;
-    //             color2.set_alpha(alpha);
-    //             ShapeBuilder::new()
-    //                 .line(from, to)
-    //                 .stroke_color(color2)
-    //                 .build()
-    //                 .draw(canvas);
-    //         }
-    //     }
+    pub fn draw(&mut self, drawing: &mut Drawing) {
+        let noise_opts = NoiseOpts::default()
+            .width(self.wh.x)
+            .height(self.wh.y)
+            .scales(self.scales);
+        let nf = Perlin::default();
+        let rect = Rect::from_xywh(self.xy.x, self.xy.y, self.wh.x, self.wh.y).unwrap();
+        let mut paint = Paint::default();
+        paint.set_color(self.bg_color);
+        drawing
+            .pixmap
+            .fill_rect(rect, &paint, Transform::identity(), None);
+        for i in 0..self.wh.x as u32 {
+            let from = pt(self.xy.x + i as f32, self.xy.y);
+            let to = pt(self.xy.x + i as f32, self.xy.y + self.wh.y);
+            let alpha = noise2d_01(nf, &noise_opts, from.x, from.y);
+            let mut color1 = self.color1;
+            color1.set_alpha(alpha);
+            ShapeBuilder::new()
+                .line(from, to)
+                .stroke_color(color1)
+                .build()
+                .push(drawing);
+        }
+        for i in 0..self.wh.y as u32 {
+            let from = pt(self.xy.x, self.xy.y + i as f32);
+            let to = pt(self.xy.x + self.wh.x, self.xy.y + i as f32);
+            let alpha = noise2d_01(nf, &noise_opts, from.x, from.y);
+            let mut color2 = self.color2;
+            color2.set_alpha(alpha);
+            ShapeBuilder::new()
+                .line(from, to)
+                .stroke_color(color2)
+                .build()
+                .push(drawing);
+        }
+    }
 }
 
 impl Default for SandBox {

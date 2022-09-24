@@ -107,8 +107,8 @@ impl<'a> SphereScene<'a> {
     }
 
     pub fn on_sphere(&self, drawing: &mut Drawing) {
-        let cw2 = drawing.pixmap_width() / 2;
-        let ch2 = drawing.pixmap_height() / 2;
+        let cw2 = drawing.pixmap_width() as i32 / 2;
+        let ch2 = drawing.pixmap_height() as i32 / 2;
         for x in 1 - cw2..cw2 {
             let x32 = x as f32;
             for y in 1 - ch2..ch2 {
@@ -119,7 +119,7 @@ impl<'a> SphereScene<'a> {
                         drawing.pixmap_width() as f32 / 2.0 + x32,
                         drawing.pixmap_height() as f32 / 2.0 - y32,
                     );
-                    drawing.dot(p.x as u32, p.y as u32, c);
+                    drawing.pixmap_dot(p.x as u32, p.y as u32, c);
                 }
             }
         }
