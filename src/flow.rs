@@ -1,7 +1,7 @@
+use crate::math::Algebra;
 use crate::matrix::*;
 use crate::noises::{noise2d, NoiseOpts};
 use crate::prelude::pt;
-use crate::math::Algebra;
 use noise::NoiseFn;
 use std::f32::consts::PI;
 use tiny_skia::Point;
@@ -181,8 +181,8 @@ impl FlowField {
             }
 
             v1 = Vertex::new(x1, y1, theta, self.sepration);
-            if (v1.distance(self.width, self.height, &self.grid) < self.sepration
-                && self.sepration > 0.0)
+            if (self.sepration > 0.0
+                && v1.distance(self.width, self.height, &self.grid) < self.sepration)
                 || v1.x > self.width as f32 - 1.0
                 || v1.y > self.height as f32 - 1.0
                 || v1.x < 0.0
@@ -193,11 +193,10 @@ impl FlowField {
                 vertices.push(v1);
             }
         }
-        for v in vertices.iter() {
-            if self.sepration <= 0.0 {
-                break;
+        if self.sepration > 0.0 {
+            for v in vertices.iter() {
+                self.grid[v.cell.0 as usize][v.cell.1 as usize].push(*v);
             }
-            self.grid[v.cell.0 as usize][v.cell.1 as usize].push(*v);
         }
         vertices.into_iter().map(|v| v.to_point()).collect()
     }
