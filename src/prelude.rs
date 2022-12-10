@@ -13,6 +13,7 @@ pub use crate::noises::trig::*;
 pub use crate::noises::white::*;
 pub use crate::noises::*;
 pub use crate::okcolor::*;
+pub use crate::point_map::*;
 pub use crate::rectangles::*;
 pub use crate::shape::*;
 pub use crate::sketch::*;
@@ -28,6 +29,6 @@ pub use palette;
 pub use palette::{
     Hsl, Hsla, Hsluv, Hsluva, Hsv, Hsva, Hwb, Hwba, Lab, Laba, Lch, Lcha, Srgb, Srgba, Xyz, Xyza,
 };
-pub use rand::{rngs::SmallRng, seq::SliceRandom, Rng, SeedableRng};
+pub use rand::{rngs::SmallRng, seq::SliceRandom, thread_rng, Rng, SeedableRng};
 pub use rand_distr::{Distribution, Normal, Standard, StandardNormal};
 pub use tiny_skia::*;

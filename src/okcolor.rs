@@ -125,7 +125,7 @@ fn compute_max_saturation(a: f32, b: f32) -> f32 {
             0.59662641,
             0.75515197,
             0.56771245,
-            4.076741662,
+            4.0767416621,
             -3.3077115913,
             0.2309699292,
         )
@@ -395,19 +395,14 @@ pub fn okhsl_to_srgb(h: f32, s: f32, l: f32) -> (f32, f32, f32) {
     let c = {
         if s < mid {
             let t = mid_inv * s;
-
             let k_1 = mid * c_0;
             let k_2 = 1.0 - k_1 / c_mid;
-
             t * k_1 / (1.0 - k_2 * t)
         } else {
             let t = (s - mid) / (1.0 - mid);
-
-            let k_0 = c_mid;
             let k_1 = (1.0 - mid) * c_mid * c_mid * mid_inv * mid_inv / c_0;
-            let k_2 = 1.0 - (k_1) / (c_max - c_mid);
-
-            k_0 + t * k_1 / (1.0 - k_2 * t)
+            let k_2 = 1.0 - k_1 / (c_max - c_mid);
+            c_mid + t * k_1 / (1.0 - k_2 * t)
         }
     };
 

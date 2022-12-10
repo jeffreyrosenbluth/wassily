@@ -9,6 +9,7 @@ pub mod math;
 pub mod matrix;
 pub mod noises;
 pub mod okcolor;
+pub mod point_map;
 pub mod prelude;
 pub mod rectangles;
 pub mod shape;
