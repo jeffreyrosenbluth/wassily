@@ -1,3 +1,4 @@
+use crate::prelude::pt;
 use image::{ImageFormat, RgbImage, RgbaImage};
 use tiny_skia::*;
 
@@ -136,6 +137,28 @@ pub fn paint_shader<'a>(shader: Shader<'a>) -> Paint<'a> {
         shader,
         ..Default::default()
     }
+}
+
+pub fn paint_lg2<'a>(
+    x0: f32,
+    y0: f32,
+    x1: f32,
+    y1: f32,
+    color0: Color,
+    color1: Color,
+) -> Paint<'a> {
+    let lg = LinearGradient::new(
+        pt(x0, y0),
+        pt(x1, y1),
+        vec![
+            GradientStop::new(0.0, color0),
+            GradientStop::new(1.0, color1),
+        ],
+        SpreadMode::Pad,
+        Transform::identity(),
+    )
+    .unwrap();
+    paint_shader(lg)
 }
 
 impl From<&RgbaImage> for Canvas {
