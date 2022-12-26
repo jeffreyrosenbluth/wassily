@@ -25,6 +25,7 @@ pub use crate::util::*;
 pub use crate::warp::*;
 pub use image::*;
 pub use noise::*;
+pub use noise::core::worley::*;
 pub use palette;
 pub use palette::{
     Hsl, Hsla, Hsluv, Hsluva, Hsv, Hsva, Hwb, Hwba, Lab, Laba, Lch, Lcha, Srgb, Srgba, Xyz, Xyza,
