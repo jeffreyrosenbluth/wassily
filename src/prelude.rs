@@ -24,6 +24,7 @@ pub use crate::textures::*;
 pub use crate::util::*;
 pub use crate::warp::*;
 pub use image::*;
+pub use noise::core::worley::ReturnType;
 pub use noise::*;
 pub use palette;
 pub use palette::{
