@@ -1,11 +1,12 @@
 use crate::math::{center, pt, Algebra};
 use crate::matrix::Matrix;
 use num_traits::AsPrimitive;
-use rand::{Rng, SeedableRng};
 use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 use std::f32::consts::PI;
 use tiny_skia::Point;
 
+/// Generate a set of points using a uniform distribution.
 pub fn uniform<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> Vec<Point> {
     let mut rng = SmallRng::seed_from_u64(seed);
     let vals: Vec<Point> = (0..n)
@@ -19,6 +20,7 @@ pub fn uniform<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> V
     vals
 }
 
+/// Generate a point from the Halton sequence.
 pub fn halton(index: u32, base: u32) -> f32 {
     let mut f = 1.0;
     let mut r = 0.0;
@@ -32,6 +34,7 @@ pub fn halton(index: u32, base: u32) -> f32 {
     r
 }
 
+/// Generate a set of points using the Halton sequence.
 pub fn halton_23<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> Vec<Point> {
     let mut rng = SmallRng::seed_from_u64(seed);
     let k: u32 = rng.gen();
@@ -42,6 +45,7 @@ pub fn halton_23<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) ->
         .collect()
 }
 
+/// Gererate a set of points using Poisson Disk sampling.
 // An improvement to Bridson's Algorithm for Poisson Disc sampling.
 // https://observablehq.com/@jrus/bridson-fork/2
 pub fn poisson_disk(width: f32, height: f32, radius: f32, seed: u64) -> Vec<Point> {

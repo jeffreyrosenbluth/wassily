@@ -11,6 +11,7 @@ pub fn calculate_hash<T: Hash>(t: T) -> u64 {
     s.finish()
 }
 
+/// Map a value from one range to anothe.
 pub fn map_range(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
     (x - in_min) / (in_max - in_min) * (out_max - out_min) + out_min
 }
@@ -38,6 +39,7 @@ pub fn gain(g: f32, t: f32) -> f32 {
     }
 }
 
+/// Smoothstep function
 pub fn smooth_step(t: f32) -> f32 {
     let s = t.clamp(0.0, 1.0);
     s * s * (3.0 - 2.0 * s)

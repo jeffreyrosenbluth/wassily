@@ -120,9 +120,7 @@ where
     }
 
     pub fn transpose(&self) -> Self {
-        Matrix::generate(self.cols(), self.rows(), |r, c| {
-            self[c][r]
-        })
+        Matrix::generate(self.cols(), self.rows(), |r, c| self[c][r])
     }
 }
 
