@@ -24,8 +24,8 @@ impl Canvas {
         let h = scale * height as f32;
         Canvas {
             pixmap: Pixmap::new(w as u32, h as u32).unwrap(),
-            width,
-            height,
+            width: w as u32,
+            height: h as u32,
             scale,
         }
     }
