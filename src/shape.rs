@@ -4,7 +4,7 @@ use crate::{
     prelude::{chaiken, pt, Trail, TAU},
 };
 use num_traits::AsPrimitive;
-use rand::rngs::SmallRng;
+use rand::RngCore;
 use rand_distr::{Distribution, Normal};
 use tiny_skia::*;
 
@@ -373,14 +373,14 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    pub fn pearl(
+    pub fn pearl<R: RngCore>(
         mut self,
         center: Point,
         a: f32,
         b: f32,
         sides: u32,
         iterations: u32,
-        rng: &mut SmallRng,
+        rng: &mut R,
     ) -> Self {
         self.shape = ShapeType::Poly;
         let mut points = vec![];
