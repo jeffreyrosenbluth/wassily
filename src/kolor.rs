@@ -329,7 +329,8 @@ impl Colorful for Color {
 
     fn grayscale(&self) -> u8 {
         let (r, g, b, _) = self.as_f32s();
-        (0.2989 * r as f32 + 0.5870 * g as f32 + 0.1140 * b as f32).clamp(0.0, 255.0) as u8
+        (255.0 * (0.2989 * r as f32 + 0.5870 * g as f32 + 0.1140 * b as f32)).clamp(0.0, 255.0)
+            as u8
     }
 
     fn rotate_hue(&self, degrees: f32) -> Color {
