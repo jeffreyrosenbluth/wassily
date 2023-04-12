@@ -3,6 +3,7 @@ use crate::{
     kolor::ConvertColor,
     prelude::{chaiken, pt, Trail, TAU},
 };
+use log::error;
 use num_traits::AsPrimitive;
 use rand::RngCore;
 use rand_distr::{Distribution, Normal};
@@ -64,7 +65,15 @@ impl<'a> Shape<'a> {
         }
     }
 
+    /// Draw a polygon. Must have at least 2 points.
     fn draw_poly(&self, canvas: &mut Canvas) {
+        if self.points.len() < 2 {
+            error!(
+                "Cannot draw a polygonal curve with less than 2 points, only {} points provided.",
+                self.points.len()
+            );
+            return;
+        }
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         let tail = &self.points[1..];
@@ -84,7 +93,15 @@ impl<'a> Shape<'a> {
         }
     }
 
+    /// Draw a quadratic bezier curve. Must have at least 3 points.
     fn draw_quad(&self, canvas: &mut Canvas) {
+        if self.points.len() < 3 {
+            error!(
+                "Cannot draw a quadratic bezier curve with less than 3 points, only {} points provided.",
+                self.points.len()
+            );
+            return;
+        }
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         pb.move_to(head.x, head.y);
@@ -107,6 +124,13 @@ impl<'a> Shape<'a> {
     }
 
     pub fn draw_cubic(&self, canvas: &mut Canvas) {
+        if self.points.len() < 4 {
+            error!(
+                "Cannot draw a cubic bezier curve with less than 4 points, only {} points provided.",
+                self.points.len()
+            );
+            return;
+        }
         let mut pb = PathBuilder::new();
         let head = self.points[0];
         pb.move_to(head.x, head.y);
@@ -131,7 +155,11 @@ impl<'a> Shape<'a> {
 
     fn draw_rect(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
-            panic!("Rectangle's points vector contains less than 2 points");
+            error!(
+                "Cannot draw a rectangle with less than 2 points, only {} points provided.",
+                self.points.len()
+            );
+            return;
         }
         let left = self.points[0].x;
         let top = self.points[0].y;
@@ -149,7 +177,11 @@ impl<'a> Shape<'a> {
 
     fn draw_circle(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
-            panic!("Circle points vector contains less than 2 points");
+            error!(
+                "Cannot draw a circle with less than 2 points, only {} points provided.",
+                self.points.len()
+            );
+            return;
         }
         let cx = self.points[0].x;
         let cy = self.points[0].y;
@@ -166,7 +198,11 @@ impl<'a> Shape<'a> {
 
     fn draw_ellipse(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
-            panic!("Ellipse points vector contains less than 2 points");
+            error!(
+                "Cannot draw a ellipse with less than 2 points, only {} points provided.",
+                self.points.len()
+            );
+            return;
         }
         let cx = self.points[0].x;
         let cy = self.points[0].y;
@@ -184,7 +220,11 @@ impl<'a> Shape<'a> {
 
     fn draw_line(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
-            panic!("Line points vector contains less than 2 points");
+            error!(
+                "Cannot draw a line with less than 2 points, only {} points provided.",
+                self.points.len()
+            );
+            return;
         }
         let x0 = self.points[0].x;
         let y0 = self.points[0].y;
