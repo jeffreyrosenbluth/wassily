@@ -36,11 +36,10 @@ fn checkered(texture: &mut Canvas) {
             let paint = paint_solid(c);
             let x = j as f32 * swatch_width;
             let y = i as f32 * swatch_width;
-            ShapeBuilder::new()
+            Shape::new()
                 .rect_xywh(pt(x, y), pt(swatch_width, swatch_width))
                 .fill_paint(&paint)
                 .no_stroke()
-                .build()
                 .draw(texture);
         }
     }

@@ -31,11 +31,10 @@ pub fn horizontal_stripe(
     let mut l = 0.0;
     canvas.pixmap.fill(color1);
     while l < height as f32 {
-        ShapeBuilder::new()
+        Shape::new()
             .line(pt(0.0, l), pt(width, l))
             .stroke_color(color2)
             .stroke_weight(4.0)
-            .build()
             .draw(&mut canvas);
         l += spacing;
     }
@@ -245,4 +244,42 @@ pub fn pattern<'a>(
         Transform::identity(),
     );
     paint_shader(pattern)
+}
+
+pub struct PatternPaint<'a> {
+    pub texture_canvas: &'a Canvas,
+    pub pattern_canvas: Canvas,
+    pub bbox: Rect,
+}
+
+impl<'a> PatternPaint<'a> {
+    pub fn new(texture_canvas: &'a Canvas, bbox: Rect, width: u32, height: u32) -> Self {
+        let pattern_canvas = Canvas::new(width, height);
+        Self {
+            texture_canvas,
+            pattern_canvas,
+            bbox,
+        }
+    }
+
+    pub fn paint(&'a mut self) -> Paint<'a> {
+        let x = self.bbox.x();
+        let y = self.bbox.y();
+        self.pattern_canvas.pixmap.draw_pixmap(
+            x as i32,
+            y as i32,
+            self.texture_canvas.pixmap.as_ref(),
+            &PixmapPaint::default(),
+            Transform::identity(),
+            None,
+        );
+        let pattern = Pattern::new(
+            self.pattern_canvas.pixmap.as_ref(),
+            SpreadMode::Pad,
+            FilterQuality::Bicubic,
+            1.0,
+            Transform::identity(),
+        );
+        paint_shader(pattern)
+    }
 }

@@ -737,7 +737,6 @@ impl IndexMut<usize> for Palette {
 
 impl IntoIterator for Palette {
     type Item = Color;
-
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {

@@ -66,10 +66,9 @@ impl SandBox {
             let alpha = noise2d_01(nf, &noise_opts, from.x, from.y);
             let mut color1 = self.color1;
             color1.set_alpha(alpha);
-            ShapeBuilder::new()
+            Shape::new()
                 .line(from, to)
                 .stroke_color(color1)
-                .build()
                 .draw(canvas);
         }
         for i in 0..self.wh.y as u32 {
@@ -78,10 +77,9 @@ impl SandBox {
             let alpha = noise2d_01(nf, &noise_opts, from.x, from.y);
             let mut color2 = self.color2;
             color2.set_alpha(alpha);
-            ShapeBuilder::new()
+            Shape::new()
                 .line(from, to)
                 .stroke_color(color2)
-                .build()
                 .draw(canvas);
         }
     }

@@ -13,12 +13,11 @@ fn main() {
             let g = n * 255.0;
             let c = gray(g as u8);
             // let c = (*ORANGERED).lerp(&MIDNIGHTBLUE, n);
-            ShapeBuilder::new()
+            Shape::new()
                 .rect_cwh(pt(x, y), pt(1.0, 1.0))
                 .no_stroke()
                 // .stroke_color(*WHITE)
                 .fill_color(c)
-                .build()
                 .draw(&mut canvas);
             // canvas.dot(x as f32, y as f32, c);
         }

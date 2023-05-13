@@ -2,7 +2,7 @@ use crate::canvas::Canvas;
 use crate::{
     noises::*,
     prelude::{paint_solid, pt, Algebra},
-    shape::ShapeBuilder,
+    shape::Shape,
 };
 use noise::OpenSimplex;
 use rand::rngs::SmallRng;
@@ -78,10 +78,9 @@ impl SandLine {
                 let mut color = self.color;
                 color.set_alpha(a);
                 let paint = paint_solid(color);
-                ShapeBuilder::new()
+                Shape::new()
                     .rect_xywh(pt(x, y), pt(1, 1))
                     .fill_paint(&paint)
-                    .build()
                     .draw(canvas);
             }
         }

@@ -25,10 +25,9 @@ fn main() {
             println!("({:2}, {:2}) : [{}, {}, {}]", j, i, c8.0, c8.1, c8.2);
             let x = j as f32 * swatch_width;
             let y = i as f32 * swatch_width;
-            ShapeBuilder::new()
+            Shape::new()
                 .rect_xywh(pt(x, y), pt(swatch_width, swatch_width))
                 .fill_paint(&paint)
-                .build()
                 .draw(&mut canvas);
         }
     }

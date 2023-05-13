@@ -7,8 +7,11 @@ use log::error;
 use num_traits::AsPrimitive;
 use rand::RngCore;
 use rand_distr::{Distribution, Normal};
-use tiny_skia::*;
+use tiny_skia::{
+    FillRule, LineCap, LineJoin, Paint, PathBuilder, Point, Rect, Stroke, StrokeDash, Transform,
+};
 
+/// Shape types
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ShapeType {
     Poly,
@@ -20,8 +23,9 @@ pub(crate) enum ShapeType {
     Ellipse,
 }
 
+/// ShapeData holds the data required to draw a shape.
 #[derive(Debug, Clone)]
-pub struct Shape<'a> {
+pub struct ShapeData<'a> {
     points: Vec<Point>,
     fill_paint: Box<Option<Paint<'a>>>,
     stroke: Stroke,
@@ -31,7 +35,7 @@ pub struct Shape<'a> {
     transform: Transform,
 }
 
-impl<'a> Shape<'a> {
+impl<'a> ShapeData<'a> {
     pub(crate) fn new(
         points: Vec<Point>,
         fill_paint: Box<Option<Paint<'a>>>,
@@ -52,7 +56,7 @@ impl<'a> Shape<'a> {
         }
     }
 
-    pub fn draw(&self, canvas: &mut Canvas) {
+    fn draw(&self, canvas: &mut Canvas) {
         let shape = self.shape;
         match shape {
             ShapeType::Poly => self.draw_poly(canvas),
@@ -65,7 +69,7 @@ impl<'a> Shape<'a> {
         }
     }
 
-    /// Draw a polygon. Must have at least 2 points.
+    // Draw a polygon. Must have at least 2 points.
     fn draw_poly(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
             error!(
@@ -93,7 +97,7 @@ impl<'a> Shape<'a> {
         }
     }
 
-    /// Draw a quadratic bezier curve. Must have at least 3 points.
+    // Draw a quadratic bezier curve. Must have at least 3 points.
     fn draw_quad(&self, canvas: &mut Canvas) {
         if self.points.len() < 3 {
             error!(
@@ -123,7 +127,10 @@ impl<'a> Shape<'a> {
         }
     }
 
-    pub fn draw_cubic(&self, canvas: &mut Canvas) {
+    // Draw a cubic bezier curve. Must have at least 4 points. Note that the
+    // first and last points are the endpoints, the middle two points are control
+    // points for every group of 4 points.
+    fn draw_cubic(&self, canvas: &mut Canvas) {
         if self.points.len() < 4 {
             error!(
                 "Cannot draw a cubic bezier curve with less than 4 points, only {} points provided.",
@@ -153,6 +160,7 @@ impl<'a> Shape<'a> {
         }
     }
 
+    // Draw a rectangle. Must have at least 2 points, top left and bottom right.
     fn draw_rect(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
             error!(
@@ -175,6 +183,7 @@ impl<'a> Shape<'a> {
         }
     }
 
+    // Draw a circle. Must have at least 2 points, center and a point whose x coordinate is the radius.
     fn draw_circle(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
             error!(
@@ -186,7 +195,6 @@ impl<'a> Shape<'a> {
         let cx = self.points[0].x;
         let cy = self.points[0].y;
         let w = self.points[1].x;
-        let _h = self.points[1].y;
         let circle = PathBuilder::from_circle(cx, cy, w).unwrap();
         if let Some(mut fp) = *self.fill_paint.clone() {
             canvas.fill_path(&circle, &mut fp, self.fillrule, self.transform, None);
@@ -196,6 +204,8 @@ impl<'a> Shape<'a> {
         }
     }
 
+    // Draw an ellipse. Must have at least 2 points, center and a point whose x coordinate is the
+    // width and y coordinate is the height.
     fn draw_ellipse(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
             error!(
@@ -218,6 +228,7 @@ impl<'a> Shape<'a> {
         }
     }
 
+    // Draw a line. Must have at least 2 points. Any more points are ignored.
     fn draw_line(&self, canvas: &mut Canvas) {
         if self.points.len() < 2 {
             error!(
@@ -240,8 +251,12 @@ impl<'a> Shape<'a> {
     }
 }
 
+/// A builder for creating shapes.
+/// The builder can be used to create a shape with multiple methods.
+/// The shape can then be completed by and drawn to the canvas by calling the
+/// draw method.
 #[derive(Debug, Clone)]
-pub struct ShapeBuilder<'a> {
+pub struct Shape<'a> {
     fill_paint: Option<Paint<'a>>,
     stroke_paint: Option<Paint<'a>>,
     stroke_width: f32,
@@ -255,11 +270,19 @@ pub struct ShapeBuilder<'a> {
     transform: Transform,
 }
 
-impl<'a> Default for ShapeBuilder<'a> {
+impl Default for Shape<'_> {
     fn default() -> Self {
+        let fill = Paint {
+            anti_alias: true,
+            ..Default::default()
+        };
+        let stroke = Paint {
+            anti_alias: true,
+            ..Default::default()
+        };
         Self {
-            fill_paint: Some(Paint::default()),
-            stroke_paint: Some(Paint::default()),
+            fill_paint: Some(fill),
+            stroke_paint: Some(stroke),
             stroke_width: 1.0,
             miter_limit: Default::default(),
             line_cap: Default::default(),
@@ -273,7 +296,7 @@ impl<'a> Default for ShapeBuilder<'a> {
     }
 }
 
-impl<'a> ShapeBuilder<'a> {
+impl<'a> Shape<'a> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -313,8 +336,8 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    pub fn stroke_paint(mut self, pain: &'a Paint) -> Self {
-        self.stroke_paint = Some(pain.clone());
+    pub fn stroke_paint(mut self, paint: &'a Paint) -> Self {
+        self.stroke_paint = Some(paint.clone());
         self
     }
 
@@ -475,9 +498,9 @@ impl<'a> ShapeBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> Shape<'a> {
-        let mut fill_paint: Box<Option<Paint<'a>>> = Box::new(None);
-        let mut stroke_paint: Box<Option<Paint<'a>>> = Box::new(None);
+    pub fn draw(self, canvas: &mut Canvas) {
+        let mut fill_paint: Box<Option<Paint<'_>>> = Box::new(None);
+        let mut stroke_paint: Box<Option<Paint<'_>>> = Box::new(None);
         if let Some(fs) = self.fill_paint {
             fill_paint = Box::new(Some(fs));
         };
@@ -491,7 +514,7 @@ impl<'a> ShapeBuilder<'a> {
             line_join: self.line_join,
             dash: self.stroke_dash,
         };
-        Shape::new(
+        ShapeData::new(
             self.points,
             fill_paint,
             stroke,
@@ -500,5 +523,6 @@ impl<'a> ShapeBuilder<'a> {
             self.fillrule,
             self.transform,
         )
+        .draw(canvas);
     }
 }
