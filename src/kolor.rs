@@ -2,10 +2,8 @@
 
 use crate::math::pt;
 use crate::noises::white::normal_xy;
-use crate::prelude::Perlin;
 use color_thief::{get_palette, ColorFormat};
 use image::{DynamicImage, GenericImageView};
-use noise::NoiseFn;
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
@@ -16,8 +14,6 @@ use rand::{rngs::SmallRng, Rng, RngCore, SeedableRng};
 use rand_distr::{Distribution, Normal};
 use std::{ops::Index, ops::IndexMut, path::Path, usize};
 use tiny_skia::{Color, Point};
-
-const PI: f32 = std::f32::consts::PI;
 
 /// Trait for converting between color types and TinySkia's `Color`.
 pub trait ConvertColor {
@@ -140,7 +136,7 @@ impl ConvertColor for image::Rgba<u8> {
 }
 
 /// Build a mapping form points on a canvas to colors. The mapping is done by
-/// providing 3 functions that map numbers to rgb components and function to
+/// providing 3 functions that map numbers to rgb components and a function to
 /// create an f32 from a point.
 pub struct ColorMap {
     pub red_fn: Box<dyn Fn(f32) -> f32>,
@@ -173,12 +169,19 @@ impl ColorMap {
     }
 }
 
-/// The 'Colorful' trait exists primarily to add methods to tiny-skia's 'Color'
+/// The `Colorful` trait exists primarily to add methods to tiny-skia's 'Color'
 /// type. Of coures, it can be implemented for other color types as well.
 pub trait Colorful {
+    /// Same as origingal color with a new alpha.
     fn opacity(&self, alpha: f32) -> Self;
+
+    /// A tuple of the color's rgba components as f32s.
     fn as_f32s(&self) -> (f32, f32, f32, f32);
+
+    /// A tuple of the color's rgba components as u8s.
     fn as_u8s(&self) -> (u8, u8, u8, u8);
+
+    /// Linear interpolation between two colors.
     fn lerp(&self, color2: &Self, t: f32) -> Self;
 
     /// Perturb a color based on its position on the canvas. The perturbation is
@@ -191,12 +194,12 @@ pub trait Colorful {
     /// with the given mean and standard deviation to the color's lightness.
     fn jiggle_xy_lightness(&self, x: u32, y: u32, mean: f32, std: f32) -> Self;
 
-    /// Perturb a color's lightness based on its position on the canvas. The
+    /// Perturb a color's saturation based on its position on the canvas. The
     /// perturbation is done by adding a random number from a normal distribution
     /// with the given mean and standard deviation to the color's saturation.
     fn jiggle_xy_saturation(&self, x: u32, y: u32, mean: f32, std: f32) -> Self;
 
-    /// Perturb a color's lightness based on its position on the canvas. The
+    /// Perturb a color's hue based on its position on the canvas. The
     /// perturbation is done by adding a random number from a normal distribution
     /// with the given mean and standard deviation to the color's hue.
     fn jiggle_xy_hue(&self, x: u32, y: u32, mean: f32, std: f32) -> Self;
@@ -208,7 +211,7 @@ pub trait Colorful {
     fn rotate_hue(&self, degrees: f32) -> Self;
 
     /// Change the lighness of a color to it's square, i.e. tightening
-    /// it away lighter or darker which ever is closer.
+    /// it away from lighter or darker which ever is closer.
     fn tighten(&self) -> Self;
 
     /// Change the lighness of a color to it's square root, i.e. spreading
@@ -267,7 +270,6 @@ pub trait Colorful {
     {
         self.saturate_fixed(-amount)
     }
-    fn from_tuple(rgb: (f32, f32, f32)) -> Self;
 }
 
 impl Colorful for Color {
@@ -312,7 +314,7 @@ impl Colorful for Color {
         xyza.to_color()
     }
 
-    /// Perturb a color's lightness based on its position on the canvas. The
+    /// Perturb a color's saturation based on its position on the canvas. The
     /// perturbation is done by adding a random number from a normal distribution
     /// with the given mean and standard deviation to the color's saturation.
     fn jiggle_xy_saturation(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
@@ -321,7 +323,7 @@ impl Colorful for Color {
         hsluva.to_color()
     }
 
-    /// Perturb a color's lightness based on its position on the canvas. The
+    /// Perturb a color's hue based on its position on the canvas. The
     /// perturbation is done by adding a random number from a normal distribution
     /// with the given mean and standard deviation to the color's hue.
     fn jiggle_xy_hue(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
@@ -344,7 +346,7 @@ impl Colorful for Color {
         okhsla.shift_hue(degrees).to_color()
     }
     /// Change the lighness of a color to it's square, i.e. tightening
-    /// it away lighter or darker which ever is closer.
+    /// it away from lighter or darker which ever is closer.
     fn tighten(&self) -> Color {
         let mut okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&self);
         let l1 = okhsla.lightness / 50.0 - 1.0;
@@ -412,14 +414,6 @@ impl Colorful for Color {
         let c2 = <Srgba as ConvertColor>::from_color(&color2).into_linear();
         Srgba::from_linear(c1.mix(c2, s)).to_color()
     }
-
-    /// Generate a Color from a tuple of floats.
-    fn from_tuple(rgb: (f32, f32, f32)) -> Self {
-        let r = rgb.0.clamp(0.0, 1.0);
-        let g = rgb.1.clamp(0.0, 1.0);
-        let b = rgb.2.clamp(0.0, 1.0);
-        Color::from_rgba(r, g, b, 1.0).unwrap()
-    }
 }
 
 /// Create an opaque color from red, green, and blue f32 components.
@@ -467,25 +461,31 @@ pub fn jiggle<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color {
     .unwrap()
 }
 
+/// Perturb the lighness of a color by a sample from the normal distribution with
+/// standard deviation `std_dev`.
 pub fn jiggle_lightness<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color {
     let normal = Normal::new(0.0, std_dev).unwrap();
-    let mut l: Lcha = <Lcha as ConvertColor>::from_color(&color);
-    l.l += normal.sample(rng) * 100.0;
-    l.to_color()
+    let mut okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&color);
+    okhsla.lightness += normal.sample(rng) * 100.0;
+    okhsla.to_color()
 }
 
+/// Perturb the saturation of a color by a sample from the normal distribution with
+/// standard deviation `std_dev`.
 pub fn jiggle_saturation<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color {
     let normal = Normal::new(0.0, std_dev).unwrap();
-    let mut hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&color);
-    hsluva.saturation += normal.sample(rng) * 100.0;
-    hsluva.to_color()
+    let mut okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&color);
+    okhsla.saturation += normal.sample(rng) * 100.0;
+    okhsla.to_color()
 }
 
+/// Perturb the hue of a color by a sample from the normal distribution with
+/// standard deviation `std_dev`.
 pub fn jiggle_hue<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color {
     let normal = Normal::new(0.0, std_dev).unwrap();
-    let mut lcha: Lcha = <Lcha as ConvertColor>::from_color(&color);
-    lcha.hue += normal.sample(rng) * 360.0;
-    lcha.to_color()
+    let mut okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&color);
+    okhsla.hue += normal.sample(rng) * 360.0;
+    okhsla.to_color()
 }
 
 /// Generate a random opaque color from the OKhsl color space.
@@ -603,15 +603,17 @@ impl Palette {
         self.colors = self.colors.iter().map(|c| c.spread()).collect();
     }
 
-    /// Rotate the [palette::LabHue] of each color.
+    /// Rotate the hue of each color in the palette.
     pub fn rotate_hue(&mut self, degrees: f32) {
         self.colors = self.colors.iter().map(|c| c.rotate_hue(degrees)).collect();
     }
 
+    /// Saturate the colors in the palette by a factor.
     pub fn saturate(&mut self, factor: f32) {
         self.colors = self.colors.iter().map(|c| c.saturate(factor)).collect();
     }
 
+    /// Saturate the colors in the palette by a fixed amount.
     pub fn saturate_fixed(&mut self, amount: f32) {
         self.colors = self
             .colors
@@ -620,10 +622,12 @@ impl Palette {
             .collect();
     }
 
+    /// Desaturate the colors in the palette by a factor.
     pub fn desaturate(&mut self, factor: f32) {
         self.colors = self.colors.iter().map(|c| c.desaturate(factor)).collect();
     }
 
+    /// Desaturate the colors in the palette by a fixed amount.
     pub fn desaturate_fixed(&mut self, amount: f32) {
         self.colors = self
             .colors
@@ -632,10 +636,12 @@ impl Palette {
             .collect();
     }
 
+    /// Lighten the colors in the palette by a factor.
     pub fn lighten(&mut self, factor: f32) {
         self.colors = self.colors.iter().map(|c| c.lighten(factor)).collect();
     }
 
+    /// Lighten the colors in the palette by a fixed amount.
     pub fn lighten_fixed(&mut self, amount: f32) {
         self.colors = self
             .colors
@@ -644,38 +650,41 @@ impl Palette {
             .collect();
     }
 
+    /// Darken the colors in the palette by a factor.
     pub fn darken(&mut self, factor: f32) {
         self.colors = self.colors.iter().map(|c| c.darken(factor)).collect();
     }
 
+    /// Darken the colors in the palette by a fixed amount.
     pub fn darken_fixed(&mut self, amount: f32) {
         self.colors = self.colors.iter().map(|c| c.darken_fixed(amount)).collect();
     }
 
-    /// Sort the colors by hue using the CIELCh color space.
+    /// Sort the colors by hue using the Okhsl color space.
     pub fn sort_by_hue(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(c);
-            (1000.0 * hsluva.hue.into_radians()) as u32
+            let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(c);
+            (1000.0 * okhsla.hue.into_radians()) as u32
         })
     }
 
-    /// Sort the colors by chroma using the CIELCh color space.
+    /// Sort the colors by saturation using the Okhsl color space.
     pub fn sort_by_saturation(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(c);
-            (1000.0 * hsluva.saturation) as u32
+            let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(c);
+            (1000.0 * okhsla.saturation) as u32
         })
     }
 
-    /// Sort the colors by lightness using the CIELCh color space.
+    /// Sort the colors by lightness using the Okhsl color space.
     pub fn sort_by_lightness(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(c);
-            (1000.0 * hsluva.l) as u32
+            let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(c);
+            (1000.0 * okhsla.lightness) as u32
         })
     }
 
+    /// Sore the colors by chroma using the CIELCh color space.
     pub fn sort_by_chroma(&mut self) {
         self.colors.sort_by_cached_key(|c| {
             let lcha: Lcha = <Lcha as ConvertColor>::from_color(c);
@@ -683,11 +692,11 @@ impl Palette {
         })
     }
 
-    /// Sort the colors by alpha(opacity) using the CIELCh color space.
+    /// Sort the colors by alpha(opacity) using the Okhsl color space.
     pub fn sort_by_alpha(&mut self) {
         self.colors.sort_by_cached_key(|c| {
-            let hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(c);
-            (1000.0 * hsluva.alpha) as u32
+            let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(c);
+            (1000.0 * okhsla.alpha) as u32
         })
     }
 
@@ -712,204 +721,39 @@ impl Palette {
         self.colors.len()
     }
 
+    /// Is the `Palette` empty?
     pub fn is_empty(&self) -> bool {
         self.colors.is_empty()
     }
 }
 
 /// Allow colors to be accessed as if `Palette` was an array, e.g. `palette[42]`.
+/// If the index is out of bounds, it will wrap around.
 impl Index<usize> for Palette {
     type Output = Color;
 
     fn index(&self, index: usize) -> &Self::Output {
+        let index = index % self.colors.len();
         &self.colors[index]
     }
 }
 
 /// Allow colors to be accessed and mutated as if `Palette` was an array, e.g. `palette[42] = GRAY`.
+/// If the index is out of bounds, it will wrap around.
 impl IndexMut<usize> for Palette {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        let index = index % self.colors.len();
         &mut self.colors[index]
     }
 }
 
+/// An interator for the `Palette`.
 impl IntoIterator for Palette {
     type Item = Color;
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.colors.into_iter()
-    }
-}
-
-/// Each color channel's (red, green, and blue) value is a function of some
-/// angle (theta). c(theta) = a + b * cos(freq * theta + phase).
-#[derive(Debug, Clone, Copy)]
-pub struct Sinusoid {
-    pub a: f32,
-    pub b: f32,
-    pub freq: f32, // radians
-}
-
-impl Sinusoid {
-    pub fn new(a: f32, b: f32) -> Self {
-        let freq = 1.0;
-        Self { a, b, freq }
-    }
-
-    pub fn eval(&self, theta: f32) -> f32 {
-        self.a + self.b * (self.freq * theta).cos()
-    }
-}
-
-impl Default for Sinusoid {
-    fn default() -> Self {
-        Self {
-            a: 0.5,
-            b: 0.5,
-            freq: 1.0,
-        }
-    }
-}
-
-/// [Procedural Color Palettess](https://iquilezles.org/www/articles/palettes/palettes.htm).
-#[derive(Debug, Clone, Copy)]
-pub struct ProcColor {
-    pub c1: Perlin,
-    pub scale: f32,
-    pub seed: f32,
-    pub c2: Sinusoid,
-    pub c3: Sinusoid,
-}
-
-impl ProcColor {
-    pub fn new(scale: f32, seed: f32, c2: Sinusoid, c3: Sinusoid) -> Self {
-        Self {
-            c1: Perlin::default(),
-            scale,
-            seed,
-            c2,
-            c3,
-        }
-    }
-
-    /// Create a procedural color as a function of the angle `theta` (radians).
-    pub fn proc_color(&self, theta: f32) -> (f32, f32, f32) {
-        let c1 = self.c1;
-        let c2 = self.c2;
-        let c3 = self.c3;
-        let arg = (theta * self.scale) as f64;
-        let mut channel1 = 0.5 + 0.5 * c1.get([arg, self.seed as f64]) as f32;
-        let mut channel2 = c2.eval(theta);
-        let mut channel3 = c3.eval(theta);
-        if channel1.is_nan() {
-            channel1 = 0.0
-        };
-        if channel2.is_nan() {
-            channel2 = 0.0
-        };
-        if channel3.is_nan() {
-            channel3 = 0.0
-        };
-        (
-            channel1.clamp(0.0, 1.0),
-            channel2.clamp(0.0, 1.0),
-            channel3.clamp(0.0, 1.0),
-        )
-    }
-}
-
-impl Default for ProcColor {
-    fn default() -> Self {
-        let r = Perlin::default();
-        let scale = 0.2;
-        let seed = 0.0;
-        let g = Sinusoid::default();
-        let b = Sinusoid::default();
-        Self {
-            c1: r,
-            scale,
-            seed,
-            c2: g,
-            c3: b,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct CosChannelXY {
-    pub a: f32,
-    pub b: f32,
-    pub freq_x: f32,  // radians
-    pub phase_x: f32, // radians
-    pub freq_y: f32,  // radians
-    pub phase_y: f32, // radians
-}
-
-impl Default for CosChannelXY {
-    fn default() -> Self {
-        Self {
-            a: 0.5,
-            b: 0.5,
-            freq_x: 1.0,
-            phase_x: 0.0,
-            freq_y: 1.0,
-            phase_y: 0.0,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct CosColorXY {
-    pub r: CosChannelXY,
-    pub g: CosChannelXY,
-    pub b: CosChannelXY,
-}
-
-impl CosColorXY {
-    pub fn new(r: CosChannelXY, g: CosChannelXY, b: CosChannelXY) -> Self {
-        Self { r, g, b }
-    }
-
-    pub fn cos_color_xy(&self, x: f32, y: f32) -> Color {
-        let r = self.r;
-        let g = self.g;
-        let b = self.b;
-        let mut red =
-            r.a + r.b * (r.freq_x * x + r.phase_x).cos() * (r.freq_y * y + r.phase_y).cos();
-        let mut green =
-            g.a + g.b * (g.freq_x * x + g.phase_x).cos() * (g.freq_y * y + g.phase_y).cos();
-        let mut blue =
-            b.a + b.b * (b.freq_x * x + b.phase_x).cos() * (b.freq_y * y + b.phase_y).cos();
-        if red.is_nan() {
-            red = 0.0
-        };
-        if green.is_nan() {
-            green = 0.0
-        };
-        if blue.is_nan() {
-            blue = 0.0
-        };
-        rgb(
-            red.clamp(0.0, 1.0),
-            green.clamp(0.0, 1.0),
-            blue.clamp(0.0, 1.0),
-        )
-    }
-}
-
-impl Default for CosColorXY {
-    fn default() -> Self {
-        let mut r = CosChannelXY::default();
-        let mut g = CosChannelXY::default();
-        let mut b = CosChannelXY::default();
-        r.phase_y = 0.1 * PI;
-        g.phase_x = 0.2 * PI;
-        g.phase_y = 0.3 * PI;
-        b.phase_x = 0.4 * PI;
-        b.phase_y = 0.5 * PI;
-
-        Self { r, g, b }
     }
 }
 
