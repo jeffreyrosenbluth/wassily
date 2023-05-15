@@ -21,6 +21,9 @@ fn main() {
 
     for y in 0..ROWS {
         for x in 0..COLS {
+            let size = SQUARESIZE as f32;
+            let half_size = size / 2.0;
+
             // Use factor to increase random displacement and angle as we move
             // down the rows.
             let factor = y as f32 / ROWS as f32;
@@ -29,9 +32,9 @@ fn main() {
             let x_offset = factor * rng.gen_range(-0.5..0.5);
             let y_offset = factor * rng.gen_range(-0.5..0.5);
 
-            // Calculate the position of the rectangle.
-            let pos_x = (x * SQUARESIZE + MARGIN) as f32 + x_offset;
-            let pos_y = (y * SQUARESIZE + MARGIN) as f32 + y_offset;
+            // Calculate the position of the center of the square.
+            let pos_x = (x * SQUARESIZE + MARGIN) as f32 + x_offset + half_size;
+            let pos_y = (y * SQUARESIZE + MARGIN) as f32 + y_offset + half_size;
 
             // A random angle to rotate the square.
             let angle = factor * rng.gen_range(-45.0..45.0);
@@ -39,18 +42,27 @@ fn main() {
             // Create a rotation transform.
             let rotation = Transform::from_rotate_at(angle, pos_x as f32, pos_y as f32);
 
-            // Choose a random color from the palette with a random opacity using
-            // Okhsl color space and set it's opacity to 0.75.
+            // Choose a random color using Okhsl color space, and set it's opacity to 0.75.
             let mut fill = rand_okhsl(&mut rng);
-            fill.set_alpha(0.75);
+            fill.set_alpha(0.85);
 
             // Draw the rectangle.
             Shape::new()
-                .rect_xywh(pt(pos_x, pos_y), pt(SQUARESIZE, SQUARESIZE))
+                .rect_cwh(pt(pos_x, pos_y), pt(size, size))
                 .fill_color(fill)
                 .no_stroke()
                 .transform(&rotation)
                 .draw(&mut canvas);
+
+            // Draw a random pearl shape in the middle of the square 25% of the time.
+            if rng.gen_bool(0.25) {
+                Shape::new()
+                    // pearl(center, width, height, sides, chaiken iterations, rng)
+                    .pearl(pt(pos_x, pos_y), size / 5.0, size / 5.0, 8, 4, &mut rng)
+                    .fill_color(rand_okhsl(&mut rng))
+                    .no_stroke()
+                    .draw(&mut canvas);
+            }
         }
     }
     canvas.save_png("./schotter.png");

@@ -1,7 +1,8 @@
 //! Utilities to manage colors and palettes.
 
+use crate::math::pt;
 use crate::noises::white::normal_xy;
-use crate::prelude::{Fbm, MultiFractal, Perlin, Seedable};
+use crate::prelude::Perlin;
 use color_thief::{get_palette, ColorFormat};
 use image::{DynamicImage, GenericImageView};
 use noise::NoiseFn;
@@ -11,13 +12,14 @@ use palette::{
     Alpha, FromColor, Hsl, Hsla, Hsluv, Hsluva, Hsv, Hsva, Hwb, Hwba, IntoColor, Lab, Laba, Lch,
     Lcha, Lighten, Mix, Okhsl, Okhsla, Okhsv, Okhsva, Saturate, ShiftHue, Srgb, Srgba, Xyz, Xyza,
 };
-use rand::{rngs::SmallRng, seq::SliceRandom, Rng, RngCore, SeedableRng};
+use rand::{rngs::SmallRng, Rng, RngCore, SeedableRng};
 use rand_distr::{Distribution, Normal};
-use std::{ops::Index, ops::IndexMut, path::Path, sync::Arc, usize};
+use std::{ops::Index, ops::IndexMut, path::Path, usize};
 use tiny_skia::{Color, Point};
 
 const PI: f32 = std::f32::consts::PI;
-const TAU: f32 = std::f32::consts::TAU;
+
+/// Trait for converting between color types and TinySkia's `Color`.
 pub trait ConvertColor {
     fn to_color(&self) -> Color;
     fn from_color(color: &Color) -> Self;
@@ -55,6 +57,7 @@ impl ConvertColor for Srgba {
     }
 }
 
+/// Implement ConvertColor for opaque palette color types.
 macro_rules! convert_color {
     ($c:ty) => {
         impl ConvertColor for $c {
@@ -73,6 +76,7 @@ macro_rules! convert_color {
     };
 }
 
+/// Implement ConvertColor for palette color types swith alpha.
 macro_rules! convert_color_alpha {
     ($c:ty) => {
         impl ConvertColor for $c {
@@ -110,11 +114,39 @@ convert_color_alpha!(Okhsla);
 convert_color!(Okhsv);
 convert_color_alpha!(Okhsva);
 
+impl ConvertColor for image::Rgb<u8> {
+    fn to_color(&self) -> Color {
+        rgb8(self.0[0], self.0[1], self.0[2])
+    }
+    fn from_color(color: &Color) -> image::Rgb<u8> {
+        let r = color.red() * 255.0 + 0.5;
+        let g = color.green() * 255.0 + 0.5;
+        let b = color.blue() * 255.0 + 0.5;
+        image::Rgb([r as u8, g as u8, b as u8])
+    }
+}
+
+impl ConvertColor for image::Rgba<u8> {
+    fn to_color(&self) -> Color {
+        Color::from_rgba8(self.0[0], self.0[1], self.0[2], self.0[3])
+    }
+    fn from_color(color: &Color) -> image::Rgba<u8> {
+        let r = color.red() * 255.0 + 0.5;
+        let g = color.green() * 255.0 + 0.5;
+        let b = color.blue() * 255.0 + 0.5;
+        let a = color.alpha() * 255.0 + 0.5;
+        image::Rgba([r as u8, g as u8, b as u8, a as u8])
+    }
+}
+
+/// Build a mapping form points on a canvas to colors. The mapping is done by
+/// providing 3 functions that map numbers to rgb components and function to
+/// create an f32 from a point.
 pub struct ColorMap {
     pub red_fn: Box<dyn Fn(f32) -> f32>,
     pub green_fn: Box<dyn Fn(f32) -> f32>,
     pub blue_fn: Box<dyn Fn(f32) -> f32>,
-    pub color_grad: Box<dyn Fn(f32, f32) -> f32>,
+    pub color_grad: Box<dyn Fn(Point) -> f32>,
 }
 
 impl ColorMap {
@@ -122,7 +154,7 @@ impl ColorMap {
         red_fn: Box<dyn Fn(f32) -> f32>,
         green_fn: Box<dyn Fn(f32) -> f32>,
         blue_fn: Box<dyn Fn(f32) -> f32>,
-        color_grad: Box<dyn Fn(f32, f32) -> f32>,
+        color_grad: Box<dyn Fn(Point) -> f32>,
     ) -> Self {
         Self {
             red_fn,
@@ -133,7 +165,7 @@ impl ColorMap {
     }
 
     pub fn get(&self, x: f32, y: f32) -> Color {
-        let t = (self.color_grad)(x, y);
+        let t = (self.color_grad)(pt(x, y));
         let r = (self.red_fn)(t);
         let g = (self.green_fn)(t);
         let b = (self.blue_fn)(t);
@@ -141,146 +173,101 @@ impl ColorMap {
     }
 }
 
-#[derive(Clone)]
-pub struct ColorWheel {
-    pub octaves: usize,
-    pub base_color: [f32; 3],
-    pub phases: Vec<[f32; 3]>,
-    pub frequencies: [f32; 7],
-    pub noise: Arc<Fbm<Perlin>>,
-    scale: f32,
-}
-
-impl ColorWheel {
-    pub fn new<R: Rng>(rng: &mut R, octaves: usize, noise_octaves: usize) -> Self {
-        assert!(octaves <= 7, "Maximum ocatves is 7");
-        let mut phases = ColorWheel::PHASES;
-        phases.shuffle(rng);
-        // let phases: Vec<[f32; 3]> = phases.into_iter().map(|v| v.choose_multiple(rng)).collect();
-        let phases: Vec<[f32; 3]> = phases.into_iter().map(|v| Self::shuffle3(rng, v)).collect();
-        let noise = Fbm::<Perlin>::default();
-        let seed: u32 = rng.gen();
-        let noise = noise.set_seed(seed).set_octaves(noise_octaves);
-        let x: f32 = 0.5 + rng.gen_range(-0.1..0.1);
-        let y: f32 = 0.3 + rng.gen_range(-0.1..0.1);
-        let z: f32 = 0.4 + rng.gen_range(-0.1..0.1);
-        let base_color = [x, y, z];
-        let mut scale: f32 = Self::AMPLITUDES[0..octaves].iter().sum();
-        scale += 0.4;
-        Self {
-            octaves,
-            phases,
-            frequencies: Self::FREQUENCIES,
-            noise: Arc::new(noise),
-            base_color,
-            scale,
-        }
-    }
-
-    const AMPLITUDES: [f32; 7] = [0.12, 0.11, 0.1, 0.09, 0.08, 0.07, 0.06];
-
-    const PHASES: [[f32; 3]; 9] = [
-        [0.0, 0.8, 1.0],
-        [0.3, 0.4, 0.1],
-        [0.1, 0.7, 1.1],
-        [0.2, 0.8, 1.4],
-        [0.2, 0.6, 0.7],
-        [0.1, 0.6, 0.7],
-        [0.0, 0.5, 0.8],
-        [0.1, 0.4, 0.7],
-        [1.1, 1.4, 2.7],
-    ];
-
-    const FREQUENCIES: [f32; 7] = [1.0, 3.1, 5.1, 9.1, 17.1, 31.1, 65.1];
-
-    fn shuffle3<R: Rng>(rng: &mut R, p: [f32; 3]) -> [f32; 3] {
-        let i: usize = rng.gen_range(0..=2);
-        let j = (i + rng.gen_range(1..=2)) % 3;
-        let x = p[i];
-        let y = p[j];
-        let z = p[3 - i - j];
-        [x, y, z]
-    }
-
-    fn term(&self, t: f32, amplitude: f32, freq: f32, phases: [f32; 3]) -> [f32; 3] {
-        phases.map(|p| amplitude * (TAU * t * freq + p).cos())
-    }
-
-    pub fn get_color<R: Rng>(&mut self, rng: &mut R, x: f32, y: f32) -> Color {
-        let mut rgb = self.base_color;
-        for i in 0..self.octaves {
-            let t = 0.5
-                + 0.5 * self.noise.get([3.0 * x as f64, 3.0 * y as f64]) as f32
-                + 0.02 * (rng.gen_range(0.0..1.0) + rng.gen_range(0.0..1.0));
-            let a = self.term(t, Self::AMPLITUDES[i], Self::FREQUENCIES[i], self.phases[i]);
-            for j in 0..3 {
-                rgb[j] += a[j];
-            }
-        }
-        Color::from_rgba(
-            (rgb[0] / self.scale).clamp(0.0, 1.0),
-            (rgb[1] / self.scale).clamp(0.2, 0.8),
-            (rgb[2] / self.scale).clamp(0.0, 1.0),
-            1.0,
-        )
-        .unwrap()
-    }
-}
-
 /// The 'Colorful' trait exists primarily to add methods to tiny-skia's 'Color'
-/// type.
+/// type. Of coures, it can be implemented for other color types as well.
 pub trait Colorful {
     fn opacity(&self, alpha: f32) -> Self;
     fn as_f32s(&self) -> (f32, f32, f32, f32);
     fn as_u8s(&self) -> (u8, u8, u8, u8);
     fn lerp(&self, color2: &Self, t: f32) -> Self;
+
+    /// Perturb a color based on its position on the canvas. The perturbation is
+    /// done by adding a random number from a normal distribution with the given
+    /// mean and standard deviation to each of the color's components.
     fn jiggle_xy(&self, x: u32, y: u32, mean: f32, std: f32) -> Self;
+
+    /// Perturb a color's lightness based on its position on the canvas. The
+    /// perturbation is done by adding a random number from a normal distribution
+    /// with the given mean and standard deviation to the color's lightness.
     fn jiggle_xy_lightness(&self, x: u32, y: u32, mean: f32, std: f32) -> Self;
+
+    /// Perturb a color's lightness based on its position on the canvas. The
+    /// perturbation is done by adding a random number from a normal distribution
+    /// with the given mean and standard deviation to the color's saturation.
     fn jiggle_xy_saturation(&self, x: u32, y: u32, mean: f32, std: f32) -> Self;
+
+    /// Perturb a color's lightness based on its position on the canvas. The
+    /// perturbation is done by adding a random number from a normal distribution
+    /// with the given mean and standard deviation to the color's hue.
     fn jiggle_xy_hue(&self, x: u32, y: u32, mean: f32, std: f32) -> Self;
-    fn grayscale(&self) -> u8;
+
+    /// Convert a color to grayscale.
+    fn grayscale(&self) -> Self;
+
+    /// Rotate the hue of a color by the given number of degrees.
     fn rotate_hue(&self, degrees: f32) -> Self;
+
+    /// Change the lighness of a color to it's square, i.e. tightening
+    /// it away lighter or darker which ever is closer.
     fn tighten(&self) -> Self;
+
+    /// Change the lighness of a color to it's square root, i.e. spreading
+    /// it towards lighter or darker which ever is closer.
     fn spread(&self) -> Self;
+
+    /// Tint a color by mixing it with white. 0 is no white, 1 is all white.
     fn tint(&self, t: f32) -> Self;
+
+    /// Tone a color by mixing it with gray. 0 is no gray, 1 is all gray.
     fn tone(&self, t: f32) -> Self;
+
+    /// Shade a color by mixing it with black. 0 is no black, 1 is all black.
     fn shade(&self, t: f32) -> Self;
+
+    /// Lighten a color by the given factor.
     fn lighten(&self, factor: f32) -> Self;
+
+    /// Lighten a color a fixed abount.
     fn lighten_fixed(&self, amount: f32) -> Self;
+
+    /// Darken a color by the given factor.
     fn darken(&self, factor: f32) -> Self
     where
         Self: Sized,
     {
         self.lighten(-factor)
     }
+
+    /// Darken a color a fixed abount.
     fn darken_fixed(&self, amount: f32) -> Self
     where
         Self: Sized,
     {
         self.lighten_fixed(-amount)
     }
+
+    /// Saturate a color by the given factor.
     fn saturate(&self, factor: f32) -> Self;
+
+    /// Saturate a color a fixed abount.
     fn saturate_fixed(&self, amount: f32) -> Self;
+
+    /// Desaturate a color by the given factor.
     fn desaturate(&self, factor: f32) -> Self
     where
         Self: Sized,
     {
         self.saturate(-factor)
     }
+
+    /// Desaturate a color a fixed abount.
     fn desaturate_fixed(&self, amount: f32) -> Self
     where
         Self: Sized,
     {
         self.saturate_fixed(-amount)
     }
-    // fn to_hsluva(&self) -> Hsluva;
-    // fn to_lcha(&self) -> Lcha;
-    // fn to_srgba(&self) -> Srgba;
-    fn from_image_rgba(p: image::Rgba<u8>) -> Self;
-    // fn from_srgba(srgba: Srgba) -> Self;
-    // fn from_srgb(srgb: Srgb) -> Self;
     fn from_tuple(rgb: (f32, f32, f32)) -> Self;
-    fn to_image_rgba(&self) -> image::Rgba<u8>;
 }
 
 impl Colorful for Color {
@@ -302,6 +289,9 @@ impl Colorful for Color {
         (r as u8, g as u8, b as u8, a as u8)
     }
 
+    /// Perturb a color based on its position on the canvas. The perturbation is
+    /// done by adding a random number from a normal distribution with the given
+    /// mean and standard deviation to each of the color's components.
     fn jiggle_xy(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
         let (r, g, b, a) = self.as_f32s();
         Color::from_rgba(
@@ -313,107 +303,117 @@ impl Colorful for Color {
         .unwrap()
     }
 
+    /// Perturb a color's lightness based on its position on the canvas. The
+    /// perturbation is done by adding a random number from a normal distribution
+    /// with the given mean and standard deviation to the color's lightness.
     fn jiggle_xy_lightness(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
         let mut xyza: Xyza = <Xyza as ConvertColor>::from_color(&self);
         xyza.y += (std * normal_xy(x as f64, y as f64) as f32 + mean) * 100.0;
         xyza.to_color()
     }
 
+    /// Perturb a color's lightness based on its position on the canvas. The
+    /// perturbation is done by adding a random number from a normal distribution
+    /// with the given mean and standard deviation to the color's saturation.
     fn jiggle_xy_saturation(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
         let mut hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&self);
         hsluva.saturation += (std * normal_xy(x as f64, y as f64) as f32 + mean) * 100.0;
         hsluva.to_color()
     }
 
+    /// Perturb a color's lightness based on its position on the canvas. The
+    /// perturbation is done by adding a random number from a normal distribution
+    /// with the given mean and standard deviation to the color's hue.
     fn jiggle_xy_hue(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
         let mut hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&self);
         hsluva.hue += (std * normal_xy(x as f64, y as f64) as f32 + mean) * 360.0;
         hsluva.to_color()
     }
 
-    fn grayscale(&self) -> u8 {
+    /// Convert a color to grayscale.
+    fn grayscale(&self) -> Self {
         let (r, g, b, _) = self.as_f32s();
-        (255.0 * (0.2989 * r as f32 + 0.5870 * g as f32 + 0.1140 * b as f32)).clamp(0.0, 255.0)
-            as u8
+        let c = (255.0 * (0.2989 * r as f32 + 0.5870 * g as f32 + 0.1140 * b as f32))
+            .clamp(0.0, 255.0) as u8;
+        rgb8(c, c, c)
     }
 
+    /// Rotate the hue of a color by the given number of degrees.
     fn rotate_hue(&self, degrees: f32) -> Color {
-        let hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&self);
-        hsluva.shift_hue(degrees).to_color()
+        let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&self);
+        okhsla.shift_hue(degrees).to_color()
     }
     /// Change the lighness of a color to it's square, i.e. tightening
     /// it away lighter or darker which ever is closer.
     fn tighten(&self) -> Color {
-        let mut hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&self);
-        let l1 = hsluva.l / 50.0 - 1.0;
+        let mut okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&self);
+        let l1 = okhsla.lightness / 50.0 - 1.0;
         let l2 = l1.abs() * l1.abs() * l1.signum();
         let l3 = 50.0 * (l2 + 1.0);
-        hsluva.l = l3;
-        hsluva.to_color()
+        okhsla.lightness = l3;
+        okhsla.to_color()
     }
 
     /// Change the lighness of a color to it's square root, i.e. spreading
     /// it towards lighter or darker which ever is closer.
     fn spread(&self) -> Color {
-        let mut hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&self);
-        let l1 = hsluva.l / 50.0 - 1.0;
+        let mut okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&self);
+        let l1 = okhsla.lightness / 50.0 - 1.0;
         let l2 = l1.abs().sqrt() * l1.signum();
         let l3 = 50.0 * (l2 + 1.0);
-        hsluva.l = l3;
-        hsluva.to_color()
+        okhsla.lightness = l3;
+        okhsla.to_color()
     }
 
+    /// Tint a color by mixing it with white. 0 is no white, 1 is all white.
     fn tint(&self, t: f32) -> Color {
         self.lerp(&rgb8(255, 255, 255), t)
     }
 
+    /// Tone a color by mixing it with gray. 0 is no gray, 1 is all gray.
     fn tone(&self, t: f32) -> Color {
         self.lerp(&rgb8(127, 127, 127), t)
     }
 
+    /// Shade a color by mixing it with black. 0 is no black, 1 is all black.
     fn shade(&self, t: f32) -> Color {
         self.lerp(&rgb8(0, 0, 0), t)
     }
 
+    /// Saturate a color by the given factor.
     fn saturate(&self, factor: f32) -> Color {
-        let lcha: Lcha = <Lcha as ConvertColor>::from_color(&self);
-        lcha.saturate(factor).to_color()
+        let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&self);
+        okhsla.saturate(factor).to_color()
     }
 
+    /// Saturate a color a fixed abount.
     fn saturate_fixed(&self, amount: f32) -> Self {
-        let lcha: Lcha = <Lcha as ConvertColor>::from_color(&self);
-        lcha.saturate_fixed(amount).to_color()
+        let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&self);
+        okhsla.saturate_fixed(amount).to_color()
     }
 
+    /// Lighten a color by the given factor.
     fn lighten(&self, factor: f32) -> Self {
-        let lcha: Lcha = <Lcha as ConvertColor>::from_color(&self);
-        lcha.lighten(factor).to_color()
+        let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&self);
+        okhsla.lighten(factor).to_color()
     }
 
+    /// Lighten a color a fixed abount.
     fn lighten_fixed(&self, amount: f32) -> Self {
-        let lcha: Lcha = <Lcha as ConvertColor>::from_color(&self);
-        lcha.lighten_fixed(amount).to_color()
+        let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(&self);
+        okhsla.lighten_fixed(amount).to_color()
     }
 
-    fn lerp(&self, color2: &Color, t: f32) -> Color {
+    /// Linearly interpolate between two colors in a linear color space and convert
+    /// back to sRGBA.
+    fn lerp(&self, color2: &Color, t: f32) -> Self {
         let s = t.clamp(0.0, 1.0);
         let c1 = <Srgba as ConvertColor>::from_color(&self).into_linear();
         let c2 = <Srgba as ConvertColor>::from_color(&color2).into_linear();
         Srgba::from_linear(c1.mix(c2, s)).to_color()
     }
 
-    fn from_image_rgba(p: image::Rgba<u8>) -> Color {
-        Color::from_rgba8(p.0[0], p.0[1], p.0[2], p.0[3])
-    }
-
-    fn to_image_rgba(&self) -> image::Rgba<u8> {
-        let r = self.red() * 255.0 + 0.5;
-        let g = self.green() * 255.0 + 0.5;
-        let b = self.blue() * 255.0 + 0.5;
-        let a = self.alpha() * 255.0 + 0.5;
-        image::Rgba([r as u8, g as u8, b as u8, a as u8])
-    }
-
+    /// Generate a Color from a tuple of floats.
     fn from_tuple(rgb: (f32, f32, f32)) -> Self {
         let r = rgb.0.clamp(0.0, 1.0);
         let g = rgb.1.clamp(0.0, 1.0);
@@ -422,6 +422,7 @@ impl Colorful for Color {
     }
 }
 
+/// Create an opaque color from red, green, and blue f32 components.
 pub fn rgb(r: f32, g: f32, b: f32) -> Color {
     Color::from_rgba(r, g, b, 1.0).expect(
         format!(
@@ -432,6 +433,7 @@ pub fn rgb(r: f32, g: f32, b: f32) -> Color {
     )
 }
 
+/// Create an opaque color from red, green, and blue u8 components.
 pub fn rgb8(r: u8, g: u8, b: u8) -> Color {
     Color::from_rgba8(r, g, b, 255)
 }
@@ -485,7 +487,25 @@ pub fn jiggle_hue<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color 
     lcha.hue += normal.sample(rng) * 360.0;
     lcha.to_color()
 }
-// }
+
+/// Generate a random opaque color from the OKhsl color space.
+pub fn rand_okhsl<R: RngCore>(rng: &mut R) -> Color {
+    let normal = Normal::new(0.0, 0.25).unwrap();
+    let h: f32 = rng.gen_range(0.0..360.0);
+    let s: f32 = 0.65 + normal.sample(rng);
+    let l: f32 = 0.5 + normal.sample(rng);
+    Okhsl::new(h, s.clamp(0.0, 1.0), l.clamp(0.0, 1.0)).to_color()
+}
+
+/// Generate a random color from the OKhsla color space.
+pub fn rand_okhsla<R: RngCore>(rng: &mut R) -> Color {
+    let normal = Normal::new(0.0, 0.25).unwrap();
+    let h: f32 = rng.gen_range(0.0..360.0);
+    let s: f32 = 0.7 + normal.sample(rng);
+    let l: f32 = 0.5 + normal.sample(rng);
+    let a: f32 = rng.gen_range(0.0..1.0);
+    Okhsla::new(h, s, l, a).to_color()
+}
 
 /// A Palette of colors and functions to manage them.
 #[derive(Clone, Debug)]
@@ -538,7 +558,7 @@ impl Palette {
             while x < w as f32 {
                 while y < h as f32 {
                     let p = img.get_pixel(x as u32, y as u32);
-                    cs.push(Color::from_image_rgba(p));
+                    cs.push(p.to_color());
                     y += delta;
                 }
                 x += delta;
@@ -547,7 +567,7 @@ impl Palette {
             cs.truncate(n)
         } else {
             for (_, _, p) in img.pixels() {
-                cs.push(Color::from_image_rgba(p));
+                cs.push(p.to_color());
             }
             cs.sort_by_cached_key(|c| c.as_u8s());
             cs.dedup_by_key(|c| c.as_u8s());
@@ -695,23 +715,6 @@ impl Palette {
     pub fn is_empty(&self) -> bool {
         self.colors.is_empty()
     }
-}
-
-/// Generate a random opaque color from the OKhsl color space.
-pub fn rand_okhsl<R: RngCore>(rng: &mut R) -> Color {
-    let h: f32 = rng.gen_range(0.0..360.0);
-    let s: f32 = rng.gen_range(0.0..1.0);
-    let l: f32 = rng.gen_range(0.0..1.0);
-    Okhsl::new(h, s, l).to_color()
-}
-
-/// Generate a random color from the OKhsla color space.
-pub fn rand_okhsla<R: RngCore>(rng: &mut R) -> Color {
-    let h: f32 = rng.gen_range(0.0..360.0);
-    let s: f32 = rng.gen_range(0.0..1.0);
-    let l: f32 = rng.gen_range(0.0..1.0);
-    let a: f32 = rng.gen_range(0.0..1.0);
-    Okhsla::new(h, s, l, a).to_color()
 }
 
 /// Allow colors to be accessed as if `Palette` was an array, e.g. `palette[42]`.
@@ -923,7 +926,7 @@ pub fn get_color<T: AsPrimitive<f32>>(
         let x = (p.x * img.width() as f32 / width.as_()) as u32;
         let y = (p.y * img.height() as f32 / height.as_()) as u32;
         let p = img.get_pixel(x, y);
-        Some(Color::from_image_rgba(p))
+        Some(p.to_color())
     }
 }
 
@@ -938,7 +941,7 @@ pub fn get_color_wrap<T: AsPrimitive<f32>>(
     let x = ((p.x * img.width() as f32 / width.as_()) as i32).rem_euclid(img.width() as i32);
     let y = ((p.y * img.height() as f32 / height.as_()) as i32).rem_euclid(img.height() as i32);
     let p = img.get_pixel(x as u32, y as u32);
-    Color::from_image_rgba(p)
+    p.to_color()
 }
 
 /// Get a color from an image by mapping the canvas coordinates to image coordinates.
@@ -952,7 +955,7 @@ pub fn get_color_clamp<T: AsPrimitive<f32>>(
     let x = ((p.x * img.width() as f32 / width.as_()) as u32).clamp(0, img.width() - 1);
     let y = ((p.y * img.height() as f32 / height.as_()) as u32).clamp(0, img.height() - 1);
     let p = img.get_pixel(x, y);
-    Color::from_image_rgba(p)
+    p.to_color()
 }
 
 /// Get a color from an image by tiling the image.
@@ -960,7 +963,7 @@ pub fn get_color_tile<T: AsPrimitive<f32>>(img: &DynamicImage, p: Point) -> Colo
     let x = (p.x as u32).rem_euclid(img.width());
     let y = (p.y as u32).rem_euclid(img.height());
     let p = img.get_pixel(x, y);
-    Color::from_image_rgba(p)
+    p.to_color()
 }
 
 #[cfg(test)]
