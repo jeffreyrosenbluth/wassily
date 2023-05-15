@@ -8,10 +8,10 @@ use noise::NoiseFn;
 use num_traits::AsPrimitive;
 use palette::{
     rgb::{Rgb, Rgba},
-    Alpha, FromColor, Hsl, Hsla, Hsluv, Hsluva, Hsv, Hsva, Hue, Hwb, Hwba, IntoColor, Lab, Laba,
-    Lch, Lcha, Mix, Saturate, Shade, Srgb, Srgba, Xyz, Xyza,
+    Alpha, FromColor, Hsl, Hsla, Hsluv, Hsluva, Hsv, Hsva, Hwb, Hwba, IntoColor, Lab, Laba, Lch,
+    Lcha, Lighten, Mix, Okhsl, Okhsla, Okhsv, Okhsva, Saturate, ShiftHue, Srgb, Srgba, Xyz, Xyza,
 };
-use rand::{rngs::SmallRng, seq::SliceRandom, Rng, SeedableRng};
+use rand::{rngs::SmallRng, seq::SliceRandom, Rng, RngCore, SeedableRng};
 use rand_distr::{Distribution, Normal};
 use std::{ops::Index, ops::IndexMut, path::Path, sync::Arc, usize};
 use tiny_skia::{Color, Point};
@@ -105,6 +105,10 @@ convert_color!(Hsv);
 convert_color_alpha!(Hsva);
 convert_color!(Hwb);
 convert_color_alpha!(Hwba);
+convert_color!(Okhsl);
+convert_color_alpha!(Okhsla);
+convert_color!(Okhsv);
+convert_color_alpha!(Okhsva);
 
 pub struct ColorMap {
     pub red_fn: Box<dyn Fn(f32) -> f32>,
@@ -395,7 +399,7 @@ impl Colorful for Color {
         let s = t.clamp(0.0, 1.0);
         let c1 = <Srgba as ConvertColor>::from_color(&self).into_linear();
         let c2 = <Srgba as ConvertColor>::from_color(&color2).into_linear();
-        Srgba::from_linear(c1.mix(&c2, s)).to_color()
+        Srgba::from_linear(c1.mix(c2, s)).to_color()
     }
 
     fn from_image_rgba(p: image::Rgba<u8>) -> Color {
@@ -447,53 +451,41 @@ pub fn gray(n: u8) -> Color {
     Color::from_rgba8(n, n, n, 255)
 }
 
-/// Perturb a `Color` value.
-pub struct Jiggle {
-    rng: SmallRng,
-    normal: Normal<f32>,
+/// Perturb the r, g, b channels of an `Color` color using a normal distribution.
+/// The value is clamped to [0, 1] and applied as a percentage.
+pub fn jiggle<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color {
+    let normal = Normal::new(0.0, std_dev).unwrap();
+    let (r, g, b, a) = color.as_f32s();
+    Color::from_rgba(
+        (r + normal.sample(rng)).clamp(0.0, 1.0),
+        (g + normal.sample(rng)).clamp(0.0, 1.0),
+        (b + normal.sample(rng)).clamp(0.0, 1.0),
+        a,
+    )
+    .unwrap()
 }
 
-impl Jiggle {
-    /// `std_dev` as percentage of color channel, 0.01 to 0.2 works well.
-    /// Larger standard deviations will produce colors very far from the input
-    /// color.
-    pub fn new(seed: u64, std_dev: f32) -> Self {
-        let rng = SmallRng::seed_from_u64(seed);
-        let normal = Normal::new(0.0, std_dev).unwrap();
-        Self { rng, normal }
-    }
-
-    /// Perturb the r, g, b channels of an `Color` color using a normal distribution.
-    /// The value is clamped to [0, 1] and applied as a percentage.
-    pub fn jiggle(&mut self, color: Color) -> Color {
-        let (r, g, b, a) = color.as_f32s();
-        Color::from_rgba(
-            (r + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
-            (g + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
-            (b + self.normal.sample(&mut self.rng)).clamp(0.0, 1.0),
-            a,
-        )
-        .unwrap()
-    }
-
-    pub fn jiggle_lightness(&mut self, color: Color) -> Color {
-        let mut l: Lcha = <Lcha as ConvertColor>::from_color(&color);
-        l.l += self.normal.sample(&mut self.rng) * 100.0;
-        l.to_color()
-    }
-
-    pub fn jiggle_saturation(&mut self, color: Color) -> Color {
-        let mut hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&color);
-        hsluva.saturation += self.normal.sample(&mut self.rng) * 100.0;
-        hsluva.to_color()
-    }
-
-    pub fn jiggle_hue(&mut self, color: Color) -> Color {
-        let mut lcha: Lcha = <Lcha as ConvertColor>::from_color(&color);
-        lcha.hue += self.normal.sample(&mut self.rng) * 360.0;
-        lcha.to_color()
-    }
+pub fn jiggle_lightness<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color {
+    let normal = Normal::new(0.0, std_dev).unwrap();
+    let mut l: Lcha = <Lcha as ConvertColor>::from_color(&color);
+    l.l += normal.sample(rng) * 100.0;
+    l.to_color()
 }
+
+pub fn jiggle_saturation<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color {
+    let normal = Normal::new(0.0, std_dev).unwrap();
+    let mut hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&color);
+    hsluva.saturation += normal.sample(rng) * 100.0;
+    hsluva.to_color()
+}
+
+pub fn jiggle_hue<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color {
+    let normal = Normal::new(0.0, std_dev).unwrap();
+    let mut lcha: Lcha = <Lcha as ConvertColor>::from_color(&color);
+    lcha.hue += normal.sample(rng) * 360.0;
+    lcha.to_color()
+}
+// }
 
 /// A Palette of colors and functions to manage them.
 #[derive(Clone, Debug)]
@@ -644,7 +636,7 @@ impl Palette {
     pub fn sort_by_hue(&mut self) {
         self.colors.sort_by_cached_key(|c| {
             let hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(c);
-            (1000.0 * hsluva.hue.to_radians()) as u32
+            (1000.0 * hsluva.hue.into_radians()) as u32
         })
     }
 
@@ -684,28 +676,14 @@ impl Palette {
         self.colors[self.rng.gen_range(0..self.colors.len())]
     }
 
-    /// Generate a random opaque color independent of the `Palette` colors.
-    pub fn rand_lab(&mut self) -> Color {
-        let l: f32 = self.rng.gen_range(0.0..100.0);
-        let a: f32 = self.rng.gen_range(-128.0..127.0);
-        let b: f32 = self.rng.gen_range(-128.0..127.0);
-        Laba::new(l, a, b, 1.0).to_color()
-    }
-
-    /// Generate a random color and random opacity independent of the `Palette` colors.
-    pub fn rand_laba(&mut self) -> Color {
-        let l: f32 = self.rng.gen_range(0.0..100.0);
-        let a: f32 = self.rng.gen_range(-128.0..127.0);
-        let b: f32 = self.rng.gen_range(-128.0..127.0);
-        let o: f32 = self.rng.gen_range(0.0..1.0);
-        Laba::new(l, a, b, o).to_color()
-    }
-
     /// Perturb the colors in the palette using a normal distrtibution with
     /// standard deviation `std_dev` considered as a percentage.
-    pub fn jiggle(&mut self, seed: u64, std_dev: f32) {
-        let mut j = Jiggle::new(seed, std_dev);
-        let cs: Vec<Color> = self.colors.iter().map(|c| j.jiggle(*c)).collect();
+    pub fn jiggle(&mut self, std_dev: f32) {
+        let cs: Vec<Color> = self
+            .colors
+            .iter()
+            .map(|c| jiggle(&mut self.rng, std_dev, *c))
+            .collect();
         self.colors = cs;
     }
 
@@ -717,6 +695,23 @@ impl Palette {
     pub fn is_empty(&self) -> bool {
         self.colors.is_empty()
     }
+}
+
+/// Generate a random opaque color from the OKhsl color space.
+pub fn rand_okhsl<R: RngCore>(rng: &mut R) -> Color {
+    let h: f32 = rng.gen_range(0.0..360.0);
+    let s: f32 = rng.gen_range(0.0..1.0);
+    let l: f32 = rng.gen_range(0.0..1.0);
+    Okhsl::new(h, s, l).to_color()
+}
+
+/// Generate a random color from the OKhsla color space.
+pub fn rand_okhsla<R: RngCore>(rng: &mut R) -> Color {
+    let h: f32 = rng.gen_range(0.0..360.0);
+    let s: f32 = rng.gen_range(0.0..1.0);
+    let l: f32 = rng.gen_range(0.0..1.0);
+    let a: f32 = rng.gen_range(0.0..1.0);
+    Okhsla::new(h, s, l, a).to_color()
 }
 
 /// Allow colors to be accessed as if `Palette` was an array, e.g. `palette[42]`.

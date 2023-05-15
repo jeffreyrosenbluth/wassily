@@ -2,9 +2,9 @@
     html_logo_url = "https://raw.githubusercontent.com/jeffreyrosenbluth/wassily/main/assets/logo.png"
 )]
 /*!
-Wassily is both an API and set of tools for creating generative 2D art. It allows you to create
-images that can easily be scaled to any size without loss of quality. It is useful for iamges that
-are meant to be printed at large sizes or displayed on screen.  Includee are many generative art
+**Wassily** is both an API and set of tools for creating generative 2D art. It allows you to create
+images that can easily be scaled to any size without loss of quality. It is useful for images that
+are meant to be printed at large sizes or displayed on screen.  Included are many generative art
 algorithms and utilities for dealing with colors and noise.
 ## Example
 
@@ -28,9 +28,6 @@ fn main() {
     // We will need a random number generator. 'SmallRng' is reexported from
     // the 'rand' crate.
     let mut rng = SmallRng::from_entropy();
-
-    // Create a palette to generate the random colors.
-    let mut palette = Palette::default();
 
     // Set the background color.
     canvas.fill(*WHITESMOKE);
@@ -56,12 +53,9 @@ fn main() {
             let rotation = Transform::from_rotate_at(angle, pos_x as f32, pos_y as f32);
 
             // Choose a random color from the palette with a random opacity using
-            // Lab color space.
-            let mut fill = palette.rand_laba();
-
-            // Increase the opacity by 0.1 so that all rectangles are visible.
-            let alpha = fill.alpha() + 0.2;
-            fill.set_alpha(alpha);
+            // Okhsl color space and set it's opacity to 0.75.
+            let mut fill = rand_okhsl(&mut rng);
+            fill.set_alpha(0.75);
 
             // Draw the rectangle.
             Shape::new()
@@ -74,7 +68,6 @@ fn main() {
     }
     canvas.save_png("./schotter.png");
 }
-
  */
 
 pub mod canvas;
@@ -87,7 +80,6 @@ pub mod lines;
 pub mod math;
 pub mod matrix;
 pub mod noises;
-pub mod okcolor;
 pub mod point_map;
 pub mod prelude;
 pub mod rectangles;

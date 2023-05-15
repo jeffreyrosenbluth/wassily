@@ -121,7 +121,7 @@ impl Canvas {
         paint: &mut Paint,
         fill_rule: FillRule,
         transform: Transform,
-        clip_mask: Option<&ClipMask>,
+        clip_mask: Option<&Mask>,
     ) {
         let mut transform = transform;
         transform = transform.post_scale(self.scale, self.scale);
@@ -135,7 +135,7 @@ impl Canvas {
         rect: Rect,
         paint: &mut Paint,
         transform: Transform,
-        clip_mask: Option<&ClipMask>,
+        clip_mask: Option<&Mask>,
     ) {
         let mut transform = transform;
         transform = transform.post_scale(self.scale, self.scale);
@@ -149,7 +149,7 @@ impl Canvas {
         paint: &mut Paint,
         stroke: &Stroke,
         transform: Transform,
-        clip_mask: Option<&ClipMask>,
+        clip_mask: Option<&Mask>,
     ) {
         let mut transform = transform;
         transform = transform.post_scale(self.scale, self.scale);

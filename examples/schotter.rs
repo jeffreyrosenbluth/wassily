@@ -16,9 +16,6 @@ fn main() {
     // the 'rand' crate.
     let mut rng = SmallRng::from_entropy();
 
-    // Create a palette to generate the random colors.
-    let mut palette = Palette::default();
-
     // Set the background color.
     canvas.fill(*WHITESMOKE);
 
@@ -43,12 +40,9 @@ fn main() {
             let rotation = Transform::from_rotate_at(angle, pos_x as f32, pos_y as f32);
 
             // Choose a random color from the palette with a random opacity using
-            // Lab color space.
-            let mut fill = palette.rand_laba();
-
-            // Increase the opacity by 0.1 so that all rectangles are visible.
-            let alpha = fill.alpha() + 0.2;
-            fill.set_alpha(alpha);
+            // Okhsl color space and set it's opacity to 0.75.
+            let mut fill = rand_okhsl(&mut rng);
+            fill.set_alpha(0.75);
 
             // Draw the rectangle.
             Shape::new()
