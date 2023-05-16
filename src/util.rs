@@ -1,4 +1,4 @@
-use crate::math::Algebra;
+use crate::points::Algebra;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},

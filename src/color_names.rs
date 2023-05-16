@@ -1,3 +1,8 @@
+//! HTML Color Names
+//! ## Example
+//! ```rust
+//! Shape::new().fill_color(*CORNFLOWERBLUE);
+//!
 use crate::kolor::rgb8;
 use once_cell::sync::Lazy;
 use tiny_skia::Color;

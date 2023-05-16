@@ -9,7 +9,6 @@ use std::{
 use tiny_skia::PremultipliedColorU8;
 
 pub type ViewFn<Model> = fn(canvas: &mut Canvas, model: &Model);
-// pub type UpdateFn<Model, Update> = fn(model: &mut Model, update: &Update);
 
 pub struct Sketch<M> {
     dir: &'static str,

@@ -1,5 +1,5 @@
-use crate::math::{center, pt, Algebra};
 use crate::matrix::Matrix;
+use crate::points::{center, pt, Algebra};
 use num_traits::AsPrimitive;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};

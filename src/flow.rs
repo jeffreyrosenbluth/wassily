@@ -1,6 +1,6 @@
-use crate::math::Algebra;
 use crate::matrix::*;
 use crate::noises::{noise2d, NoiseOpts};
+use crate::points::Algebra;
 use crate::prelude::pt;
 use noise::NoiseFn;
 use std::f32::consts::PI;

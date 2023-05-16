@@ -1,10 +1,10 @@
-//! A builder for creating shapes. `Shape` is the main way in which paths are build
-//! and drawn to the canvas. The basid idea is to provide a list of points that
-//! are connected by lines and curves. The shape can then be filled and/or stroked.
-//! finally invoke the draw method to draw the shape to a  `Canvas`.
+//! A builder for creating shapes. `Shape` is the main way in which paths are built
+//! and drawn to the `Canvas`. The basid idea is to provide a list of points that
+//! are connected by lines or bezier curves. The shape can then be filled and/or stroked.
+//! Invoke the draw method to finish the build and draw the shape to a  `Canvas`.
 /*!
 
-
+```rust
 use wassily::prelude::*;
 
 fn main() {
@@ -19,9 +19,11 @@ fn main() {
         .draw(&mut canvas);
     canvas.save_png("./star.png");
 }
+```
+Produces:
 
-<img src="https://raw.githubusercontent.com/jeffreyrosenbluth/wassily/main/assets/star.png" alt="Star image" width="500" />
 
+<img src="https://raw.githubusercontent.com/jeffreyrosenbluth/wassily/main/assets/star.png" alt="Star image" width="400"/>
  */
 
 use crate::{
@@ -277,10 +279,7 @@ impl<'a> ShapeData<'a> {
     }
 }
 
-/// A builder for creating shapes. `Shape` is the main way in which paths are build
-/// and drawn to the canvas. The basid idea is to provide a list of points that
-/// are connected by lines and curves. The shape can then be filled and/or stroked.
-/// finally invoke the draw method to draw the shape to a  `Canvas`.
+/// The shape builder
 #[derive(Debug, Clone)]
 pub struct Shape<'a> {
     fill_paint: Option<Paint<'a>>,
@@ -323,6 +322,7 @@ impl Default for Shape<'_> {
 }
 
 impl<'a> Shape<'a> {
+    /// Create an empty shape to start building.
     pub fn new() -> Self {
         Self::default()
     }

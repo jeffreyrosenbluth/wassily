@@ -1,9 +1,9 @@
-use num_complex::Complex32;
+use crate::kolor::{get_color_clamp, get_color_tile};
+use crate::points::pt;
 use image::DynamicImage;
+use num_complex::Complex32;
 use std::sync::Arc;
 use tiny_skia::{Color, Point};
-use crate::math::pt;
-use crate::kolor::{get_color_clamp, get_color_tile};
 
 type DomWarp = Arc<dyn Fn(Complex32) -> Complex32 + Send + Sync>;
 
@@ -53,7 +53,6 @@ impl<'a> Warp<'a> {
             Final::More(w) => w.coords(x1, y1),
             _ => pt(x1, y1),
         }
-
     }
 
     pub fn get(&self, x: f32, y: f32) -> Color {

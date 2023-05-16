@@ -1,6 +1,6 @@
 //! Mappings from the unit square to itself.
 
-use crate::math::Algebra;
+use crate::points::Algebra;
 use crate::prelude::{pt, Point, PI};
 
 pub fn sinusoid(p: Point) -> Point {

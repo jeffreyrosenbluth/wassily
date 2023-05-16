@@ -80,6 +80,7 @@ fn main() {
     }
     canvas.save_png("./schotter.png");
 }
+```
 
  */
 
@@ -90,10 +91,10 @@ pub mod grain;
 pub mod grid;
 pub mod kolor;
 pub mod lines;
-pub mod math;
 pub mod matrix;
 pub mod noises;
 pub mod point_map;
+pub mod points;
 pub mod prelude;
 pub mod rectangles;
 pub mod shape;
