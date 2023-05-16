@@ -1,3 +1,4 @@
+//! Endomorphisms of the unit square.
 //! Mappings from the unit square to itself.
 
 use crate::points::Algebra;
