@@ -169,7 +169,7 @@ impl ColorMap {
     }
 }
 
-/// The `Colorful` trait exists primarily to add methods to tiny-skia's 'Color'
+/// The `Colorful` trait exists primarily to add methods to tiny-skia's `Color`
 /// type. Of coures, it can be implemented for other color types as well.
 pub trait Colorful {
     /// Same as origingal color with a new alpha.
@@ -488,7 +488,7 @@ pub fn jiggle_hue<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color 
     okhsla.to_color()
 }
 
-/// Generate a random opaque color from the OKhsl color space.
+/// Generate a random opaque color from the Okhsl color space.
 pub fn rand_okhsl<R: RngCore>(rng: &mut R) -> Color {
     let normal = Normal::new(0.0, 0.25).unwrap();
     let h: f32 = rng.gen_range(0.0..360.0);
@@ -497,7 +497,7 @@ pub fn rand_okhsl<R: RngCore>(rng: &mut R) -> Color {
     Okhsl::new(h, s.clamp(0.0, 1.0), l.clamp(0.0, 1.0)).to_color()
 }
 
-/// Generate a random color from the OKhsla color space.
+/// Generate a random color from the Okhsla color space.
 pub fn rand_okhsla<R: RngCore>(rng: &mut R) -> Color {
     let normal = Normal::new(0.0, 0.25).unwrap();
     let h: f32 = rng.gen_range(0.0..360.0);
@@ -522,7 +522,7 @@ impl Default for Palette {
 }
 
 impl Palette {
-    /// Generate a palatte from a vector of 'Color's
+    /// Generate a palette from a vector of 'Color's
     pub fn new(colors: Vec<Color>) -> Self {
         let rng = SmallRng::seed_from_u64(0);
         let colors = colors;

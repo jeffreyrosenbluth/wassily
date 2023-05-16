@@ -2,9 +2,11 @@ use num_traits::AsPrimitive;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use tiny_skia::Point;
 
-pub const TAU: f32 = std::f32::consts::TAU;
-pub const PI: f32 = std::f32::consts::PI;
+pub use std::f32::consts::FRAC_PI_2 as HALF_PI;
+pub use std::f32::consts::PI;
+pub use std::f32::consts::TAU;
 
+/// Create a `Point` from x and y coordinates.
 pub fn pt<S, T>(x: S, y: T) -> Point
 where
     S: AsPrimitive<f32>,
@@ -68,7 +70,7 @@ pub trait Algebra: Copy {
 }
 
 impl Algebra for Point {
-    const ZERO: Self = Point {x: 0.0, y: 0.0};
+    const ZERO: Self = Point { x: 0.0, y: 0.0 };
 
     fn mag2(self) -> f32 {
         self.x * self.x + self.y * self.y
@@ -114,7 +116,11 @@ pub struct Point3 {
 }
 
 impl Algebra for Point3 {
-    const ZERO: Self = Point3 {x: 0.0, y: 0.0, z: 0.0};
+    const ZERO: Self = Point3 {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
 
     fn scale(self, k: f32) -> Self {
         self * k
