@@ -1,6 +1,5 @@
 pub use crate::canvas::*;
 pub use crate::color_names::*;
-pub use crate::flow::*;
 pub use crate::grain::*;
 pub use crate::grid::*;
 pub use crate::kolor::*;
@@ -13,7 +12,6 @@ pub use crate::noises::white::*;
 pub use crate::noises::*;
 pub use crate::point_map::*;
 pub use crate::points::*;
-pub use crate::rectangles::*;
 pub use crate::shape::*;
 pub use crate::sketch::*;
 pub use crate::sphere::*;

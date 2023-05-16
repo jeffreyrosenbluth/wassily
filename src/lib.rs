@@ -86,7 +86,6 @@ fn main() {
 
 pub mod canvas;
 pub mod color_names;
-pub mod flow;
 pub mod grain;
 pub mod grid;
 pub mod kolor;
@@ -96,7 +95,6 @@ pub mod noises;
 pub mod point_map;
 pub mod points;
 pub mod prelude;
-pub mod rectangles;
 pub mod shape;
 pub mod sketch;
 pub mod sphere;

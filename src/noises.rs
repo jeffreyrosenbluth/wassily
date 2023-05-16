@@ -1,10 +1,12 @@
+//! Make noise easier to use in generative art.
+//! And add some noise functions not present in the noise crate.
 use noise::NoiseFn;
 use num_traits::{AsPrimitive, ToPrimitive};
 
+pub mod curl;
 pub mod gabor;
 pub mod trig;
 pub mod white;
-pub mod curl;
 
 #[derive(Debug, Clone, Copy)]
 pub struct NoiseOpts {

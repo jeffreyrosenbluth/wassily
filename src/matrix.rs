@@ -1,5 +1,5 @@
-/// A zero indexed row-major matrix backed by a `Vec`.
-/// Allows acces to elements of matrix A by A[i][j]
+//! A zero indexed row-major matrix backed by a `Vec`.
+//! Allows acces to elements of matrix A by A[i][j]
 use num_traits::{zero, AsPrimitive, Float, One, Zero};
 use std::ops::{Add, Div, Index, IndexMut, Mul};
 

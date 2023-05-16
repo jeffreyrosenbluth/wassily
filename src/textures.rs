@@ -2,7 +2,6 @@ use crate::canvas::*;
 use crate::kolor::*;
 use crate::noises::*;
 use crate::prelude::pt;
-use crate::rectangles::SandBox;
 use crate::shape::*;
 use crate::stipple::uniform;
 use noise::core::worley::distance_functions::euclidean_squared;
@@ -155,20 +154,6 @@ pub fn wood(width: u32, height: u32, color1: Color, color2: Color, scale: f32) -
             canvas.dot(i as f32, j as f32, c);
         }
     }
-    canvas
-}
-
-pub fn sand(width: u32, height: u32, color1: Color, color2: Color, scale: f32) -> Canvas {
-    let mut canvas = Canvas::new(width, height);
-    let mut sb = SandBox::new(
-        pt(0u32, 0u32),
-        pt(width, height),
-        color1,
-        color2,
-        color2,
-        scale,
-    );
-    sb.draw(&mut canvas);
     canvas
 }
 

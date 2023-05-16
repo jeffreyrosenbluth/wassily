@@ -1,3 +1,4 @@
+//! Grain effect
 use crate::canvas::{paint_shader, Canvas};
 use crate::kolor::rgb;
 use crate::noises::{noise2d, NoiseOpts};
@@ -8,6 +9,7 @@ use tiny_skia::{BlendMode, FilterQuality, Paint, Pattern, SpreadMode, Transform}
 
 pub struct Grain(Canvas);
 
+/// Create a grain effect
 impl Grain {
     pub fn new(width: u32, height: u32, scale: f32, factor: f32) -> Self {
         let mut canvas = Canvas::new(width, height);
@@ -22,7 +24,7 @@ impl Grain {
                 c.set_alpha(0.4);
                 let mut paint = Paint::default();
                 paint.set_color(c);
-                // paint.blend_mode = BlendMode::Overlay;
+                paint.blend_mode = BlendMode::Overlay;
                 Shape::new()
                     .rect_xywh(pt(i, j), pt(1, 1))
                     .fill_paint(&paint)
@@ -33,6 +35,7 @@ impl Grain {
         Grain(canvas)
     }
 
+    /// Create a `Paint` with the grain to use as an overlay on a shape or path.
     pub fn grain(&self) -> Paint {
         let pattern = Pattern::new(
             (self.0).pixmap.as_ref(),
@@ -46,6 +49,7 @@ impl Grain {
         p
     }
 
+    /// Apply the grain to the entire `Canvas`.
     pub fn canvas_grain(&self, canvas: &mut Canvas) {
         let paint = self.grain();
         Shape::new()
