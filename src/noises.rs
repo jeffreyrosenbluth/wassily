@@ -5,7 +5,7 @@ use num_traits::{AsPrimitive, ToPrimitive};
 
 pub mod curl;
 pub mod gabor;
-pub mod trig;
+pub mod sinusoid;
 pub mod white;
 
 #[derive(Debug, Clone, Copy)]

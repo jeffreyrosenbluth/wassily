@@ -1,7 +1,7 @@
+//! A Curl noise struct that holds a source noise function and an epsilon value.
 use noise::NoiseFn;
 use std::f64::consts::PI;
 
-/// A Curl noise struct that holds a source noise function and an epsilon value.
 pub struct Curl<T> {
     pub source: T,
     pub eps: f64,

@@ -1,9 +1,8 @@
+///! Gabor Noise - 2d only.
 use noise::NoiseFn;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
-// Gabor Noise
-//
 // Lagae, Ares & Lefebvre, Sylvain & Drettakis, George & Dutré, Philip. (2009).
 // Procedural Noise using Sparse Gabor Convolution.
 // ACM Transactions on Graphics. 28. 10.1145/1576246.1531360.
@@ -126,8 +125,8 @@ impl Gabor {
         let mut rnd = SmallRng::seed_from_u64(morton(i as u32, j as u32) as u64);
         let mut noise = 0.0;
         for _ in 0..self.impulses_per_cell {
-            let xi:f64 = rnd.gen();
-            let yi:f64 = rnd.gen();
+            let xi: f64 = rnd.gen();
+            let yi: f64 = rnd.gen();
             let wi: f64 = rnd.gen::<f64>() * 2.0 - 1.0;
             let omega0i: f64;
             if let Some(o) = self.omega0 {

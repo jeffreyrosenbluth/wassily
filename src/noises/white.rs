@@ -1,9 +1,9 @@
+//! Stateless pseudrandom number generators. These are often usefull when
+//! parallelizing an algorithm where you want to avoid mutable state.
 use noise::NoiseFn;
 
-/// Stateless pseudrandom number generators. These are often usefull when
-/// parallelizing an algorithm where you want to avoid mutable state.
-/// See https://github.com/Lokathor/randomize and
-/// https://lokathor.github.io/prng/
+// See https://github.com/Lokathor/randomize and
+// https://lokathor.github.io/prng/
 const PCG_MULTIPLIER: u64 = 6364136223846793005;
 const DEFAULT_PCG_INC: u64 = 15726070495360670683;
 

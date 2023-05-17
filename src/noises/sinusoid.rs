@@ -1,3 +1,4 @@
+//! Various sinusoidal noises.
 use noise::NoiseFn;
 #[derive(Clone, Copy, Debug)]
 pub struct Trig {
