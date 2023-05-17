@@ -1,4 +1,4 @@
-///! Gabor Noise - 2d only.
+//! Gabor Noise - 2d only.
 use noise::NoiseFn;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};

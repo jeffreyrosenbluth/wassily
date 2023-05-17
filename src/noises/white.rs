@@ -134,6 +134,8 @@ impl NoiseFn<f64, 2> for White {
         prf(point[0], point[1])
     }
 }
+
+/// Guassian noise.
 pub struct Guassian {
     mean: f64,
     std: f64,

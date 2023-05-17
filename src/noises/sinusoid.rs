@@ -1,12 +1,16 @@
 //! Various sinusoidal noises.
 use noise::NoiseFn;
 #[derive(Clone, Copy, Debug)]
-pub struct Trig {
+
+/// Parameters for the sinusoidal fumctions. One for each dimension.
+/// The thrid dimension is ignored for 2d noise.
+/// The outputs of the three sinusoids are averaged.
+pub struct Sinusoid {
     pub phases: [f64; 3],
     pub frequencies: [f64; 3],
 }
 
-impl Trig {
+impl Sinusoid {
     pub fn new2(phase_x: f64, frequency_x: f64, phase_y: f64, frequency_y: f64) -> Self {
         Self {
             phases: [phase_x, phase_y, 0.0],
@@ -36,7 +40,7 @@ impl Trig {
     }
 }
 
-impl Default for Trig {
+impl Default for Sinusoid {
     fn default() -> Self {
         Self {
             phases: [0.0, 0.0, 0.0],
@@ -45,7 +49,7 @@ impl Default for Trig {
     }
 }
 
-impl NoiseFn<f64, 2> for Trig {
+impl NoiseFn<f64, 2> for Sinusoid {
     fn get(&self, point: [f64; 2]) -> f64 {
         let x = std::f64::consts::TAU * self.frequencies[0] * (point[0] + self.phases[0]);
         let y = std::f64::consts::TAU * self.frequencies[1] * (point[1] + self.phases[1]);
@@ -53,7 +57,7 @@ impl NoiseFn<f64, 2> for Trig {
     }
 }
 
-impl NoiseFn<f64, 3> for Trig {
+impl NoiseFn<f64, 3> for Sinusoid {
     fn get(&self, point: [f64; 3]) -> f64 {
         let x = std::f64::consts::TAU * self.frequencies[0] * (point[0] + self.phases[0]);
         let y = std::f64::consts::TAU * self.frequencies[1] * (point[1] + self.phases[1]);
@@ -62,6 +66,10 @@ impl NoiseFn<f64, 3> for Trig {
     }
 }
 
+/// Parameters for the carrier, modulator and index fumctions. One for each dimension.
+/// The thrid dimension is ignored for 2d noise.
+/// The outputs are multiplied for 2d noise and the aveage of the pairwise products
+/// is returned for 3d noise.
 #[derive(Clone, Copy, Debug)]
 pub struct FMSynth {
     pub carrier_freqs: [f64; 3],
@@ -199,6 +207,10 @@ impl NoiseFn<f64, 3> for FMSynth {
     }
 }
 
+/// Parameters for the carrier, modulator and index fumctions. One for each dimension.
+/// The thrid dimension is ignored for 2d noise.
+/// The outputs are arveraged for 2d noise and the aveage of the pairwise products
+/// is returned for 3d noise.
 #[derive(Clone, Copy, Debug)]
 pub struct FMCross {
     pub carrier_freqs: [f64; 3],

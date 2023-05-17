@@ -1,4 +1,4 @@
-//! Make noise easier to use in generative art.
+//! Make noise easier to use in generative art and use f32 instead of f64.
 //! And add some noise functions not present in the noise crate.
 use noise::NoiseFn;
 use num_traits::{AsPrimitive, ToPrimitive};
@@ -8,6 +8,11 @@ pub mod gabor;
 pub mod sinusoid;
 pub mod white;
 
+/// The input to noise will be scaled by scale / (width or height).
+/// This will keep noise independent of the canvas size.
+/// If you prefer to scale the input yourself, use `Default::default()`
+/// or set width and height to be 1.0.
+/// The output will be scaled by factor.
 #[derive(Debug, Clone, Copy)]
 pub struct NoiseOpts {
     pub width: f32,
@@ -106,7 +111,7 @@ impl Default for NoiseOpts {
     }
 }
 
-pub fn get_f32<const N: usize>(nf: impl NoiseFn<f64, N>, point: [f32; N]) -> f32 {
+fn get_f32<const N: usize>(nf: impl NoiseFn<f64, N>, point: [f32; N]) -> f32 {
     let coords = point.iter().map(|p| p.to_f64());
     let mut a: [f64; N] = [0.0; N];
     for (i, c) in coords.enumerate() {
@@ -115,6 +120,7 @@ pub fn get_f32<const N: usize>(nf: impl NoiseFn<f64, N>, point: [f32; N]) -> f32
     nf.get(a) as f32
 }
 
+/// Get a f32 noise value in the range [-1.0, 1.0].
 pub fn noise2d(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f32 {
     opts.factor
         * get_f32(
@@ -126,10 +132,12 @@ pub fn noise2d(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f3
         )
 }
 
+/// Get a f32 noise value in the range [0.0, 1.0].
 pub fn noise2d_01(nf: impl NoiseFn<f64, 2>, opts: &NoiseOpts, x: f32, y: f32) -> f32 {
     0.5 * noise2d(&nf, opts, x, y) + 0.5
 }
 
+/// Get a f32 noise value in the range [-1.0, 1.0].
 pub fn noise3d(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f32) -> f32 {
     opts.factor
         * get_f32(
@@ -142,6 +150,7 @@ pub fn noise3d(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f3
         )
 }
 
+/// Get a f32 noise value in the range [0.0, 1.0].
 pub fn noise3d_01(nf: impl NoiseFn<f64, 3>, opts: &NoiseOpts, x: f32, y: f32, z: f32) -> f32 {
     0.5 * noise3d(&nf, opts, x, y, z) + 0.5
 }
