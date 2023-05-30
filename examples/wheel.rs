@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use wassily::prelude::*;
-const WIDTH: u32 = 7200;
-const HEIGHT: u32 = 9600;
+const WIDTH: u32 = 1080;
+const HEIGHT: u32 = 1080;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
@@ -33,7 +33,6 @@ impl ColorWheel {
         assert!(octaves <= 7, "Maximum ocatves is 7");
         let mut phases = ColorWheel::PHASES;
         phases.shuffle(rng);
-        // let phases: Vec<[f32; 3]> = phases.into_iter().map(|v| v.choose_multiple(rng)).collect();
         let phases: Vec<[f32; 3]> = phases.into_iter().map(|v| Self::shuffle3(rng, v)).collect();
         let noise = Fbm::<Perlin>::default();
         let seed: u32 = rng.gen();

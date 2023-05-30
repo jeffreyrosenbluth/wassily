@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["jeffreyrosenbluth <jeffrey.rosenbluth@gmail.com>"]
 edition = "2021"
 exclude = [
-    "src/bin/*",
+    "src/bin/meta.rs"
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

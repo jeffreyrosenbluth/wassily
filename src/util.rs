@@ -27,10 +27,12 @@ pub fn curl(f: impl Fn(f32, f32) -> f32, x: f32, y: f32, eps: f32) -> f32 {
     dfdy.atan2(-dfdx)
 }
 
+/// Perlins bias function, sets value at 0.5 to b.
 pub fn bias(b: f32, t: f32) -> f32 {
     t / ((1.0 / b - 2.0) * (1.0 - t) + 1.0)
 }
 
+/// Perlins gain function, sets value at 0.5 to 0.5 regardless of g.
 pub fn gain(g: f32, t: f32) -> f32 {
     if t < 0.5 {
         bias(g, 2.0 * t) / 2.0

@@ -21,18 +21,13 @@ fn main() {
 }
 
 fn checkered(texture: &mut Canvas) {
+    let mut rng = SmallRng::seed_from_u64(0);
     let width = texture.width();
-    let mut palette = Palette::steal("./fruit.png", 90);
-    palette.rotate_hue(180.0);
-    let num_colors = palette.len() as f32;
-    let n = (0.5 + num_colors.sqrt()) as usize;
+    let n = 10;
     let swatch_width = width as f32 / n as f32;
     for i in 0..n {
         for j in 0..n {
-            if palette.colors.len() <= (i * n + j) {
-                break;
-            }
-            let c = palette[(i * n + j)];
+            let c = rand_okhsl(&mut rng);
             let paint = paint_solid(c);
             let x = j as f32 * swatch_width;
             let y = i as f32 * swatch_width;
