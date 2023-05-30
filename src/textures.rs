@@ -1,3 +1,5 @@
+//! Tools to make paints from patterns.
+//! See the logo example for an example of how to use these.
 use crate::canvas::*;
 use crate::kolor::*;
 use crate::noises::*;
@@ -8,6 +10,43 @@ use noise::core::worley::distance_functions::euclidean_squared;
 use noise::core::worley::ReturnType;
 use noise::*;
 use tiny_skia::*;
+pub struct PatternPaint<'a> {
+    pub texture_canvas: &'a Canvas,
+    pub pattern_canvas: Canvas,
+    pub bbox: Rect,
+}
+
+impl<'a> PatternPaint<'a> {
+    pub fn new(texture_canvas: &'a Canvas, bbox: Rect, width: u32, height: u32) -> Self {
+        let pattern_canvas = Canvas::new(width, height);
+        Self {
+            texture_canvas,
+            pattern_canvas,
+            bbox,
+        }
+    }
+
+    pub fn paint(&'a mut self) -> Paint<'a> {
+        let x = self.bbox.x();
+        let y = self.bbox.y();
+        self.pattern_canvas.pixmap.draw_pixmap(
+            x as i32,
+            y as i32,
+            self.texture_canvas.pixmap.as_ref(),
+            &PixmapPaint::default(),
+            Transform::identity(),
+            None,
+        );
+        let pattern = Pattern::new(
+            self.pattern_canvas.pixmap.as_ref(),
+            SpreadMode::Pad,
+            FilterQuality::Bicubic,
+            1.0,
+            Transform::identity(),
+        );
+        paint_shader(pattern)
+    }
+}
 
 pub fn stipple_texture(width: u32, height: u32, color: Color, spacing: f32) -> Canvas {
     let mut canvas = Canvas::new(width, height);
@@ -204,67 +243,4 @@ pub fn granite(
         }
     }
     canvas
-}
-
-pub fn pattern<'a>(
-    texture_canvas: &'a Canvas,
-    pattern_canvas: &'a mut Canvas,
-    bbox: Rect,
-) -> Paint<'a> {
-    let x = bbox.x();
-    let y = bbox.y();
-    pattern_canvas.pixmap.draw_pixmap(
-        x as i32,
-        y as i32,
-        texture_canvas.pixmap.as_ref(),
-        &PixmapPaint::default(),
-        Transform::identity(),
-        None,
-    );
-    let pattern = Pattern::new(
-        pattern_canvas.pixmap.as_ref(),
-        SpreadMode::Pad,
-        FilterQuality::Bicubic,
-        1.0,
-        Transform::identity(),
-    );
-    paint_shader(pattern)
-}
-
-pub struct PatternPaint<'a> {
-    pub texture_canvas: &'a Canvas,
-    pub pattern_canvas: Canvas,
-    pub bbox: Rect,
-}
-
-impl<'a> PatternPaint<'a> {
-    pub fn new(texture_canvas: &'a Canvas, bbox: Rect, width: u32, height: u32) -> Self {
-        let pattern_canvas = Canvas::new(width, height);
-        Self {
-            texture_canvas,
-            pattern_canvas,
-            bbox,
-        }
-    }
-
-    pub fn paint(&'a mut self) -> Paint<'a> {
-        let x = self.bbox.x();
-        let y = self.bbox.y();
-        self.pattern_canvas.pixmap.draw_pixmap(
-            x as i32,
-            y as i32,
-            self.texture_canvas.pixmap.as_ref(),
-            &PixmapPaint::default(),
-            Transform::identity(),
-            None,
-        );
-        let pattern = Pattern::new(
-            self.pattern_canvas.pixmap.as_ref(),
-            SpreadMode::Pad,
-            FilterQuality::Bicubic,
-            1.0,
-            Transform::identity(),
-        );
-        paint_shader(pattern)
-    }
 }
