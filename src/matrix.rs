@@ -1,5 +1,5 @@
 //! A zero indexed row-major matrix backed by a `Vec`.
-//! Allows acces to elements of matrix A by A[i][j]
+//! Allows acces to elements of matrix A by A\[i\]\[j\].
 use num_traits::{zero, AsPrimitive, Float, One, Zero};
 use std::ops::{Add, Div, Index, IndexMut, Mul};
 
@@ -11,6 +11,7 @@ pub struct Matrix<T> {
 }
 
 impl<T> Matrix<T> {
+    /// Create a new matrix with the given number of rows and columns.
     pub fn new<U: AsPrimitive<usize>>(rows: U, cols: U, data: Vec<T>) -> Self {
         assert_eq!(rows.as_() * cols.as_(), data.len());
         Self {
@@ -20,18 +21,22 @@ impl<T> Matrix<T> {
         }
     }
 
+    /// The number of rows in the matrix.
     pub fn rows(&self) -> usize {
         self.rows
     }
 
+    /// The number of columns in the matrix.
     pub fn cols(&self) -> usize {
         self.cols
     }
 
+    /// The index in the underyling data vector for the given row and column.
     fn get_index(&self, row: usize, col: usize) -> usize {
         row * self.cols + col
     }
 
+    /// Create a new matrix using a function to generate the data.
     pub fn generate<F, U: AsPrimitive<usize>>(rows: U, cols: U, generator: F) -> Self
     where
         F: Fn(usize, usize) -> T,
@@ -49,6 +54,7 @@ impl<T> Matrix<T> {
         }
     }
 
+    /// Get a reference to the element at the given row and column.
     pub fn get_ref(&self, row: usize, col: usize) -> Option<&T> {
         if row < self.rows && col < self.cols {
             Some(&self.data[self.get_index(row, col)])
@@ -57,6 +63,7 @@ impl<T> Matrix<T> {
         }
     }
 
+    /// Insert a value at the given row and column.
     pub fn put(&mut self, row: usize, col: usize, item: T) -> bool {
         if row >= self.rows || col >= self.cols {
             false
@@ -67,6 +74,7 @@ impl<T> Matrix<T> {
         }
     }
 
+    /// Is this a valid row and column?
     pub fn valid<U: Into<usize>>(&self, row: U, col: U) -> bool {
         row.into() < self.rows() && col.into() < self.cols()
     }
@@ -76,11 +84,14 @@ impl<T> Matrix<T>
 where
     T: Clone + Copy,
 {
+    /// Create a new matrix with the given number of rows and columns filled with
+    /// a given value.
     pub fn fill(rows: usize, cols: usize, datum: T) -> Self {
         let data = vec![datum; rows * cols];
         Self { rows, cols, data }
     }
 
+    /// Return the element at the given row and column.
     pub fn get(&self, row: usize, col: usize) -> Option<T> {
         if row < self.rows && col < self.cols {
             let idx = self.get_index(row, col);
@@ -118,6 +129,7 @@ where
         })
     }
 
+    // Transpose the matrix.
     pub fn transpose(&self) -> Self {
         Matrix::generate(self.cols(), self.rows(), |r, c| self[c][r])
     }
@@ -127,6 +139,7 @@ impl<T> Matrix<T>
 where
     T: Zero + Clone,
 {
+    /// A matrix of all zeros.
     pub fn zeros<U: AsPrimitive<usize>>(rows: U, cols: U) -> Self {
         let data = vec![T::zero(); rows.as_() * cols.as_()];
         Self {
@@ -141,6 +154,7 @@ impl<T> Matrix<T>
 where
     T: One + Clone,
 {
+    /// A matrix of all ones.
     pub fn ones<U: AsPrimitive<usize>>(rows: U, cols: U) -> Self {
         let data = vec![T::one(); rows.as_() * cols.as_()];
         Self {
@@ -155,6 +169,7 @@ impl<T> Matrix<T>
 where
     T: Float,
 {
+    /// Convolves the matrix with the given kernel.
     pub fn convolve(&self, kernel: &Matrix<T>) -> Matrix<T> {
         let mut m: Matrix<T> = Matrix {
             rows: self.rows,

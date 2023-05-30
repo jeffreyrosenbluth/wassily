@@ -398,11 +398,16 @@ impl<'a> Shape<'a> {
         self
     }
 
-    /// Set the points that determin the shape.
+    /// Set the points that determine the shape.
     pub fn points(mut self, pts: &[Point]) -> Self {
         let points = pts.to_vec();
         self.points = points;
         self
+    }
+
+    /// Get points.
+    pub fn get_points(&self) -> &[Point] {
+        &self.points
     }
 
     /// Interpret the points as a rectangle. The first point is the top left corner
@@ -462,8 +467,9 @@ impl<'a> Shape<'a> {
         self
     }
 
-    /// Create a star from it's center, inner radius, outer radius and number of sides.
-    pub fn star(mut self, center: Point, radius1: f32, radius2: f32, sides: u32) -> Self {
+    /// Create a star from it's center, inner radius, outer radius, number of sides
+    /// and smoothness parameter.
+    pub fn star(mut self, center: Point, inner_radius: f32, outer_radius: f32, sides: u32) -> Self {
         self.shape = ShapeType::Poly;
         let mut theta = 0.0;
         let delta = TAU / sides as f32;
@@ -471,12 +477,12 @@ impl<'a> Shape<'a> {
         let mut pts = vec![];
         while theta < TAU {
             pts.push(pt(
-                center.x + radius2 * theta.cos(),
-                center.y + radius2 * theta.sin(),
+                center.x + outer_radius * theta.cos(),
+                center.y + outer_radius * theta.sin(),
             ));
             pts.push(pt(
-                center.x + radius1 * (theta + half_delta).cos(),
-                center.y + radius1 * (theta + half_delta).sin(),
+                center.x + inner_radius * (theta + half_delta).cos(),
+                center.y + inner_radius * (theta + half_delta).sin(),
             ));
             theta += delta;
         }

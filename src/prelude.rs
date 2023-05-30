@@ -14,7 +14,6 @@ pub use crate::noises::white::*;
 pub use crate::noises::*;
 pub use crate::points::*;
 pub use crate::shape::*;
-pub use crate::sketch::*;
 pub use crate::sphere::*;
 pub use crate::stipple::*;
 pub use crate::subdivision::*;

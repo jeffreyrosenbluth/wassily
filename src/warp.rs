@@ -1,3 +1,4 @@
+//! Tools for domain warping.
 use crate::kolor::{get_color_clamp, get_color_tile};
 use crate::points::pt;
 use image::DynamicImage;
@@ -13,7 +14,7 @@ pub enum Coord {
     Cartesian,
     Absolute,
 }
-pub enum Final<'a> {
+pub enum WarpNode<'a> {
     More(Arc<Warp<'a>>),
     Func(Arc<dyn Fn(f32, f32) -> Color + Sync + Send>),
     Img(&'a DynamicImage, f32, f32),
@@ -21,12 +22,12 @@ pub enum Final<'a> {
 
 pub struct Warp<'a> {
     dw: DomWarp,
-    warp: Final<'a>,
+    warp: WarpNode<'a>,
     coord: Coord,
 }
 
 impl<'a> Warp<'a> {
-    pub fn new(dw: DomWarp, warp: Final<'a>, coord: Coord) -> Self {
+    pub fn new(dw: DomWarp, warp: WarpNode<'a>, coord: Coord) -> Self {
         Self { dw, warp, coord }
     }
 
@@ -37,7 +38,7 @@ impl<'a> Warp<'a> {
         height: f32,
         coord: Coord,
     ) -> Self {
-        let warp = Final::Img(img, width, height);
+        let warp = WarpNode::Img(img, width, height);
         Self { dw, warp, coord }
     }
 
@@ -50,7 +51,7 @@ impl<'a> Warp<'a> {
             Coord::Absolute => (c.re, c.im),
         };
         match &self.warp {
-            Final::More(w) => w.coords(x1, y1),
+            WarpNode::More(w) => w.coords(x1, y1),
             _ => pt(x1, y1),
         }
     }
@@ -64,9 +65,9 @@ impl<'a> Warp<'a> {
             Coord::Absolute => (c.re, c.im),
         };
         match &self.warp {
-            Final::More(w) => w.get(x1, y1),
-            Final::Func(f) => f(x1, y1),
-            Final::Img(img, w, h) => get_color_clamp(img, *w, *h, pt(x1, y1)),
+            WarpNode::More(w) => w.get(x1, y1),
+            WarpNode::Func(f) => f(x1, y1),
+            WarpNode::Img(img, w, h) => get_color_clamp(img, *w, *h, pt(x1, y1)),
         }
     }
 
@@ -79,9 +80,9 @@ impl<'a> Warp<'a> {
             Coord::Absolute => (c.re, c.im),
         };
         match &self.warp {
-            Final::More(w) => w.get(x1, y1),
-            Final::Func(f) => f(x1, y1),
-            Final::Img(img, _, _) => get_color_tile::<f32>(img, pt(x1, y1)),
+            WarpNode::More(w) => w.get(x1, y1),
+            WarpNode::Func(f) => f(x1, y1),
+            WarpNode::Img(img, _, _) => get_color_tile::<f32>(img, pt(x1, y1)),
         }
     }
 }

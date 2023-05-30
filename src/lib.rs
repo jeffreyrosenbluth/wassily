@@ -96,7 +96,6 @@ pub mod noises;
 pub mod points;
 pub mod prelude;
 pub mod shape;
-pub mod sketch;
 pub mod sphere;
 pub mod stipple;
 pub mod subdivision;

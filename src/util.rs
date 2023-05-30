@@ -39,17 +39,19 @@ pub fn gain(g: f32, t: f32) -> f32 {
     }
 }
 
-/// Smoothstep function
+/// Smoothstep function - Cubic.
 pub fn smooth_step(t: f32) -> f32 {
     let s = t.clamp(0.0, 1.0);
     s * s * (3.0 - 2.0 * s)
 }
 
+/// Smootherstep function - Quintic.
 pub fn smoother_step(t: f32) -> f32 {
     let s = t.clamp(0.0, 1.0);
     s * s * s * (6.0 * s * s - 15.0 * s + 10.0)
 }
 
+/// The bounding rectangle of a set of points.
 pub fn bounding_box(points: &[Point], min_size: f32) -> Rect {
     let (left, top, right, bottom) =
         points
@@ -86,10 +88,11 @@ pub enum Trail {
     Closed,
 }
 
-pub fn chaiken(pts: &[Point], n: u32, trail: Trail) -> Vec<Point> {
+/// Chaiken's algorithm for curve smoothing.
+pub fn chaiken(pts: &[Point], smoothness: u32, trail: Trail) -> Vec<Point> {
     let mut pts = pts.to_vec();
     const RATIO: f32 = 0.25;
-    if n == 0 || pts.len() < 3 {
+    if smoothness == 0 || pts.len() < 3 {
         if trail == Trail::Closed {
             pts.push(pts[0])
         }
@@ -106,7 +109,7 @@ pub fn chaiken(pts: &[Point], n: u32, trail: Trail) -> Vec<Point> {
         c.insert(0, pts[0]);
         c.push(pts[pts.len() - 1]);
     }
-    chaiken(&c, n - 1, trail)
+    chaiken(&c, smoothness - 1, trail)
 }
 
 #[cfg(test)]

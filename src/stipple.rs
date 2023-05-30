@@ -1,3 +1,4 @@
+//! Low discrepancy sampling algorithms.
 use crate::matrix::Matrix;
 use crate::points::{center, pt, Algebra};
 use num_traits::AsPrimitive;
@@ -7,6 +8,7 @@ use std::f32::consts::PI;
 use tiny_skia::Point;
 
 /// Generate a set of points using a uniform distribution.
+/// This sequence is not low discrepancy.
 pub fn uniform<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> Vec<Point> {
     let mut rng = SmallRng::seed_from_u64(seed);
     let vals: Vec<Point> = (0..n)
@@ -20,7 +22,7 @@ pub fn uniform<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> V
     vals
 }
 
-/// Generate a point from the Halton sequence.
+/// Generate a number from the Halton sequence.
 pub fn halton(index: u32, base: u32) -> f32 {
     let mut f = 1.0;
     let mut r = 0.0;
