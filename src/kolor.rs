@@ -309,9 +309,9 @@ impl Colorful for Color {
     /// perturbation is done by adding a random number from a normal distribution
     /// with the given mean and standard deviation to the color's lightness.
     fn jiggle_xy_lightness(&self, x: u32, y: u32, mean: f32, std: f32) -> Color {
-        let mut xyza: Xyza = <Xyza as ConvertColor>::from_color(&self);
-        xyza.y += (std * normal_xy(x as f64, y as f64) as f32 + mean) * 100.0;
-        xyza.to_color()
+        let mut hsluva: Hsluva = <Hsluva as ConvertColor>::from_color(&self);
+        hsluva.l += (std * normal_xy(x as f64, y as f64) as f32 + mean) * 100.0;
+        hsluva.to_color()
     }
 
     /// Perturb a color's saturation based on its position on the canvas. The
