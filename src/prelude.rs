@@ -32,4 +32,3 @@ pub use palette::{
 pub use rand::{rngs::SmallRng, seq::SliceRandom, thread_rng, Rng, SeedableRng};
 pub use rand_distr::{Distribution, Normal, Standard, StandardNormal};
 pub use tiny_skia::*;
-pub use tiny_skia_path::IntSize;
