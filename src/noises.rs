@@ -17,10 +17,10 @@ pub mod white;
 pub struct NoiseOpts {
     pub width: f32,
     pub height: f32,
-    x_scale: f32,
-    y_scale: f32,
-    z_scale: f32,
-    factor: f32,
+    pub x_scale: f32,
+    pub y_scale: f32,
+    pub z_scale: f32,
+    pub factor: f32,
 }
 
 impl NoiseOpts {
