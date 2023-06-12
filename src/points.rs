@@ -1,4 +1,5 @@
 //! Functions for dealing with 2D and 3D points.
+use num_complex::Complex32;
 use num_traits::AsPrimitive;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use tiny_skia::Point;
@@ -35,6 +36,10 @@ where
     T: AsPrimitive<f32>,
 {
     Point::from_xy(r.as_() * theta.as_().cos(), r.as_() * theta.as_().sin())
+}
+
+pub fn complex(p: Point) -> Complex32 {
+    Complex32::new(p.x, p.y)
 }
 
 pub fn center<S, T>(width: S, height: T) -> Point
