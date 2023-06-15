@@ -2,11 +2,10 @@
 use crate::kolor::{get_color_clamp, get_color_tile};
 use crate::points::pt;
 use image::DynamicImage;
-use num_complex::Complex32;
 use std::sync::Arc;
 use tiny_skia::{Color, Point};
 
-type DomWarp = Arc<dyn Fn(Complex32) -> Complex32 + Send + Sync>;
+type DomWarp = Arc<dyn Fn(Point) -> Point + Send + Sync>;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Coord {
@@ -43,12 +42,12 @@ impl<'a> Warp<'a> {
     }
 
     pub fn coords(&self, x: f32, y: f32) -> Point {
-        let c = (self.dw)(Complex32::new(x, y));
-        let r = c.im.abs();
+        let c = (self.dw)(pt(x, y));
+        let r = c.y.abs();
         let (x1, y1) = match self.coord {
-            Coord::Polar => (x + c.re.cos() * r, y + c.re.sin() * r),
-            Coord::Cartesian => (x + c.re, y + c.im),
-            Coord::Absolute => (c.re, c.im),
+            Coord::Polar => (x + c.x.cos() * r, y + c.x.sin() * r),
+            Coord::Cartesian => (x + c.x, y + c.y),
+            Coord::Absolute => (c.x, c.y),
         };
         match &self.warp {
             WarpNode::More(w) => w.coords(x1, y1),
@@ -57,12 +56,12 @@ impl<'a> Warp<'a> {
     }
 
     pub fn get(&self, x: f32, y: f32) -> Color {
-        let c = (self.dw)(Complex32::new(x, y));
-        let r = c.im.abs();
+        let c = (self.dw)(pt(x, y));
+        let r = c.y.abs();
         let (x1, y1) = match self.coord {
-            Coord::Polar => (x + c.re.cos() * r, y + c.re.sin() * r),
-            Coord::Cartesian => (x + c.re, y + c.im),
-            Coord::Absolute => (c.re, c.im),
+            Coord::Polar => (x + c.x.cos() * r, y + c.x.sin() * r),
+            Coord::Cartesian => (x + c.x, y + c.y),
+            Coord::Absolute => (c.x, c.y),
         };
         match &self.warp {
             WarpNode::More(w) => w.get(x1, y1),
@@ -72,12 +71,12 @@ impl<'a> Warp<'a> {
     }
 
     pub fn get_tiled(&self, x: f32, y: f32) -> Color {
-        let c = (self.dw)(Complex32::new(x, y));
-        let r = c.im.abs();
+        let c = (self.dw)(pt(x, y));
+        let r = c.y.abs();
         let (x1, y1) = match self.coord {
-            Coord::Polar => (x + c.re.cos() * r, y + c.re.sin() * r),
-            Coord::Cartesian => (x + c.re, y + c.im),
-            Coord::Absolute => (c.re, c.im),
+            Coord::Polar => (x + c.x.cos() * r, y + c.x.sin() * r),
+            Coord::Cartesian => (x + c.x, y + c.y),
+            Coord::Absolute => (c.x, c.y),
         };
         match &self.warp {
             WarpNode::More(w) => w.get(x1, y1),
