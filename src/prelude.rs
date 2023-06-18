@@ -9,6 +9,7 @@ pub use crate::lines::*;
 pub use crate::matrix::*;
 pub use crate::noises::curl::*;
 pub use crate::noises::gabor::*;
+pub use crate::noises::image_noise::*;
 pub use crate::noises::sinusoid::*;
 pub use crate::noises::white::*;
 pub use crate::noises::*;
