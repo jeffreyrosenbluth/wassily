@@ -2,17 +2,17 @@ use image::{GenericImageView, Pixel};
 use noise::NoiseFn;
 
 #[derive(Clone, Debug)]
-pub struct ImageNoise {
+pub struct ImgNoise {
     img: image::DynamicImage,
 }
 
-impl ImageNoise {
+impl ImgNoise {
     pub fn new(img: image::DynamicImage) -> Self {
         Self { img }
     }
 }
 
-impl NoiseFn<f64, 2> for ImageNoise {
+impl NoiseFn<f64, 2> for ImgNoise {
     fn get(&self, point: [f64; 2]) -> f64 {
         let (w, h) = self.img.dimensions();
         let (x, y) = (point[0] * w as f64, point[1] * h as f64);
