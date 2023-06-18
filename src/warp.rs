@@ -1,5 +1,5 @@
 //! Tools for domain warping.
-use crate::kolor::{get_color_clamp, get_color_tile};
+use crate::kolor::{get_color_clamp, get_color_tile, get_color_wrap};
 use crate::points::pt;
 use image::DynamicImage;
 use std::sync::Arc;
@@ -67,6 +67,20 @@ impl<'a> Warp<'a> {
             WarpNode::More(w) => w.get(x1, y1),
             WarpNode::Func(f) => f(x1, y1),
             WarpNode::Img(img, w, h) => get_color_clamp(img, *w, *h, pt(x1, y1)),
+        }
+    }
+    pub fn get_wrapped(&self, x: f32, y: f32) -> Color {
+        let c = (self.dw)(pt(x, y));
+        let r = c.y.abs();
+        let (x1, y1) = match self.coord {
+            Coord::Polar => (x + c.x.cos() * r, y + c.x.sin() * r),
+            Coord::Cartesian => (x + c.x, y + c.y),
+            Coord::Absolute => (c.x, c.y),
+        };
+        match &self.warp {
+            WarpNode::More(w) => w.get(x1, y1),
+            WarpNode::Func(f) => f(x1, y1),
+            WarpNode::Img(img, w, h) => get_color_wrap(img, *w, *h, pt(x1, y1)),
         }
     }
 
