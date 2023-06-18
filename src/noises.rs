@@ -5,7 +5,7 @@ use num_traits::{AsPrimitive, ToPrimitive};
 
 pub mod curl;
 pub mod gabor;
-pub mod image_noise;
+pub mod img_noise;
 pub mod sinusoid;
 pub mod white;
 
