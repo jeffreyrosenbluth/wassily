@@ -1,5 +1,5 @@
 //! A Curl noise struct that holds a source noise function and an epsilon value.
-use noise::NoiseFn;
+use noise::{NoiseFn, Seedable};
 use std::f64::consts::PI;
 
 pub struct Curl<T> {
@@ -39,5 +39,21 @@ where
         let dfdx = (self.source.get([x1, y]) - self.source.get([x0, y])) / (2.0 * self.eps);
         let dfdy = (self.source.get([x, y1]) - self.source.get([x, y0])) / (2.0 * self.eps);
         dfdy.atan2(-dfdx) / PI
+    }
+}
+
+impl<T> Seedable for Curl<T>
+where
+    T: Seedable,
+{
+    fn set_seed(self, seed: u32) -> Self {
+        Self {
+            source: self.source.set_seed(seed),
+            ..self
+        }
+    }
+
+    fn seed(&self) -> u32 {
+        self.source.seed()
     }
 }
