@@ -1,7 +1,7 @@
 use image::{GenericImageView, Pixel};
 use noise::NoiseFn;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum ColorMap {
     GrayScale,
     InvertedGray,
