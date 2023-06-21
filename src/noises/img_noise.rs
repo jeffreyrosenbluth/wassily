@@ -2,23 +2,30 @@ use image::{GenericImageView, Pixel};
 use noise::NoiseFn;
 
 #[derive(Clone, Debug)]
+pub enum ColorMap {
+    GrayScale,
+    InvertedGray,
+    Red,
+    Green,
+    Blue,
+}
+
+#[derive(Clone, Debug)]
 pub struct ImgNoise {
     img: image::DynamicImage,
-    invert: bool,
+    color_map: ColorMap,
 }
 
 impl ImgNoise {
     pub fn new(img: image::DynamicImage) -> Self {
-        Self { img, invert: false }
+        Self {
+            img,
+            color_map: ColorMap::GrayScale,
+        }
     }
 
-    pub fn invert(mut self) -> Self {
-        self.invert = true;
-        self
-    }
-
-    pub fn no_invert(mut self) -> Self {
-        self.invert = false;
+    pub fn set_map(mut self, color_map: ColorMap) -> Self {
+        self.color_map = color_map;
         self
     }
 }
@@ -27,10 +34,17 @@ impl NoiseFn<f64, 2> for ImgNoise {
     fn get(&self, point: [f64; 2]) -> f64 {
         let (w, h) = self.img.dimensions();
         let (x, y) = (point[0] * w as f64, point[1] * h as f64);
-        let mut pixel = self.img.get_pixel(x as u32 % w, y as u32 % h).to_luma();
-        if self.invert {
-            pixel.invert()
+        let pixel = self.img.get_pixel(x as u32 % w, y as u32 % h);
+        let v = match self.color_map {
+            ColorMap::GrayScale => pixel.to_luma()[0],
+            ColorMap::InvertedGray => {
+                let luma = pixel.to_luma()[0];
+                255 - luma
+            }
+            ColorMap::Red => pixel.to_rgb()[0],
+            ColorMap::Green => pixel.to_rgb()[1],
+            ColorMap::Blue => pixel.to_rgb()[2],
         };
-        2.0 * (pixel[0] as f64 / 255.0 - 0.5)
+        2.0 * (v as f64 / 255.0 - 0.5)
     }
 }
