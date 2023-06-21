@@ -10,6 +10,18 @@ pub enum ColorMap {
     Blue,
 }
 
+impl std::fmt::Display for ColorMap {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ColorMap::GrayScale => write!(f, "GrayScale"),
+            ColorMap::InvertedGray => write!(f, "InvertedGray"),
+            ColorMap::Red => write!(f, "Red"),
+            ColorMap::Green => write!(f, "Green"),
+            ColorMap::Blue => write!(f, "Blue"),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct ImgNoise {
     img: image::DynamicImage,
