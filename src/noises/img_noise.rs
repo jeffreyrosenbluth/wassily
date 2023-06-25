@@ -50,7 +50,9 @@ impl NoiseFn<f64, 2> for ImgNoise {
         let v = match self.color_map {
             ColorMap::GrayScale => pixel.to_luma()[0],
             ColorMap::RotatedGray => {
-                pixel = self.img.get_pixel(w - (x as u32 % w), h - (y as u32 % h));
+                pixel = self
+                    .img
+                    .get_pixel(w - 1 - (x as u32 % w), h - 1 - (y as u32 % h));
                 pixel.to_luma()[0]
             }
             ColorMap::Red => pixel.to_rgb()[0],
