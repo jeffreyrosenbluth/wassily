@@ -129,7 +129,7 @@ impl Quad {
         } else {
             self.tr.y
         };
-        if x1 - x0 > y1 - y0 {
+        if (x1 - x0).abs() > (y0 - y1).abs() {
             Orientation::Vertical
         } else {
             Orientation::Horizontal
