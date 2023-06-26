@@ -46,19 +46,28 @@ impl NoiseFn<f64, 2> for ImgNoise {
     fn get(&self, point: [f64; 2]) -> f64 {
         let (w, h) = self.img.dimensions();
         let (x, y) = (point[0] * w as f64, point[1] * h as f64);
-        let mut pixel = self.img.get_pixel(x as u32 % w, y as u32 % h);
+        let pixel = self.img.get_pixel(x as u32 % w, y as u32 % h);
+        let rgb: Vec<f64> = pixel
+            .to_rgb()
+            .channels()
+            .into_iter()
+            .map(|v| From::from(*v))
+            .collect();
+        let x = 0.49 * rgb[0] + 0.31 * rgb[1] + 0.2 * rgb[2];
+        let y = 0.17697 * rgb[0] * 0.8124 * rgb[1] + 0.01063 * rgb[2];
         let v = match self.color_map {
-            ColorMap::GrayScale => pixel.to_luma()[0],
-            ColorMap::RotatedGray => {
-                pixel = self
-                    .img
-                    .get_pixel(w - 1 - (x as u32 % w), h - 1 - (y as u32 % h));
-                pixel.to_luma()[0]
-            }
-            ColorMap::Red => pixel.to_rgb()[0],
-            ColorMap::Green => pixel.to_rgb()[1],
-            ColorMap::Blue => pixel.to_rgb()[2],
+            ColorMap::GrayScale => x,   //pixel.to_luma()[0],
+            ColorMap::RotatedGray => y, // {
+            //     pixel = self
+            //         .img
+            //         .get_pixel(w - 1 - (x as u32 % w), h - 1 - (y as u32 % h));
+            //     pixel.to_luma()[0]
+            // }
+            ColorMap::Red => pixel.to_rgb()[0] as f64,
+            ColorMap::Green => pixel.to_rgb()[1] as f64,
+            ColorMap::Blue => pixel.to_rgb()[2] as f64,
         };
-        2.0 * (v as f64 / 255.0 - 0.5)
+        2.0 * (v - 0.5)
+        // 2.0 * (v as f64 / 255.0 - 0.5)
     }
 }
