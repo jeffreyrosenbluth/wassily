@@ -54,7 +54,7 @@ impl NoiseFn<f64, 2> for ImgNoise {
             .map(|v| From::from(*v))
             .collect();
         let x = 0.49 * rgb[0] + 0.31 * rgb[1] + 0.2 * rgb[2];
-        let y = 0.17697 * rgb[0] * 0.8124 * rgb[1] + 0.01063 * rgb[2];
+        let y = 0.17697 * rgb[0] + 0.8124 * rgb[1] + 0.01063 * rgb[2];
         let v = match self.color_map {
             ColorMap::GrayScale => x,   //pixel.to_luma()[0],
             ColorMap::RotatedGray => y, // {
