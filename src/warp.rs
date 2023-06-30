@@ -43,9 +43,11 @@ impl<'a> Warp<'a> {
 
     pub fn coords(&self, x: f32, y: f32) -> Point {
         let c = (self.dw)(pt(x, y));
-        let r = c.y.abs();
         let (x1, y1) = match self.coord {
-            Coord::Polar => (x + c.x.cos() * r, y + c.x.sin() * r),
+            Coord::Polar => {
+                let r = c.y.abs();
+                (x + c.x.cos() * r, y + c.x.sin() * r)
+            }
             Coord::Cartesian => (x + c.x, y + c.y),
             Coord::Absolute => (c.x, c.y),
         };
@@ -57,9 +59,11 @@ impl<'a> Warp<'a> {
 
     pub fn get(&self, x: f32, y: f32) -> Color {
         let c = (self.dw)(pt(x, y));
-        let r = c.y.abs();
         let (x1, y1) = match self.coord {
-            Coord::Polar => (x + c.x.cos() * r, y + c.x.sin() * r),
+            Coord::Polar => {
+                let r = c.y.abs();
+                (x + c.x.cos() * r, y + c.x.sin() * r)
+            }
             Coord::Cartesian => (x + c.x, y + c.y),
             Coord::Absolute => (c.x, c.y),
         };
@@ -71,9 +75,11 @@ impl<'a> Warp<'a> {
     }
     pub fn get_wrapped(&self, x: f32, y: f32) -> Color {
         let c = (self.dw)(pt(x, y));
-        let r = c.y.abs();
         let (x1, y1) = match self.coord {
-            Coord::Polar => (x + c.x.cos() * r, y + c.x.sin() * r),
+            Coord::Polar => {
+                let r = c.y.abs();
+                (x + c.x.cos() * r, y + c.x.sin() * r)
+            }
             Coord::Cartesian => (x + c.x, y + c.y),
             Coord::Absolute => (c.x, c.y),
         };
@@ -86,9 +92,11 @@ impl<'a> Warp<'a> {
 
     pub fn get_tiled(&self, x: f32, y: f32) -> Color {
         let c = (self.dw)(pt(x, y));
-        let r = c.y.abs();
         let (x1, y1) = match self.coord {
-            Coord::Polar => (x + c.x.cos() * r, y + c.x.sin() * r),
+            Coord::Polar => {
+                let r = c.y.abs();
+                (x + c.x.cos() * r, y + c.x.sin() * r)
+            }
             Coord::Cartesian => (x + c.x, y + c.y),
             Coord::Absolute => (c.x, c.y),
         };
