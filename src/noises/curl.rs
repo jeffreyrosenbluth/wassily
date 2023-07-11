@@ -2,6 +2,7 @@
 use noise::{NoiseFn, Seedable};
 use std::f64::consts::PI;
 
+#[derive(Debug, Clone)]
 pub struct Curl<T> {
     pub source: T,
     pub eps: f64,

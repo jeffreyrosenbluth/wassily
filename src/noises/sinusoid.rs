@@ -1,10 +1,9 @@
 //! Various sinusoidal noises.
 use noise::NoiseFn;
-#[derive(Clone, Copy, Debug)]
-
 /// Parameters for the sinusoidal fumctions. One for each dimension.
 /// The thrid dimension is ignored for 2d noise.
 /// The outputs of the three sinusoids are averaged.
+#[derive(Clone, Copy, Debug)]
 pub struct Sinusoid {
     pub phases: [f64; 3],
     pub frequencies: [f64; 3],

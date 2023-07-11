@@ -40,6 +40,7 @@ impl<T> Matrix<T> {
     pub fn generate<F, U: AsPrimitive<usize>>(rows: U, cols: U, generator: F) -> Self
     where
         F: Fn(usize, usize) -> T,
+        U: AsPrimitive<usize>,
     {
         let mut data: Vec<T> = vec![];
         for r in 0..rows.as_() {

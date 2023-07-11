@@ -4,7 +4,6 @@ use palette::{IntoColor, Lab, Srgb};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum ColorMap {
-    GrayScale,
     Lightness,
     RedGreen,
     YellowBlue,
@@ -13,7 +12,6 @@ pub enum ColorMap {
 impl std::fmt::Display for ColorMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ColorMap::GrayScale => write!(f, "GrayScale"),
             ColorMap::Lightness => write!(f, "Lighness (L*)"),
             ColorMap::RedGreen => write!(f, "Red - Green (a*)"),
             ColorMap::YellowBlue => write!(f, "Yellow - Blue (b*)"),
@@ -31,7 +29,7 @@ impl ImgNoise {
     pub fn new(img: image::DynamicImage) -> Self {
         Self {
             img,
-            color_map: ColorMap::GrayScale,
+            color_map: ColorMap::Lightness,
         }
     }
 
@@ -54,7 +52,6 @@ impl NoiseFn<f64, 2> for ImgNoise {
             .collect();
         let lab: Lab = Srgb::new(rgb[0], rgb[1], rgb[2]).into_color();
         match self.color_map {
-            ColorMap::GrayScale => 2.0 * (pixel.to_luma()[0] as f64 / 255.0 - 0.5),
             ColorMap::Lightness => 2.0 * (0.01 * lab.l as f64 - 0.5),
             ColorMap::RedGreen => lab.a as f64 / 128.0,
             ColorMap::YellowBlue => lab.b as f64 / 128.0,
