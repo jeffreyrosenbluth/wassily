@@ -6,14 +6,22 @@ edition = "2021"
 exclude = [
     "src/bin/meta.rs"
 ]
+license = "MIT OR Apache-2.0"
+description = "wassily is both an API and set of tools for creating generative 2D art"
+readme = "README.md"
+repository = "https://github.com/jeffreyrosenbluth/wassily/"
+homepage = "https://github.com/jeffreyrosenbluth/wassily/"
+keywords = ["art", "graphics","2d", "creative", "sketch"]
+categories = ["graphics"]
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tiny-skia = "0.10"
-noise = { git = "https://github.com/Razaekel/noise-rs.git", branch = "develop" }
+tiny-skia = "0.11"
+# noise = { git = "https://github.com/Razaekel/noise-rs.git", branch = "develop" }
 # noise = { git = "https://github.com/jeffreyrosenbluth/noise-rs", branch = "develop" }
-# noise = "0.8"
+noise = "0.8"
 rand = {version = "0.8.5", features = ["small_rng"]}
 rand_distr = "0.4"
 palette = "0.7"
