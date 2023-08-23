@@ -1,4 +1,5 @@
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+![crates.io](https://img.shields.io/crates/v/$CRATE.svg)
 
 Released under [MIT](/LICENSE) by [@jeffreyrosenbluth](https://github.com/jeffreyrosenbluth).
 
