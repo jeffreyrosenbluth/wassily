@@ -1,5 +1,6 @@
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 ![crates.io](https://img.shields.io/crates/v/$CRATE.svg)
+[![Version][crates.io version]][crates.io link]
 
 Released under [MIT](/LICENSE) by [@jeffreyrosenbluth](https://github.com/jeffreyrosenbluth).
 
@@ -13,3 +14,5 @@ algorithms and utilities for dealing with colors and noise.
 ## Example
 
 <img src="https://raw.githubusercontent.com/jeffreyrosenbluth/wassily/main/assets/schotter.png" alt="Schotter image" width="500" />
+
+[crates.io version]: https://img.shields.io/crates/v/wassily.svg?style=for-the-badge&logo=rust
