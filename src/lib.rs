@@ -93,6 +93,7 @@ pub mod kolor;
 pub mod lines;
 pub mod matrix;
 pub mod noises;
+pub mod parametric;
 pub mod points;
 pub mod prelude;
 pub mod shape;
