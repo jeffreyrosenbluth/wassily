@@ -24,7 +24,7 @@ fn rng_u64_to_f64(value: u64) -> f64 {
 pub fn lcg(state: u64) -> u64 {
     state
         .wrapping_mul(PCG_MULTIPLIER)
-        .wrapping_add(DEFAULT_PCG_INC as u64)
+        .wrapping_add(DEFAULT_PCG_INC)
 }
 
 pub fn xsh_rr_u64_to_u32(state: u64) -> u32 {
@@ -115,16 +115,11 @@ pub fn normal_xy(x: f64, y: f64) -> f64 {
 }
 
 /// White noise
+#[derive(Default)]
 pub struct White {}
 
 impl White {
     pub fn new() -> Self {
-        Self {}
-    }
-}
-
-impl Default for White {
-    fn default() -> Self {
         Self {}
     }
 }

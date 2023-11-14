@@ -105,28 +105,20 @@ where
     /// Insert a column at position n.
     pub fn insert_col(&self, n: usize, column: Vec<T>) -> Self {
         assert_eq!(column.len(), self.rows());
-        Matrix::generate(self.rows(), self.cols() + 1, |r, c| {
-            if c < n {
-                self[r][c]
-            } else if c == n {
-                column[r]
-            } else {
-                self[r][c - 1]
-            }
+        Matrix::generate(self.rows(), self.cols() + 1, |r, c| match c.cmp(&n) {
+            std::cmp::Ordering::Less => self[r][c],
+            std::cmp::Ordering::Equal => column[r],
+            std::cmp::Ordering::Greater => self[r][c - 1],
         })
     }
 
     /// Insert a row at position n.
     pub fn insert_row(&self, n: usize, row: Vec<T>) -> Self {
         assert_eq!(row.len(), self.cols());
-        Matrix::generate(self.rows() + 1, self.cols(), |r, c| {
-            if r < n {
-                self[r][c]
-            } else if r == n {
-                row[c]
-            } else {
-                self[r - 1][c]
-            }
+        Matrix::generate(self.rows() + 1, self.cols(), |r, c| match r.cmp(&n) {
+            std::cmp::Ordering::Less => self[r][c],
+            std::cmp::Ordering::Equal => row[c],
+            std::cmp::Ordering::Greater => self[r - 1][c],
         })
     }
 

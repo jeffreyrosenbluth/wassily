@@ -3,10 +3,10 @@ use crate::prelude::Point;
 
 #[derive(Debug, Clone)]
 pub struct ParametricPath {
-    points: Vec<Point>,
-    lengths: Vec<f32>,
-    total_length: f32,
-    params: Vec<f32>,
+    pub points: Vec<Point>,
+    pub lengths: Vec<f32>,
+    pub total_length: f32,
+    pub params: Vec<f32>,
 }
 
 impl ParametricPath {
@@ -34,7 +34,7 @@ impl ParametricPath {
     }
 
     pub fn point_at(&self, t: f32) -> Point {
-        assert!(t >= 0.0 && t <= 1.0);
+        assert!((0.0..=1.0).contains(&t));
         if t == 0.0 {
             return self.points[0];
         };
@@ -42,7 +42,12 @@ impl ParametricPath {
             return self.points[self.points.len() - 1];
         };
 
-        let (i, t1) = self.params.iter().enumerate().find(|&p| &t <= p.1).unwrap();
+        let (i, t1) = self
+            .params
+            .iter()
+            .enumerate()
+            .find(|&p| &t <= p.1)
+            .unwrap_or_else(|| panic!("Cannot find param >= t ({t})"));
         let t0 = self.params[i - 1];
         self.points[i - 1].lerp(self.points[i], (t - t0) / (t1 - t0))
     }
@@ -61,6 +66,58 @@ impl ParametricPath {
         points.push(self.point_at(t1));
         points
     }
+}
+
+/// Refine a curve by inserting points between existing points. Until the piecewise linear
+/// segments are within `eps` of the curve defined by `f`.
+pub fn refine(pts: &[Point], f: impl Fn(f32) -> f32, eps: f32) -> Vec<Point> {
+    fn refiner(pts: &[Point], f: impl Fn(f32) -> f32, idx: usize, eps: f32) -> Vec<Point> {
+        let mut refined_pts = pts.to_vec();
+        if idx > refined_pts.len() - 2 {
+            refined_pts
+        } else {
+            let a = refined_pts[idx];
+            let b = refined_pts[idx + 1];
+            let m = (a + b).scale(0.5);
+            let q = pt(m.x, f(m.x));
+            if (q.y - m.y).abs() > eps {
+                refined_pts.insert(idx + 1, q);
+                refiner(&refined_pts, f, idx, eps)
+            } else {
+                refiner(&refined_pts, f, idx + 1, eps)
+            }
+        }
+    }
+    refiner(pts, f, 0, eps)
+}
+
+/// Create a piecewise linear curve from a function so that it looks smooth with an
+/// error of < `eps`.
+/*
+```rust
+ let f = |x: f32| x.sin();
+    let sine_path = curve(f, pt(0, 1080 / 2), 1080.0, 400.0, 0.1);
+    for t in sine_path.clone().windows(2) {
+        let c = (*WHITE)
+            .lerp(&*BLUE, 1.0 - t[0].x / 1080.0)
+        Shape::new()
+            .points( &t,)
+            .no_fill()
+            .stroke_weight(16.0)
+            .stroke_color(c)
+            .line_cap(LineCap::Square)
+            .draw(&mut canvas);
+    }
+````
+*/
+pub fn curve(f: fn(f32) -> f32, start: Point, width: f32, height: f32, eps: f32) -> Vec<Point> {
+    let g = |x: f32| start.y + height * f(2.0 * PI * x / width);
+    let mut pts = Vec::new();
+    for i in 0..=10 {
+        let s = width * i as f32 / 10.0;
+        pts.push(pt(start.x + s, g(s)));
+    }
+    refine(&pts, g, eps)
 }
 
 #[cfg(test)]

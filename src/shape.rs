@@ -7,7 +7,6 @@
 ```rust
 use wassily::prelude::*;
 
-fn main() {
     let mut canvas = Canvas::new(500, 500);
     canvas.fill(*CORNFLOWERBLUE);
     let pos = center(500, 500);
@@ -18,7 +17,6 @@ fn main() {
         .stroke_weight(3.0)
         .draw(&mut canvas);
     canvas.save_png("./star.png");
-}
 ```
 Produces:
 
@@ -389,6 +387,11 @@ impl<'a> Shape<'a> {
     /// Set the line join of the shape.
     pub fn line_join(mut self, join: LineJoin) -> Self {
         self.line_join = join;
+        self
+    }
+
+    pub fn miter_limit(mut self, limit: f32) -> Self {
+        self.miter_limit = limit;
         self
     }
 

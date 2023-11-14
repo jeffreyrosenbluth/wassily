@@ -1,21 +1,74 @@
 use std::sync::Arc;
 use wassily::prelude::*;
-const WIDTH: u32 = 1080;
-const HEIGHT: u32 = 1080;
+const WIDTH: u32 = 60000;
+const HEIGHT: u32 = 14400;
 
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
     let mut rng = SmallRng::seed_from_u64(23);
-    let mut color_wheel = ColorWheel::new(&mut rng, 7, 3);
+    let mut color_wheel = ColorWheel::new(&mut rng, 5, 3);
+    let color_bar = ColorBar::default();
     for i in 0..WIDTH {
         for j in 0..HEIGHT {
             let x = i as f32 / WIDTH as f32;
             let y = j as f32 / HEIGHT as f32;
-            let c = color_wheel.get_color(&mut rng, x, y);
+            // let c = color_wheel.get_color(&mut rng, x, y);
+            let c = color_bar.get_color(x, y);
             canvas.dot(i as f32, j as f32, c);
         }
     }
-    canvas.save_png("./wheel4.png");
+    canvas.save_png("./wheel.png");
+}
+
+pub struct ColorBar {
+    pub colors: Vec<Color>,
+    pub noise: Arc<Fbm<Perlin>>,
+    pub scale: f64,
+}
+
+impl Default for ColorBar {
+    fn default() -> Self {
+        let noise = Fbm::<Perlin>::default();
+        let noise = noise.set_octaves(4);
+        Self {
+            colors: vec![
+                *MEDIUMAQUAMARINE,
+                *LIGHTSEAGREEN,
+                *BLACK,
+                *PALETURQUOISE,
+                *BLACK,
+                *MEDIUMBLUE,
+                *GREEN,
+                *MEDIUMSEAGREEN,
+                *CORNFLOWERBLUE,
+                *INDIGO,
+                *SEAGREEN,
+                *MIDNIGHTBLUE,
+                // *BLACK,
+            ],
+            noise: Arc::new(noise),
+            scale: 4.0,
+        }
+    }
+}
+
+impl ColorBar {
+    pub fn get_color(&self, x: f32, y: f32) -> Color {
+        let t = 0.5
+            + 0.5
+                * self
+                    .noise
+                    .get([self.scale * x as f64, self.scale * y as f64]) as f32;
+        let delta = 1.0 / (self.colors.len()) as f32;
+        let mut c = 0;
+        let mut s = 0.0;
+        while s < t {
+            s += delta;
+            c += 1;
+        }
+        let a = (s - t) / delta;
+        self.colors[(c - 1) % self.colors.len()].lerp(&self.colors[c % self.colors.len()], a)
+    }
 }
 
 #[derive(Clone)]
@@ -84,10 +137,9 @@ impl ColorWheel {
 
     pub fn get_color<R: Rng>(&mut self, rng: &mut R, x: f32, y: f32) -> Color {
         let mut rgb = self.base_color;
+        let t = 0.5 + 0.5 * self.noise.get([3.0 * x as f64, 3.0 * y as f64]) as f32;
         for i in 0..self.octaves {
-            let t = 0.5
-                + 0.5 * self.noise.get([3.0 * x as f64, 3.0 * y as f64]) as f32
-                + 0.02 * (rng.gen_range(0.0..1.0) + rng.gen_range(0.0..1.0));
+            // t += 0.005 * (rng.gen_range(0.0..1.0) + rng.gen_range(0.0..1.0));
             let a = self.term(t, Self::AMPLITUDES[i], Self::FREQUENCIES[i], self.phases[i]);
             for j in 0..3 {
                 rgb[j] += a[j];

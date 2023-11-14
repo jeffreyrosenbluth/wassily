@@ -13,7 +13,7 @@ pub type Quadrilateral = [Point; 4];
 impl Grid {
     fn get_quad(&self, i: usize, j: usize) -> Quadrilateral {
         assert!(
-            i <= self.grid.rows() - 1 && j <= self.grid.cols() - 1,
+            i < self.grid.rows() && j < self.grid.cols(),
             "Quad index out of bounds"
         );
         let bl = self.grid[i + 1][j];

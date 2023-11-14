@@ -25,7 +25,7 @@ pub fn horseshoe(p: Point) -> Point {
     pt((p.x + p.y) * (p.x - p.y), 2.0 * p.x * p.y).scale(1.0 / p.mag())
 }
 
-pub fn polar(p: Point) -> Point {
+pub fn to_polar(p: Point) -> Point {
     pt(p.x.atan2(p.y) / PI, p.mag() - 1.0)
 }
 

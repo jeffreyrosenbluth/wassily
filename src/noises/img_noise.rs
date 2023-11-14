@@ -47,7 +47,7 @@ impl NoiseFn<f64, 2> for ImgNoise {
         let rgb: Vec<f32> = pixel
             .to_rgb()
             .channels()
-            .into_iter()
+            .iter()
             .map(|v| *v as f32 / 255.0)
             .collect();
         let lab: Lab = Srgb::new(rgb[0], rgb[1], rgb[2]).into_color();

@@ -1,14 +1,101 @@
 use crate::canvas::Canvas;
+use crate::kolor::Colorful;
+use crate::prelude::WHITE;
 use crate::{
+    curves::ParametricPath,
     noises::*,
     prelude::{paint_solid, pt, Algebra},
     shape::Shape,
+    stipple::halton,
 };
 use noise::OpenSimplex;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 use rand_distr::{Distribution, Normal};
 use tiny_skia::{Color, Point};
+
+pub struct FadeLine {
+    pub start: Point,
+    pub end: Point,
+    pub color: Color,
+    pub thickness: f32,
+    pub subdivisions: u32,
+    rng: SmallRng,
+}
+
+/*
+```rust
+fn main() {
+    let width = 1080;
+    let height = 1080;
+    let linecolor = *WHITE;
+    let mut canvas = Canvas::new(width, height);
+    canvas.fill(rgb8(0, 0, 0));
+    canvas.fill(rgb8(1, 8, 48));
+    for i in (0..width).step_by(10) {
+        let mut fl = FadeLine::new(pt(i, 0), pt(i, height), i as u64);
+        fl = fl.thickness(0.20).color(linecolor);
+        fl.draw(&mut canvas);
+    }
+    for i in (0..height).step_by(10) {
+        let mut fl = FadeLine::new(pt(0, i), pt(width, i), 1137 + i as u64);
+        fl = fl.thickness(0.20).color(linecolor);
+        fl.draw(&mut canvas);
+    }
+    canvas.save_png("./blue.png");
+}
+````
+ */
+impl FadeLine {
+    pub fn new(start: Point, end: Point, seed: u64) -> Self {
+        let color = *WHITE;
+        let thickness = 1.0;
+        let subdivisions = 25;
+        let rng = SmallRng::seed_from_u64(seed);
+        Self {
+            start,
+            end,
+            color,
+            thickness,
+            subdivisions,
+            rng,
+        }
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = color;
+        self
+    }
+
+    pub fn thickness(mut self, thickness: f32) -> Self {
+        self.thickness = thickness;
+        self
+    }
+
+    pub fn subdivisions(mut self, subdivisions: u32) -> Self {
+        self.subdivisions = subdivisions;
+        self
+    }
+
+    pub fn draw(&mut self, canvas: &mut Canvas) {
+        let k: u32 = self.rng.gen();
+        let mut ts: Vec<f32> = (0..self.subdivisions).map(|i| halton(i + k, 2)).collect();
+        ts.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        ts[0] = 0.0;
+        ts[self.subdivisions as usize - 1] = 1.0;
+        let pp = ParametricPath::new(vec![self.start, self.end]);
+        for t in ts.windows(2) {
+            let ps = pp.section(t[0], t[1]);
+            let c = self.color.opacity(self.rng.gen_range(0.1..0.9));
+            Shape::new()
+                .points(&ps)
+                .no_fill()
+                .stroke_weight(self.thickness)
+                .stroke_color(c)
+                .draw(canvas);
+        }
+    }
+}
 
 pub struct SandLine {
     pub start: Point,

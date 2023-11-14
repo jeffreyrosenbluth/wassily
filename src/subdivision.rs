@@ -94,16 +94,10 @@ impl Quad {
         let v = self.to_vec();
         let xs = v.iter().map(|p| p.x);
         let ys = v.iter().map(|p| p.y);
-        let min_x = xs
-            .clone()
-            .min_by(|a, b| a.partial_cmp(&b).unwrap())
-            .unwrap();
-        let max_x = xs.max_by(|a, b| a.partial_cmp(&b).unwrap()).unwrap();
-        let min_y = ys
-            .clone()
-            .min_by(|a, b| a.partial_cmp(&b).unwrap())
-            .unwrap();
-        let max_y = ys.max_by(|a, b| a.partial_cmp(&b).unwrap()).unwrap();
+        let min_x = xs.clone().min_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
+        let max_x = xs.max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
+        let min_y = ys.clone().min_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
+        let max_y = ys.max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
         (pt(min_x, min_y), pt(max_x, max_y))
     }
 
@@ -147,7 +141,7 @@ impl Eq for Quad {}
 
 impl PartialOrd for Quad {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.bl.x.partial_cmp(&other.bl.x)
+        Some(self.cmp(other))
     }
 }
 
@@ -194,8 +188,8 @@ pub fn warp_points(points: &[Point], scale: f32, factor: f32) -> Vec<Point> {
     let nfy = Perlin::default().set_seed(1);
     let opts = NoiseOpts::new(1.0, 1.0, scale, scale, scale, factor);
     let qs = points.iter().map(|p| {
-        let dx = noise2d(&nfx, &opts, p.x, p.y);
-        let dy = noise2d(&nfy, &opts, p.x, p.y);
+        let dx = noise2d(nfx, &opts, p.x, p.y);
+        let dy = noise2d(nfy, &opts, p.x, p.y);
         pt(p.x + dx, p.y + dy)
     });
     qs.collect()
@@ -221,7 +215,7 @@ pub fn ray_points_perspective(
     let mut ps = ray_points(start, middle, stops1);
     let mut qs = ray_points(end, middle, stops2);
     qs.reverse();
-    ps.extend(qs[1..].into_iter());
+    ps.extend(qs[1..].iter());
     ps
 }
 
@@ -253,16 +247,15 @@ pub fn perspective_quads(
 
 pub fn neighbor_quads(quad: Quad, quads: &[Quad]) -> Vec<Quad> {
     let f = |q: &Quad| {
-        let r = if (q.bl == quad.tl && q.br == quad.tr)
+        if (q.bl == quad.tl && q.br == quad.tr)
             || (q.bl == quad.br && q.tl == quad.tr)
             || (q.tl == quad.bl && q.tr == quad.br)
             || (q.tr == quad.tl && q.br == quad.bl)
         {
-            Some(q.clone())
+            Some(*q)
         } else {
             None
-        };
-        r
+        }
     };
     quads.iter().filter_map(f).collect()
 }
@@ -360,7 +353,7 @@ impl Eq for Tri {}
 
 impl PartialOrd for Tri {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.bl.x.partial_cmp(&other.bl.x)
+        Some(self.cmp(other))
     }
 }
 
