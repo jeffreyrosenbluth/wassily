@@ -1,8 +1,7 @@
-//! Utilities to manage colors and palettes.
+//! Utilities to manage colors.
 
 use crate::noises::white::normal_xy;
 use crate::points::pt;
-use color_thief::{get_palette, ColorFormat};
 use image::{DynamicImage, GenericImageView};
 use num_traits::AsPrimitive;
 use palette::{
@@ -10,9 +9,8 @@ use palette::{
     Alpha, FromColor, Hsl, Hsla, Hsluv, Hsluva, Hsv, Hsva, Hwb, Hwba, IntoColor, Lab, Laba, Lch,
     Lcha, Lighten, Mix, Okhsl, Okhsla, Okhsv, Okhsva, Saturate, ShiftHue, Srgb, Srgba, Xyz, Xyza,
 };
-use rand::{rngs::SmallRng, Rng, RngCore, SeedableRng};
+use rand::{Rng, RngCore};
 use rand_distr::{Distribution, Normal};
-use std::{ops::Index, ops::IndexMut, path::Path, usize};
 use tiny_skia::{Color, Point};
 
 /// Trait for converting between color types and TinySkia's `Color`.
@@ -182,6 +180,8 @@ pub trait Colorful {
     fn as_u8s(&self) -> (u8, u8, u8, u8);
 
     /// Linear interpolation between two colors.
+    /// Colors should be converted to a linear color space before mixing
+    /// and then back to the original color space.
     fn lerp(&self, color2: &Self, t: f32) -> Self;
 
     /// Perturb a color based on its position on the canvas. The perturbation is
@@ -503,255 +503,6 @@ pub fn rand_okhsla<R: RngCore>(rng: &mut R) -> Color {
     let l: f32 = 0.5 + normal.sample(rng);
     let a: f32 = rng.gen_range(0.0..1.0);
     Okhsla::new(h, s, l, a).to_color()
-}
-
-/// A Palette of colors and functions to manage them.
-#[derive(Clone, Debug)]
-pub struct Palette {
-    pub colors: Vec<Color>,
-    rng: SmallRng,
-    pub current: usize,
-}
-
-impl Default for Palette {
-    fn default() -> Self {
-        Palette::new(vec![])
-    }
-}
-
-impl Palette {
-    /// Generate a palette from a vector of 'Color's
-    pub fn new(colors: Vec<Color>) -> Self {
-        let rng = SmallRng::seed_from_u64(0);
-        Palette {
-            colors,
-            rng,
-            current: 0,
-        }
-    }
-
-    /// Set the seed of the random number generator used in all of the random
-    /// color functions.
-    pub fn set_seed(&mut self, seed: u64) {
-        self.rng = SmallRng::seed_from_u64(seed);
-    }
-
-    /// The index of the color list.
-    pub fn set_index(&mut self, i: usize) {
-        self.current = i % self.colors.len();
-    }
-
-    /// Generate a palatte from the colors in an image. If `n` is None
-    /// use each unique color in the image otherwise choose n colors.
-    pub fn with_img<T: AsRef<Path>>(path: T, n: Option<usize>) -> Self {
-        let img = image::open(path).expect("Could not find image file");
-        let mut cs: Vec<Color> = vec![];
-        let w = img.width();
-        let h = img.height();
-        if let Some(n) = n {
-            let delta = (w as f32 * h as f32 / n as f32).sqrt();
-            let mut x = 0.0;
-            let mut y = 0.0;
-            while x < w as f32 {
-                while y < h as f32 {
-                    let p = img.get_pixel(x as u32, y as u32);
-                    cs.push(p.to_color());
-                    y += delta;
-                }
-                x += delta;
-                y = 0.0;
-            }
-            cs.truncate(n)
-        } else {
-            for (_, _, p) in img.pixels() {
-                cs.push(p.to_color());
-            }
-            cs.sort_by_cached_key(|c| c.as_u8s());
-            cs.dedup_by_key(|c| c.as_u8s());
-        }
-        Self::new(cs)
-    }
-
-    /// Create a palette of colors using the [color_thief] package.
-    pub fn steal<T: AsRef<Path>>(path: T, max_colors: u8) -> Self {
-        fn find_color(t: image::ColorType) -> ColorFormat {
-            match t {
-                image::ColorType::Rgb8 => ColorFormat::Rgb,
-                image::ColorType::Rgba8 => ColorFormat::Rgba,
-                _ => unreachable!(),
-            }
-        }
-        let img = image::open(path).expect("Could not find image file");
-        let color_type = find_color(img.color());
-        let palette = get_palette(img.as_bytes(), color_type, 10, max_colors).unwrap();
-        let palette = palette
-            .into_iter()
-            .map(|c| Color::from_rgba8(c.r, c.g, c.b, 255));
-        Self::new(palette.collect())
-    }
-
-    pub fn tighten(&mut self) {
-        self.colors = self.colors.iter().map(|c| c.tighten()).collect();
-    }
-
-    /// Change the lighness of the colors to their square root, i.e. spreading
-    /// them towards lighter or darker which ever is closer.
-    pub fn spread(&mut self) {
-        self.colors = self.colors.iter().map(|c| c.spread()).collect();
-    }
-
-    /// Rotate the hue of each color in the palette.
-    pub fn rotate_hue(&mut self, degrees: f32) {
-        self.colors = self.colors.iter().map(|c| c.rotate_hue(degrees)).collect();
-    }
-
-    /// Saturate the colors in the palette by a factor.
-    pub fn saturate(&mut self, factor: f32) {
-        self.colors = self.colors.iter().map(|c| c.saturate(factor)).collect();
-    }
-
-    /// Saturate the colors in the palette by a fixed amount.
-    pub fn saturate_fixed(&mut self, amount: f32) {
-        self.colors = self
-            .colors
-            .iter()
-            .map(|c| c.saturate_fixed(amount))
-            .collect();
-    }
-
-    /// Desaturate the colors in the palette by a factor.
-    pub fn desaturate(&mut self, factor: f32) {
-        self.colors = self.colors.iter().map(|c| c.desaturate(factor)).collect();
-    }
-
-    /// Desaturate the colors in the palette by a fixed amount.
-    pub fn desaturate_fixed(&mut self, amount: f32) {
-        self.colors = self
-            .colors
-            .iter()
-            .map(|c| c.desaturate_fixed(amount))
-            .collect();
-    }
-
-    /// Lighten the colors in the palette by a factor.
-    pub fn lighten(&mut self, factor: f32) {
-        self.colors = self.colors.iter().map(|c| c.lighten(factor)).collect();
-    }
-
-    /// Lighten the colors in the palette by a fixed amount.
-    pub fn lighten_fixed(&mut self, amount: f32) {
-        self.colors = self
-            .colors
-            .iter()
-            .map(|c| c.lighten_fixed(amount))
-            .collect();
-    }
-
-    /// Darken the colors in the palette by a factor.
-    pub fn darken(&mut self, factor: f32) {
-        self.colors = self.colors.iter().map(|c| c.darken(factor)).collect();
-    }
-
-    /// Darken the colors in the palette by a fixed amount.
-    pub fn darken_fixed(&mut self, amount: f32) {
-        self.colors = self.colors.iter().map(|c| c.darken_fixed(amount)).collect();
-    }
-
-    /// Sort the colors by hue using the Okhsl color space.
-    pub fn sort_by_hue(&mut self) {
-        self.colors.sort_by_cached_key(|c| {
-            let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(c);
-            (1000.0 * okhsla.hue.into_radians()) as u32
-        })
-    }
-
-    /// Sort the colors by saturation using the Okhsl color space.
-    pub fn sort_by_saturation(&mut self) {
-        self.colors.sort_by_cached_key(|c| {
-            let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(c);
-            (1000.0 * okhsla.saturation) as u32
-        })
-    }
-
-    /// Sort the colors by lightness using the Okhsl color space.
-    pub fn sort_by_lightness(&mut self) {
-        self.colors.sort_by_cached_key(|c| {
-            let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(c);
-            (1000.0 * okhsla.lightness) as u32
-        })
-    }
-
-    /// Sore the colors by chroma using the CIELCh color space.
-    pub fn sort_by_chroma(&mut self) {
-        self.colors.sort_by_cached_key(|c| {
-            let lcha: Lcha = <Lcha as ConvertColor>::from_color(c);
-            (1000.0 * lcha.chroma) as u32
-        })
-    }
-
-    /// Sort the colors by alpha(opacity) using the Okhsl color space.
-    pub fn sort_by_alpha(&mut self) {
-        self.colors.sort_by_cached_key(|c| {
-            let okhsla: Okhsla = <Okhsla as ConvertColor>::from_color(c);
-            (1000.0 * okhsla.alpha) as u32
-        })
-    }
-
-    /// Choose a color from the palette at random.
-    pub fn rand_color(&mut self) -> Color {
-        self.colors[self.rng.gen_range(0..self.colors.len())]
-    }
-
-    /// Perturb the colors in the palette using a normal distrtibution with
-    /// standard deviation `std_dev` considered as a percentage.
-    pub fn jiggle(&mut self, std_dev: f32) {
-        let cs: Vec<Color> = self
-            .colors
-            .iter()
-            .map(|c| jiggle(&mut self.rng, std_dev, *c))
-            .collect();
-        self.colors = cs;
-    }
-
-    /// The number of colors in the `Palette`.
-    pub fn len(&self) -> usize {
-        self.colors.len()
-    }
-
-    /// Is the `Palette` empty?
-    pub fn is_empty(&self) -> bool {
-        self.colors.is_empty()
-    }
-}
-
-/// Allow colors to be accessed as if `Palette` was an array, e.g. `palette[42]`.
-/// If the index is out of bounds, it will wrap around.
-impl Index<usize> for Palette {
-    type Output = Color;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        let index = index % self.colors.len();
-        &self.colors[index]
-    }
-}
-
-/// Allow colors to be accessed and mutated as if `Palette` was an array, e.g. `palette[42] = GRAY`.
-/// If the index is out of bounds, it will wrap around.
-impl IndexMut<usize> for Palette {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        let index = index % self.colors.len();
-        &mut self.colors[index]
-    }
-}
-
-/// An interator for the `Palette`.
-impl IntoIterator for Palette {
-    type Item = Color;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.colors.into_iter()
-    }
 }
 
 /// Get a color from an image by mapping the canvas coordinates to image coordinates.

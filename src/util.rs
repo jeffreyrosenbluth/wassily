@@ -16,6 +16,16 @@ pub fn map_range(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -
     (x - in_min) / (in_max - in_min) * (out_max - out_min) + out_min
 }
 
+/// Sine function mapped to [0.0, 1.0].
+pub fn sin01(x: f32) -> f32 {
+    x.sin() * 0.5 + 0.5
+}
+
+/// Cosine function mapped to [0.0, 1.0].
+pub fn cos01(x: f32) -> f32 {
+    x.cos() * 0.5 + 0.5
+}
+
 /// Calculate the curl of a function from R2 -> R
 pub fn curl(f: impl Fn(f32, f32) -> f32, x: f32, y: f32, eps: f32) -> f32 {
     let x0 = x - eps;
