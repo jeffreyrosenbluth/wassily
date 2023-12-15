@@ -86,7 +86,7 @@ fn main() {
 
 pub mod canvas;
 pub mod color_names;
-pub mod color_palettes;
+pub mod color_palette;
 pub mod curves;
 pub mod endo2d;
 pub mod grain;

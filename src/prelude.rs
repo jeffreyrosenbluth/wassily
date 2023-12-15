@@ -1,7 +1,7 @@
 //! # Prelude - use this to import everthing you need to use the library.
 pub use crate::canvas::*;
 pub use crate::color_names::*;
-pub use crate::color_palettes::*;
+pub use crate::color_palette::*;
 pub use crate::curves::*;
 pub use crate::endo2d::*;
 pub use crate::grain::*;

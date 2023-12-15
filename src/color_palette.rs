@@ -1,10 +1,8 @@
 //! A Palette of colors and functions to manage them.
 
-use crate::kolor::*;
-use crate::util::map_range;
+use crate::{kolor::*, util::map_range};
 use color_thief::{get_palette, ColorFormat};
 use image::GenericImageView;
-use noise::NoiseFn;
 use palette::{Lcha, Okhsla};
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use std::{
@@ -266,7 +264,7 @@ impl IntoIterator for Palette {
 /// A color scale is a gradient made from five colors. The gradient is
 /// is created by finding the 5 term fourier series that fits the five colors.
 /// The colors are the values of the function at t = 1/6,2/6, 3/6, 4/6, and 5/6.
-/// Where t is in [0,1].
+/// Where t is in [0,1]. A nice feature of 'ColorScale' is that they are periodic.
 pub struct ColorScale {
     pub a0: (f32, f32, f32),
     pub a1: (f32, f32, f32),
@@ -280,45 +278,47 @@ fn f(x: f32) -> f32 {
     2.0 * x - 1.0
 }
 
+fn coefficients(
+    channel0: f32,
+    channel1: f32,
+    channel2: f32,
+    channel3: f32,
+    channel4: f32,
+) -> (f32, f32, f32, f32, f32) {
+    let a0 = 0.3333 * f(channel0) + 0.3333 * f(channel2) + 0.3333 * f(channel4);
+    let a1 = 0.5 * f(channel0) - 0.5 * f(channel1) - 0.5 * f(channel3) + 0.5 * f(channel4);
+    let a2 = 0.1667 * f(channel0) - 0.5 * f(channel1) + 0.6667 * f(channel2) - 0.5 * f(channel3)
+        + 0.1667 * f(channel4);
+    let b1 =
+        0.2887 * f(channel0) + 0.2887 * f(channel1) - 0.2887 * f(channel3) - 0.2887 * f(channel4);
+    let b2 =
+        0.2887 * f(channel0) - 0.2887 * f(channel1) + 0.2887 * f(channel3) - 0.2887 * f(channel4);
+    (a0, a1, a2, b1, b2)
+}
+
 impl ColorScale {
     pub fn new(color0: Color, color1: Color, color2: Color, color3: Color, color4: Color) -> Self {
-        let ra0 = 0.3333 * f(color0.red()) + 0.3333 * f(color2.red()) + 0.3333 * f(color4.red());
-        let ra1 = 0.5 * f(color0.red()) - 0.5 * f(color1.red()) - 0.5 * f(color3.red())
-            + 0.5 * f(color4.red());
-        let ra2 = 0.1667 * f(color0.red()) - 0.5 * f(color1.red()) + 0.6667 * f(color2.red())
-            - 0.5 * f(color3.red())
-            + 0.1667 * f(color4.red());
-        let rb1 = 0.2887 * f(color0.red()) + 0.2887 * f(color1.red())
-            - 0.2887 * f(color3.red())
-            - 0.2887 * f(color4.red());
-        let rb2 = 0.2887 * f(color0.red()) - 0.2887 * f(color1.red()) + 0.2887 * f(color3.red())
-            - 0.2887 * f(color4.red());
-
-        let ga0 =
-            0.3333 * f(color0.green()) + 0.3333 * f(color2.green()) + 0.3333 * f(color4.green());
-        let ga1 = 0.5 * f(color0.green()) - 0.5 * f(color1.green()) - 0.5 * f(color3.green())
-            + 0.5 * f(color4.green());
-        let ga2 = 0.1667 * f(color0.green()) - 0.5 * f(color1.green()) + 0.6667 * f(color2.green())
-            - 0.5 * f(color3.green())
-            + 0.1667 * f(color4.green());
-        let gb1 = 0.2887 * f(color0.green()) + 0.2887 * f(color1.green())
-            - 0.2887 * f(color3.green())
-            - 0.2887 * f(color4.green());
-        let gb2 = 0.2887 * f(color0.green()) - 0.2887 * f(color1.green())
-            + 0.2887 * f(color3.green())
-            - 0.2887 * f(color4.green());
-
-        let ba0 = 0.3333 * f(color0.blue()) + 0.3333 * f(color2.blue()) + 0.3333 * f(color4.blue());
-        let ba1 = 0.5 * f(color0.blue()) - 0.5 * f(color1.blue()) - 0.5 * f(color3.blue())
-            + 0.5 * f(color4.blue());
-        let ba2 = 0.1667 * f(color0.blue()) - 0.5 * f(color1.blue()) + 0.6667 * f(color2.blue())
-            - 0.5 * f(color3.blue())
-            + 0.1667 * f(color4.blue());
-        let bb1 = 0.2887 * f(color0.blue()) + 0.2887 * f(color1.blue())
-            - 0.2887 * f(color3.blue())
-            - 0.2887 * f(color4.blue());
-        let bb2 = 0.2887 * f(color0.blue()) - 0.2887 * f(color1.blue()) + 0.2887 * f(color3.blue())
-            - 0.2887 * f(color4.blue());
+        let (ra0, ra1, ra2, rb1, rb2) = coefficients(
+            color0.red(),
+            color1.red(),
+            color2.red(),
+            color3.red(),
+            color4.red(),
+        );
+        let (ga0, ga1, ga2, gb1, gb2) = coefficients(
+            color0.green(),
+            color1.green(),
+            color2.green(),
+            color3.green(),
+            color4.green(),
+        );
+        let (ba0, ba1, ba2, bb1, bb2) = coefficients(
+            color0.blue(),
+            color1.blue(),
+            color2.blue(),
+            color3.blue(),
+            color4.blue(),
+        );
 
         Self {
             a0: (ra0, ga0, ba0),
@@ -329,6 +329,31 @@ impl ColorScale {
         }
     }
 
+    /// Create a color scale from 2 colors by interpolating the other 3
+    /// between them.
+    pub fn from_2(color0: Color, color4: Color) -> Self {
+        let color1 = color0.lerp(&color4, 0.25);
+        let color2 = color0.lerp(&color4, 0.5);
+        let color3 = color0.lerp(&color4, 0.75);
+        Self::new(color0, color1, color2, color3, color4)
+    }
+
+    /// Create a color scale from 3 colors by interpolating the other 2
+    /// in between them.
+    pub fn from_3_colors(color0: Color, color2: Color, color4: Color) -> Self {
+        let color1 = color0.lerp(&color2, 0.5);
+        let color3 = color2.lerp(&color4, 0.5);
+        Self::new(color0, color1, color2, color3, color4)
+    }
+
+    /// Create a color scale from 3 colors plus black and white.
+    pub fn from_3_bw(color0: Color, color2: Color, color4: Color) -> Self {
+        let color1 = Color::from_rgba8(0, 0, 0, 255);
+        let color3 = Color::from_rgba8(255, 255, 255, 255);
+        Self::new(color0, color1, color2, color3, color4)
+    }
+
+    /// Get a color from the color scale at t in [0,1].
     pub fn get_color(&self, t: f32) -> Color {
         let red = 0.5
             + 0.5
@@ -360,205 +385,21 @@ impl ColorScale {
         )
         .unwrap()
     }
-}
-pub struct NoiseColorScale {
-    pub color_scale: ColorScale,
-    pub noise: Box<dyn NoiseFn<f64, 2>>,
-    pub scale: f64,
-}
 
-impl NoiseColorScale {
-    pub fn new(
-        color1: Color,
-        color2: Color,
-        color3: Color,
-        color4: Color,
-        color5: Color,
-        noise: Box<dyn NoiseFn<f64, 2>>,
-        scale: f64,
-    ) -> Self {
-        let color_scale = ColorScale::new(color1, color2, color3, color4, color5);
-        Self {
-            color_scale,
-            noise,
-            scale,
-        }
-    }
-    pub fn set_scale(mut self, scale: f64) -> Self {
-        self.scale = scale;
-        self
+    /// Get a color from the fractal version of the color scale at t in [0,1].
+    pub fn get_color_fractal(&self, t: f32, phase: f32) -> Color {
+        let a = self.get_color(t);
+        let b = self.get_color(2.0 * t).rotate_hue(phase);
+        let c = self.get_color(3.0 * t).rotate_hue(2.0 * phase);
+        let d = b.lerp(&c, 0.3333);
+        a.lerp(&d, 0.3333)
     }
 
-    pub fn set_noise(mut self, noise: Box<dyn NoiseFn<f64, 2>>) -> Self {
-        self.noise = noise;
-        self
-    }
-
-    pub fn get_color(&self, x: f32, y: f32) -> Color {
-        let s = self
-            .noise
-            .get([self.scale * x as f64, self.scale * y as f64]) as f32;
-        self.color_scale.get_color(s)
-    }
-}
-
-/// 'ColorRamp' is a color gradient made from four colors. The gradient is
-/// defined by two cubic curves, one for the red, green, and blue channels.
-/// The first curve is fit to the points (0, 1/3, 2/3, 0) and the second curve
-/// is fit to the points (0.2, 0.4, 0.6, 0.8).
-/// The curves are combined with weigth (1-alpha) on the second curve.
-/// The input t for the second curve is mapped to a sine wave with a frequency.
-/// This crates a color gradient with lots of variation and includes the origingal
-/// four colors.
-pub struct ColorRamp {
-    a0: (f32, f32, f32),
-    b0: (f32, f32, f32),
-    c0: (f32, f32, f32),
-    d0: (f32, f32, f32),
-    a1: (f32, f32, f32),
-    b1: (f32, f32, f32),
-    c1: (f32, f32, f32),
-    d1: (f32, f32, f32),
-    alpha: f32,
-    frequency: f32,
-}
-
-impl ColorRamp {
-    pub fn new(
-        color1: Color,
-        color2: Color,
-        color3: Color,
-        color4: Color,
-        alpha: f32,
-        frequency: f32,
-    ) -> Self {
-        let (ra0, rb0, rc0, rd0) =
-            fit_cubic_0(color1.red(), color2.red(), color3.red(), color4.red());
-        let (ga0, gb0, gc0, gd0) = fit_cubic_0(
-            color1.green(),
-            color2.green(),
-            color3.green(),
-            color4.green(),
-        );
-        let (ba0, bb0, bc0, bd0) =
-            fit_cubic_0(color1.blue(), color2.blue(), color3.blue(), color4.blue());
-
-        let (ra1, rb1, rc1, rd1) =
-            fit_cubic_1(color1.red(), color2.red(), color3.red(), color4.red());
-        let (ga1, gb1, gc1, gd1) = fit_cubic_1(
-            color1.green(),
-            color2.green(),
-            color3.green(),
-            color4.green(),
-        );
-        let (ba1, bb1, bc1, bd1) =
-            fit_cubic_1(color1.blue(), color2.blue(), color3.blue(), color4.blue());
-        Self {
-            a0: (ra0, ga0, ba0),
-            b0: (rb0, gb0, bb0),
-            c0: (rc0, gc0, bc0),
-            d0: (rd0, gd0, bd0),
-            a1: (ra1, ga1, ba1),
-            b1: (rb1, gb1, bb1),
-            c1: (rc1, gc1, bc1),
-            d1: (rd1, gd1, bd1),
-            alpha,
-            frequency,
-        }
-    }
-
-    /// The default color ramp has a frequency of 2.0 and an alpha of 0.3333.
-    /// i.e. 2/3 weight on curve 1 and 1/3 weight on curve 2.
-    pub fn standard(color1: Color, color2: Color, color3: Color, color4: Color) -> Self {
-        Self::new(color1, color2, color3, color4, 0.3333, 2.0)
-    }
-
-    pub fn set_alpha(mut self, alpha: f32) -> Self {
-        self.alpha = alpha;
-        self
-    }
-
-    pub fn get_color(&self, t: f32) -> Color {
-        if t > 1.0 || t < 0.0 {
-            println!("WARNING: t must be between 0 and 1, but t = {}", t);
-        }
-        let t = t.clamp(0.0, 1.0);
-        let t2 = t * t;
-        let t3 = t2 * t;
-        let red0 = (self.a0.0 * t3 + self.b0.0 * t2 + self.c0.0 * t + self.d0.0).clamp(0.0, 1.0);
-        let green0 = (self.a0.1 * t3 + self.b0.1 * t2 + self.c0.1 * t + self.d0.1).clamp(0.0, 1.0);
-        let blue0 = (self.a0.2 * t3 + self.b0.2 * t2 + self.c0.2 * t + self.d0.2).clamp(0.0, 1.0);
-
-        let u = 0.5 + 0.5 * (TAU * self.frequency * t).sin();
-        let u2 = u * u;
-        let u3 = u2 * u;
-        let red1 = (self.a1.0 * u3 + self.b1.0 * u2 + self.c1.0 * u + self.d1.0).clamp(0.0, 1.0);
-        let green1 = (self.a1.1 * u3 + self.b1.1 * u2 + self.c1.1 * u + self.d1.1).clamp(0.0, 1.0);
-        let blue1 = (self.a1.2 * u3 + self.b1.2 * u2 + self.c1.2 * u + self.d1.2).clamp(0.0, 1.0);
-
-        let red = (1.0 - self.alpha) * red0 + self.alpha * red1;
-        let green = (1.0 - self.alpha) * green0 + self.alpha * green1;
-        let blue = (1.0 - self.alpha) * blue0 + self.alpha * blue1;
-        Color::from_rgba(red, green, blue, 1.0).unwrap()
-    }
-}
-
-fn fit_cubic_0(y0: f32, y1: f32, y2: f32, y3: f32) -> (f32, f32, f32, f32) {
-    let a = -4.5 * y0 + 13.5 * y1 - 13.5 * y2 + 4.5 * y3;
-    let b = 9.0 * y0 - 22.5 * y1 + 18.0 * y2 - 4.5 * y3;
-    let c = -5.5 * y0 + 9.0 * y1 - 4.5 * y2 + y3;
-    let d = y0;
-    (a, b, c, d)
-}
-fn fit_cubic_1(y0: f32, y1: f32, y2: f32, y3: f32) -> (f32, f32, f32, f32) {
-    let a = -20.8333 * y0 + 62.5 * y1 - 62.5 * y2 + 20.8333 * y3;
-    let b = 37.5 * y0 - 100.0 * y1 + 87.5 * y2 - 25.0 * y3;
-    let c = -21.6667 * y0 + 47.5 * y1 - 35.0 * y2 + 9.1667 * y3;
-    let d = 4.0 * y0 - 6.0 * y1 + 4.0 * y2 - y3;
-    (a, b, c, d)
-}
-
-pub struct NoiseColorRamp {
-    pub color_quad: ColorRamp,
-    pub noise: Box<dyn NoiseFn<f64, 2>>,
-    pub scale: f64,
-    pub alpha: f32,
-}
-
-impl NoiseColorRamp {
-    pub fn new(
-        color1: Color,
-        color2: Color,
-        color3: Color,
-        color4: Color,
-        noise: Box<dyn NoiseFn<f64, 2>>,
-        scale: f64,
-        alpha: f32,
-        frequency: f32,
-    ) -> Self {
-        let color_quad = ColorRamp::new(color1, color2, color3, color4, alpha, frequency);
-        Self {
-            color_quad,
-            noise,
-            scale,
-            alpha,
-        }
-    }
-    pub fn set_scale(mut self, scale: f64) -> Self {
-        self.scale = scale;
-        self
-    }
-
-    pub fn set_noise(mut self, noise: Box<dyn NoiseFn<f64, 2>>) -> Self {
-        self.noise = noise;
-        self
-    }
-
-    pub fn get_color(&self, x: f32, y: f32) -> Color {
-        let s = self
-            .noise
-            .get([self.scale * x as f64, self.scale * y as f64]) as f32;
-        let t = map_range(s, -2.0, 2.0, 0.0, 1.0);
-        self.color_quad.get_color(t)
+    /// Get a color from the scale but cli[ it to limit the range of colors.
+    /// Useful for creating a palette of colors that are similar to a standard
+    /// linear gradient.  0.1 is a good value for clip.
+    pub fn get_color_clip(&self, t: f32, clip: f32) -> Color {
+        let t = map_range(t, 0.0, 1.0, clip, 1.0 - clip);
+        self.get_color(t)
     }
 }
