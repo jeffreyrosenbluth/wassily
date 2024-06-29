@@ -391,8 +391,8 @@ impl ColorScale {
         let a = self.get_color(t);
         let b = self.get_color(2.0 * t).rotate_hue(phase);
         let c = self.get_color(3.0 * t).rotate_hue(2.0 * phase);
-        let d = b.lerp(&c, 0.3333);
-        a.lerp(&d, 0.3333)
+        let d = b.lerp(&c, 0.5);
+        a.lerp(&d, 0.5)
     }
 
     /// Get a color from the scale but cli[ it to limit the range of colors.

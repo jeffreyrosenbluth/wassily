@@ -8,11 +8,16 @@ const HEIGHT: u32 = 1000;
 fn main() {
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
     let mut rng = SmallRng::seed_from_u64(SEED);
-    let c1 = rand_okhsl(&mut rng);
-    let c2 = rand_okhsl(&mut rng);
-    let c3 = rand_okhsl(&mut rng);
-    let c4 = rand_okhsl(&mut rng);
-    let c5 = rand_okhsl(&mut rng);
+    // let c1 = rand_okhsl(&mut rng);
+    // let c2 = rand_okhsl(&mut rng);
+    // let c3 = rand_okhsl(&mut rng);
+    // let c4 = rand_okhsl(&mut rng);
+    // let c5 = rand_okhsl(&mut rng);
+    let c4 = *BLACK;
+    let c1 = *RED;
+    let c5 = rgb8(0, 255, 0);
+    let c3 = *BLUE;
+    let c2 = *WHITE;
     let x_delta = WIDTH / 5;
     let y_delta = HEIGHT / 5;
 
@@ -48,7 +53,7 @@ fn main() {
     // Panel 2: The generated fractal palette
     for i in 0..HEIGHT {
         let t = i as f32 / HEIGHT as f32;
-        let c = cs.get_color_fractal(t, 15.0);
+        let c = cs.get_color_fractal(t, 0.0);
         Shape::new()
             .line(pt(x_delta, i), pt(3 * x_delta, i))
             .stroke_color(c)
