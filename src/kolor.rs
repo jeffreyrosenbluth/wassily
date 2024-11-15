@@ -431,17 +431,17 @@ pub fn rgb8(r: u8, g: u8, b: u8) -> Color {
 }
 
 //     /// Black with opacity alpha [0.0, 1.0].
-pub fn black(alpha: f32) -> Color {
+pub fn blacks(alpha: f32) -> Color {
     Color::from_rgba(0.0, 0.0, 0.0, alpha).unwrap()
 }
 
 /// White with opacity alpha [0.0, 1.0].
-pub fn white(alpha: f32) -> Color {
+pub fn whites(alpha: f32) -> Color {
     Color::from_rgba(1.0, 1.0, 1.0, alpha).unwrap()
 }
 
 /// Gray, set r, g, and b to the same value 0..255.
-pub fn gray(n: u8) -> Color {
+pub fn grays(n: u8) -> Color {
     Color::from_rgba8(n, n, n, 255)
 }
 
@@ -536,6 +536,28 @@ pub fn get_color_wrap<T: AsPrimitive<f32>>(
     p.to_color()
 }
 
+/// Get a color from an image by mapping the canvas coordinates to image coordinates. If the
+/// point 'p' is out of bounds reflect around as if the image is a torus.
+pub fn get_color_reflect<T: AsPrimitive<f32>>(
+    img: &DynamicImage,
+    width: T,
+    height: T,
+    p: Point,
+) -> Color {
+    let x = if p.x < 0.0 {
+        (p.y * img.width() as f32 / width.as_()).abs()
+    } else {
+        2.0 * img.width() as f32 - (p.x * img.width() as f32 / width.as_())
+    };
+    let y = if p.y < 0.0 {
+        (p.y * img.height() as f32 / height.as_()).abs()
+    } else {
+        2.0 * img.height() as f32 - (p.y * img.height() as f32 / height.as_())
+    };
+    let p = img.get_pixel(x as u32, y as u32);
+    p.to_color()
+}
+
 /// Get a color from an image by mapping the canvas coordinates to image coordinates.
 /// point 'p' is out of bounds clamp the coordinate.
 pub fn get_color_clamp<T: AsPrimitive<f32>>(
@@ -565,7 +587,7 @@ mod tests {
     #[test]
     fn lerp_test() {
         let c1 = Color::BLACK;
-        let c2 = gray(255);
+        let c2 = grays(255);
         assert_eq!(c1.lerp(&c2, 0.5), rgb8(187, 187, 187));
     }
 }
