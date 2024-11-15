@@ -546,14 +546,14 @@ pub fn get_color_reflect<T: AsPrimitive<f32>>(
 ) -> Color {
     let x = if p.x < 0.0 {
         (p.x * img.width() as f32 / width.as_()).abs()
-    } else if p.x * img.width() as f32 / width.as_() > img.width() as f32 {
+    } else if p.x * img.width() as f32 / width.as_() >= img.width() as f32 {
         2.0 * img.width() as f32 - (p.x * img.width() as f32 / width.as_())
     } else {
         p.x * img.width() as f32 / width.as_()
     };
     let y = if p.y < 0.0 {
         (p.y * img.height() as f32 / height.as_()).abs()
-    } else if p.y * img.height() as f32 / height.as_() > img.height() as f32 {
+    } else if p.y * img.height() as f32 / height.as_() >= img.height() as f32 {
         2.0 * img.height() as f32 - (p.y * img.height() as f32 / height.as_())
     } else {
         p.y * img.height() as f32 / height.as_()
