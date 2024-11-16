@@ -561,6 +561,7 @@ pub fn get_color_reflect<T: AsPrimitive<f32>>(
     } else {
         py
     };
+
     let p = img.get_pixel(
         (x as u32).clamp(0, img.width() - 1),
         (y as u32).clamp(0, img.height() - 1),
