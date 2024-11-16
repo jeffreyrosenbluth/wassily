@@ -62,12 +62,13 @@ impl NoiseFn<f64, 2> for ImgNoise {
 }
 
 pub fn reflect(p: f64, period: f64) -> f64 {
-    let p = p % (2.0 * period);
-    if p < 0.0 {
+    let p = p % (2.0 * period - 1.0);
+    let r = if p < 0.0 {
         -p
     } else if p >= period {
         2.0 * period - p
     } else {
         p
-    }
+    };
+    r.clamp(0.0, period - 1.0)
 }
