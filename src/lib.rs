@@ -97,6 +97,7 @@ pub mod matrix;
 pub mod noises;
 pub mod points;
 pub mod prelude;
+pub mod quadtree;
 pub mod shape;
 pub mod sphere;
 pub mod stipple;

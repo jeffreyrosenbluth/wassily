@@ -3,12 +3,12 @@ use rand_distr::{Distribution, Normal};
 use wassily::prelude::*;
 
 const D: u32 = 1;
-const SEED: u64 = 169; // 81, 83, 84*, 93, 110, 116, 124, 129, 137, 141,151
+const SEED: u64 = 84; // 81, 83, 84*, 93, 110, 116, 124, 129, 137, 141,151
 const WIDTH: u32 = 1080 / D;
 const HEIGHT: u32 = 1080 / D;
 const PHASE: f32 = 0.01;
 const FREQ: f32 = 2.05;
-const STYLE: Style = Style::Standard;
+const STYLE: Style = Style::Clipped;
 const STD: f32 = 0.00;
 
 #[derive(Debug, Clone, Copy)]
@@ -91,11 +91,17 @@ fn main() {
     let c4 = rand_okhsl(&mut rng);
     let c5 = rand_okhsl(&mut rng);
 
-    let c4 = *BLACK;
-    let c1 = *RED;
-    let c2 = rgb8(0, 255, 0);
-    let c3 = *BLUE;
-    let c5 = *WHITE;
+    println!("{:?}", c1);
+    println!("{:?}", c2);
+    println!("{:?}", c3);
+    println!("{:?}", c4);
+    println!("{:?}", c5);
+
+    // let c4 = *BLACK;
+    // let c1 = *RED;
+    // let c2 = rgb8(0, 255, 0);
+    // let c3 = *BLUE;
+    // let c5 = *WHITE;
 
     canvas.fill(*WHITE);
 

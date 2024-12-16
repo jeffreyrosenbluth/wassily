@@ -395,7 +395,7 @@ impl ColorScale {
         a.lerp(&d, 0.5)
     }
 
-    /// Get a color from the scale but cli[ it to limit the range of colors.
+    /// Get a color from the scale but clip it to limit the range of colors.
     /// Useful for creating a palette of colors that are similar to a standard
     /// linear gradient.  0.1 is a good value for clip.
     pub fn get_color_clip(&self, t: f32, clip: f32) -> Color {
