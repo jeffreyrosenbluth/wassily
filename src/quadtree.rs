@@ -3,19 +3,19 @@ use tiny_skia::Point;
 
 const CAPACITY: usize = 64;
 
-pub fn blq(bl: Point, tr: Point) -> (Point, Point) {
+fn blq(bl: Point, tr: Point) -> (Point, Point) {
     (bl, (bl + tr).scale(0.5))
 }
 
-pub fn brq(bl: Point, tr: Point) -> (Point, Point) {
+fn brq(bl: Point, tr: Point) -> (Point, Point) {
     (pt((bl.x + tr.x) / 2.0, bl.y), pt(tr.x, (bl.y + tr.y) / 2.0))
 }
 
-pub fn tlq(bl: Point, tr: Point) -> (Point, Point) {
+fn tlq(bl: Point, tr: Point) -> (Point, Point) {
     (pt(bl.x, (bl.y + tr.y) / 2.0), pt((bl.x + tr.x) / 2.0, tr.y))
 }
 
-pub fn trq(bl: Point, tr: Point) -> (Point, Point) {
+fn trq(bl: Point, tr: Point) -> (Point, Point) {
     ((bl + tr).scale(0.5), tr)
 }
 
