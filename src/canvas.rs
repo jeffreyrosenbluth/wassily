@@ -200,6 +200,14 @@ impl Canvas {
         img.save_with_format(path, ImageFormat::Tiff)
             .expect("Error writing tiff");
     }
+
+    pub fn data(&self) -> &[u8] {
+        self.pixmap.data()
+    }
+
+    pub fn take(self) -> Vec<u8> {
+        self.pixmap.take()
+    }
 }
 
 /// Create a tiny-skia `Paint` from a solid `Color`.
