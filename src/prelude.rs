@@ -23,7 +23,10 @@ pub use crate::subdivision::*;
 pub use crate::textures::*;
 pub use crate::util::*;
 pub use crate::warp::*;
+
+#[allow(ambiguous_glob_reexports)]
 pub use image::*;
+
 pub use noise::core::worley::ReturnType;
 pub use noise::core::worley::*;
 pub use noise::*;

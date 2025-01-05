@@ -43,7 +43,9 @@ impl NoiseFn<f64, 2> for ImgNoise {
     fn get(&self, point: [f64; 2]) -> f64 {
         let (w, h) = self.img.dimensions();
         let (x, y) = (point[0] * w as f64, point[1] * h as f64);
-        let pixel = self.img.get_pixel(x as u32 % w, y as u32 % h);
+        let pixel = self
+            .img
+            .get_pixel(reflect(x, w as f64) as u32, reflect(y, h as f64) as u32);
         let rgb: Vec<f32> = pixel
             .to_rgb()
             .channels()
@@ -57,4 +59,14 @@ impl NoiseFn<f64, 2> for ImgNoise {
             ColorMap::YellowBlue => lab.b as f64 / 128.0,
         }
     }
+}
+
+pub fn reflect(p: f64, period: f64) -> f64 {
+    let mut p = p;
+    while p < 0.0 {
+        p += period * 2.0
+    }
+    p = p % (2.0 * period);
+    let r = if p >= period { 2.0 * period - p } else { p };
+    r.clamp(0.0, period - 1.0)
 }

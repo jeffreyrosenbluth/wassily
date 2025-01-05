@@ -2,7 +2,7 @@
 //! A context for drawing.
 
 use crate::prelude::pt;
-use image::{ImageFormat, RgbImage, RgbaImage};
+use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
 use tiny_skia::*;
 
 /// A `Canvas` is an abstraction over a tiny-skia `Pixmap` that allows for drawing at different
@@ -60,6 +60,22 @@ impl Canvas {
             pixmap: Pixmap::new(width, height).unwrap(),
             width,
             height,
+            scale: 1.0,
+        }
+    }
+
+    pub fn from_image(image: &DynamicImage) -> Canvas {
+        let rgba_img = image.to_rgba8();
+
+        let img_width = rgba_img.width();
+        let img_height = rgba_img.height();
+        let mut pixmap = Pixmap::new(img_width, img_height).unwrap();
+        pixmap.data_mut().copy_from_slice(rgba_img.as_raw());
+
+        Canvas {
+            pixmap: pixmap.to_owned(),
+            width: image.width(),
+            height: image.height(),
             scale: 1.0,
         }
     }

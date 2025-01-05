@@ -20,6 +20,8 @@ pub struct FadeLine {
     pub color: Color,
     pub thickness: f32,
     pub subdivisions: u32,
+    pub min_opacity: f32,
+    pub max_opacity: f32,
     rng: SmallRng,
 }
 
@@ -51,6 +53,8 @@ impl FadeLine {
         let color = *WHITE;
         let thickness = 1.0;
         let subdivisions = 25;
+        let min_opacity = 0.1;
+        let max_opacity = 0.9;
         let rng = SmallRng::seed_from_u64(seed);
         Self {
             start,
@@ -58,6 +62,8 @@ impl FadeLine {
             color,
             thickness,
             subdivisions,
+            min_opacity,
+            max_opacity,
             rng,
         }
     }
@@ -77,6 +83,16 @@ impl FadeLine {
         self
     }
 
+    pub fn min_opacity(mut self, min_opacity: f32) -> Self {
+        self.min_opacity = min_opacity;
+        self
+    }
+
+    pub fn max_opacity(mut self, max_opacity: f32) -> Self {
+        self.max_opacity = max_opacity;
+        self
+    }
+
     pub fn draw(&mut self, canvas: &mut Canvas) {
         let k: u32 = self.rng.gen();
         let mut ts: Vec<f32> = (0..self.subdivisions).map(|i| halton(i + k, 2)).collect();
@@ -86,7 +102,9 @@ impl FadeLine {
         let pp = ParametricPath::new(vec![self.start, self.end]);
         for t in ts.windows(2) {
             let ps = pp.section(t[0], t[1]);
-            let c = self.color.opacity(self.rng.gen_range(0.1..0.9));
+            let c = self
+                .color
+                .opacity(self.rng.gen_range(self.min_opacity..self.max_opacity));
             Shape::new()
                 .points(&ps)
                 .no_fill()

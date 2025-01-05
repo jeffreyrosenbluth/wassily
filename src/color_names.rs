@@ -155,3 +155,448 @@ pub static WHITE: Lazy<Color> = Lazy::new(|| rgb8(255, 255, 255));
 pub static WHITESMOKE: Lazy<Color> = Lazy::new(|| rgb8(245, 245, 245));
 pub static YELLOW: Lazy<Color> = Lazy::new(|| rgb8(255, 255, 0));
 pub static YELLOWGREEN: Lazy<Color> = Lazy::new(|| rgb8(154, 205, 50));
+
+pub fn alice_blue() -> Color {
+    rgb8(240, 248, 255)
+}
+pub fn antique_white() -> Color {
+    rgb8(250, 235, 215)
+}
+pub fn aqua() -> Color {
+    rgb8(0, 255, 255)
+}
+pub fn aquamarine() -> Color {
+    rgb8(127, 255, 212)
+}
+pub fn azure() -> Color {
+    rgb8(240, 255, 255)
+}
+pub fn beige() -> Color {
+    rgb8(245, 245, 220)
+}
+pub fn bisque() -> Color {
+    rgb8(255, 228, 196)
+}
+pub fn black() -> Color {
+    rgb8(0, 0, 0)
+}
+pub fn blanched_almond() -> Color {
+    rgb8(255, 235, 205)
+}
+pub fn blue() -> Color {
+    rgb8(0, 0, 255)
+}
+pub fn blue_violet() -> Color {
+    rgb8(138, 43, 226)
+}
+pub fn brown() -> Color {
+    rgb8(165, 42, 42)
+}
+pub fn burlywood() -> Color {
+    rgb8(222, 184, 135)
+}
+pub fn cadet_blue() -> Color {
+    rgb8(95, 158, 160)
+}
+pub fn chartreuse() -> Color {
+    rgb8(127, 255, 0)
+}
+pub fn chocolate() -> Color {
+    rgb8(210, 105, 30)
+}
+pub fn coral() -> Color {
+    rgb8(255, 127, 80)
+}
+pub fn cornflower_blue() -> Color {
+    rgb8(100, 149, 237)
+}
+pub fn cornsilk() -> Color {
+    rgb8(255, 248, 220)
+}
+pub fn crimson() -> Color {
+    rgb8(220, 20, 60)
+}
+pub fn cyan() -> Color {
+    rgb8(0, 255, 255)
+}
+pub fn dark_blue() -> Color {
+    rgb8(0, 0, 139)
+}
+pub fn dark_cyan() -> Color {
+    rgb8(0, 139, 139)
+}
+pub fn dark_goldenrod() -> Color {
+    rgb8(184, 134, 11)
+}
+pub fn dark_gray() -> Color {
+    rgb8(169, 169, 169)
+}
+pub fn dark_green() -> Color {
+    rgb8(0, 100, 0)
+}
+pub fn dark_grey() -> Color {
+    rgb8(169, 169, 169)
+}
+pub fn dark_khaki() -> Color {
+    rgb8(189, 183, 107)
+}
+pub fn dark_magenta() -> Color {
+    rgb8(139, 0, 139)
+}
+pub fn dark_olive_green() -> Color {
+    rgb8(85, 107, 47)
+}
+pub fn dark_orange() -> Color {
+    rgb8(255, 140, 0)
+}
+pub fn dark_orchid() -> Color {
+    rgb8(153, 50, 204)
+}
+pub fn dark_red() -> Color {
+    rgb8(139, 0, 0)
+}
+pub fn dark_salmon() -> Color {
+    rgb8(233, 150, 122)
+}
+pub fn dark_sea_green() -> Color {
+    rgb8(143, 188, 143)
+}
+pub fn dark_slate_blue() -> Color {
+    rgb8(72, 61, 139)
+}
+pub fn dark_slate_gray() -> Color {
+    rgb8(47, 79, 79)
+}
+pub fn dark_slate_grey() -> Color {
+    rgb8(47, 79, 79)
+}
+pub fn dark_turquoise() -> Color {
+    rgb8(0, 206, 209)
+}
+pub fn dark_violet() -> Color {
+    rgb8(148, 0, 211)
+}
+pub fn deep_pink() -> Color {
+    rgb8(255, 20, 147)
+}
+pub fn deep_sky_blue() -> Color {
+    rgb8(0, 191, 255)
+}
+pub fn dim_gray() -> Color {
+    rgb8(105, 105, 105)
+}
+pub fn dim_grey() -> Color {
+    rgb8(105, 105, 105)
+}
+pub fn dodger_blue() -> Color {
+    rgb8(30, 144, 255)
+}
+pub fn firebrick() -> Color {
+    rgb8(178, 34, 34)
+}
+pub fn floral_white() -> Color {
+    rgb8(255, 250, 240)
+}
+pub fn forest_green() -> Color {
+    rgb8(34, 139, 34)
+}
+pub fn fuchsia() -> Color {
+    rgb8(255, 0, 255)
+}
+pub fn gainsboro() -> Color {
+    rgb8(220, 220, 220)
+}
+pub fn ghost_white() -> Color {
+    rgb8(248, 248, 255)
+}
+pub fn gold() -> Color {
+    rgb8(255, 215, 0)
+}
+pub fn goldenrod() -> Color {
+    rgb8(218, 165, 32)
+}
+pub fn gray() -> Color {
+    rgb8(128, 128, 128)
+}
+pub fn green() -> Color {
+    rgb8(0, 128, 0)
+}
+pub fn green_yellow() -> Color {
+    rgb8(173, 255, 47)
+}
+pub fn grey() -> Color {
+    rgb8(128, 128, 128)
+}
+pub fn honeydew() -> Color {
+    rgb8(240, 255, 240)
+}
+pub fn hot_pink() -> Color {
+    rgb8(255, 105, 180)
+}
+pub fn indian_red() -> Color {
+    rgb8(205, 92, 92)
+}
+pub fn indigo() -> Color {
+    rgb8(75, 0, 130)
+}
+pub fn ivory() -> Color {
+    rgb8(255, 255, 240)
+}
+pub fn khaki() -> Color {
+    rgb8(240, 230, 140)
+}
+pub fn lavender() -> Color {
+    rgb8(230, 230, 250)
+}
+pub fn lavender_blush() -> Color {
+    rgb8(255, 240, 245)
+}
+pub fn lawn_green() -> Color {
+    rgb8(124, 252, 0)
+}
+pub fn lemon_chiffon() -> Color {
+    rgb8(255, 250, 205)
+}
+pub fn light_blue() -> Color {
+    rgb8(173, 216, 230)
+}
+pub fn light_coral() -> Color {
+    rgb8(240, 128, 128)
+}
+pub fn light_cyan() -> Color {
+    rgb8(224, 255, 255)
+}
+pub fn light_goldenrod_yellow() -> Color {
+    rgb8(250, 250, 210)
+}
+pub fn light_gray() -> Color {
+    rgb8(211, 211, 211)
+}
+pub fn light_green() -> Color {
+    rgb8(144, 238, 144)
+}
+pub fn light_grey() -> Color {
+    rgb8(211, 211, 211)
+}
+pub fn light_pink() -> Color {
+    rgb8(255, 182, 193)
+}
+pub fn light_salmon() -> Color {
+    rgb8(255, 160, 122)
+}
+pub fn light_sea_green() -> Color {
+    rgb8(32, 178, 170)
+}
+pub fn light_sky_blue() -> Color {
+    rgb8(135, 206, 250)
+}
+pub fn light_slate_gray() -> Color {
+    rgb8(119, 136, 153)
+}
+pub fn light_slate_grey() -> Color {
+    rgb8(119, 136, 153)
+}
+pub fn light_steel_blue() -> Color {
+    rgb8(176, 196, 222)
+}
+pub fn light_yellow() -> Color {
+    rgb8(255, 255, 224)
+}
+pub fn lime() -> Color {
+    rgb8(0, 255, 0)
+}
+pub fn lime_green() -> Color {
+    rgb8(50, 205, 50)
+}
+pub fn linen() -> Color {
+    rgb8(250, 240, 230)
+}
+pub fn magenta() -> Color {
+    rgb8(255, 0, 255)
+}
+pub fn maroon() -> Color {
+    rgb8(128, 0, 0)
+}
+pub fn medium_aquamarine() -> Color {
+    rgb8(102, 205, 170)
+}
+pub fn medium_blue() -> Color {
+    rgb8(0, 0, 205)
+}
+pub fn medium_orchid() -> Color {
+    rgb8(186, 85, 211)
+}
+pub fn medium_purple() -> Color {
+    rgb8(147, 112, 219)
+}
+pub fn medium_sea_green() -> Color {
+    rgb8(60, 179, 113)
+}
+pub fn medium_slate_blue() -> Color {
+    rgb8(123, 104, 238)
+}
+pub fn medium_spring_green() -> Color {
+    rgb8(0, 250, 154)
+}
+pub fn medium_turquoise() -> Color {
+    rgb8(72, 209, 204)
+}
+pub fn medium_violet_red() -> Color {
+    rgb8(199, 21, 133)
+}
+pub fn midnight_blue() -> Color {
+    rgb8(25, 25, 112)
+}
+pub fn mint_cream() -> Color {
+    rgb8(245, 255, 250)
+}
+pub fn misty_rose() -> Color {
+    rgb8(255, 228, 225)
+}
+pub fn moccasin() -> Color {
+    rgb8(255, 228, 181)
+}
+pub fn navajo_white() -> Color {
+    rgb8(255, 222, 173)
+}
+pub fn navy() -> Color {
+    rgb8(0, 0, 128)
+}
+pub fn old_lace() -> Color {
+    rgb8(253, 245, 230)
+}
+pub fn olive() -> Color {
+    rgb8(128, 128, 0)
+}
+pub fn olive_drab() -> Color {
+    rgb8(107, 142, 35)
+}
+pub fn orange() -> Color {
+    rgb8(255, 165, 0)
+}
+pub fn orange_red() -> Color {
+    rgb8(255, 69, 0)
+}
+pub fn orchid() -> Color {
+    rgb8(218, 112, 214)
+}
+pub fn pale_goldenrod() -> Color {
+    rgb8(238, 232, 170)
+}
+pub fn pale_green() -> Color {
+    rgb8(152, 251, 152)
+}
+pub fn pale_turquoise() -> Color {
+    rgb8(175, 238, 238)
+}
+pub fn pale_violet_red() -> Color {
+    rgb8(219, 112, 147)
+}
+pub fn papaya_whip() -> Color {
+    rgb8(255, 239, 213)
+}
+pub fn peach_puff() -> Color {
+    rgb8(255, 218, 185)
+}
+pub fn peru() -> Color {
+    rgb8(205, 133, 63)
+}
+pub fn pink() -> Color {
+    rgb8(255, 192, 203)
+}
+pub fn plum() -> Color {
+    rgb8(221, 160, 221)
+}
+pub fn powder_blue() -> Color {
+    rgb8(176, 224, 230)
+}
+pub fn purple() -> Color {
+    rgb8(128, 0, 128)
+}
+pub fn rebecca_purple() -> Color {
+    rgb8(102, 51, 153)
+}
+pub fn red() -> Color {
+    rgb8(255, 0, 0)
+}
+pub fn rosy_brown() -> Color {
+    rgb8(188, 143, 143)
+}
+pub fn royal_blue() -> Color {
+    rgb8(65, 105, 225)
+}
+pub fn saddle_brown() -> Color {
+    rgb8(139, 69, 19)
+}
+pub fn salmon() -> Color {
+    rgb8(250, 128, 114)
+}
+pub fn sandy_brown() -> Color {
+    rgb8(244, 164, 96)
+}
+pub fn sea_green() -> Color {
+    rgb8(46, 139, 87)
+}
+pub fn seashell() -> Color {
+    rgb8(255, 245, 238)
+}
+pub fn sienna() -> Color {
+    rgb8(160, 82, 45)
+}
+pub fn silver() -> Color {
+    rgb8(192, 192, 192)
+}
+pub fn sky_blue() -> Color {
+    rgb8(135, 206, 235)
+}
+pub fn slate_blue() -> Color {
+    rgb8(106, 90, 205)
+}
+pub fn slate_gray() -> Color {
+    rgb8(112, 128, 144)
+}
+pub fn slate_grey() -> Color {
+    rgb8(112, 128, 144)
+}
+pub fn snow() -> Color {
+    rgb8(255, 250, 250)
+}
+pub fn spring_green() -> Color {
+    rgb8(0, 255, 127)
+}
+pub fn steel_blue() -> Color {
+    rgb8(70, 130, 180)
+}
+pub fn tan() -> Color {
+    rgb8(210, 180, 140)
+}
+pub fn teal() -> Color {
+    rgb8(0, 128, 128)
+}
+pub fn thistle() -> Color {
+    rgb8(216, 191, 216)
+}
+pub fn tomato() -> Color {
+    rgb8(255, 99, 71)
+}
+pub fn turquoise() -> Color {
+    rgb8(64, 224, 208)
+}
+pub fn violet() -> Color {
+    rgb8(238, 130, 238)
+}
+pub fn wheat() -> Color {
+    rgb8(245, 222, 179)
+}
+pub fn white() -> Color {
+    rgb8(255, 255, 255)
+}
+pub fn white_smoke() -> Color {
+    rgb8(245, 245, 245)
+}
+pub fn yellow() -> Color {
+    rgb8(255, 255, 0)
+}
+pub fn yellow_green() -> Color {
+    rgb8(154, 205, 50)
+}

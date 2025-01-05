@@ -3,13 +3,13 @@ use rand_distr::{Distribution, Normal};
 use wassily::prelude::*;
 
 const D: u32 = 1;
-const SEED: u64 = 172; // 81, 83, 84*, 93, 110, 116, 124, 129, 137, 141,151
-const WIDTH: u32 = 1080 * 4 / 3 / D;
+const SEED: u64 = 84; // 81, 83, 84*, 93, 110, 116, 124, 129, 137, 141,151
+const WIDTH: u32 = 1080 / D;
 const HEIGHT: u32 = 1080 / D;
-const PHASE: f32 = 0.0;
-const FREQ: f32 = 0.6;
-const STYLE: Style = Style::Fractal;
-const STD: f32 = 0.02;
+const PHASE: f32 = 0.01;
+const FREQ: f32 = 2.05;
+const STYLE: Style = Style::Clipped;
+const STD: f32 = 0.00;
 
 #[derive(Debug, Clone, Copy)]
 enum Style {
@@ -108,6 +108,12 @@ fn main() {
     let c3 = rand_okhsl(&mut rng);
     let c4 = rand_okhsl(&mut rng);
     let c5 = rand_okhsl(&mut rng);
+
+    println!("{:?}", c1);
+    println!("{:?}", c2);
+    println!("{:?}", c3);
+    println!("{:?}", c4);
+    println!("{:?}", c5);
 
     // let c4 = *BLACK;
     // let c1 = *RED;
