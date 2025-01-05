@@ -3,13 +3,13 @@ use rand_distr::{Distribution, Normal};
 use wassily::prelude::*;
 
 const D: u32 = 1;
-const SEED: u64 = 169; // 81, 83, 84*, 93, 110, 116, 124, 129, 137, 141,151
-const WIDTH: u32 = 1080 / D;
+const SEED: u64 = 172; // 81, 83, 84*, 93, 110, 116, 124, 129, 137, 141,151
+const WIDTH: u32 = 1080 * 4 / 3 / D;
 const HEIGHT: u32 = 1080 / D;
-const PHASE: f32 = 0.01;
-const FREQ: f32 = 2.05;
-const STYLE: Style = Style::Standard;
-const STD: f32 = 0.00;
+const PHASE: f32 = 0.0;
+const FREQ: f32 = 0.6;
+const STYLE: Style = Style::Fractal;
+const STD: f32 = 0.02;
 
 #[derive(Debug, Clone, Copy)]
 enum Style {
@@ -74,6 +74,24 @@ fn g7(x: f32, y: f32) -> f32 {
     let theta = f32::atan2(y, x);
     (1.0 + 0.10 * f32::sin(8.0 * theta).powf(5.0)) * r
 }
+// float sdVesica(vec2 p, float r, float d)
+// {
+//     p = abs(p);
+//     float b = sqrt(r*r-d*d);
+//     return ((p.y-b)*d>p.x*b) ? length(p-vec2(0.0,b))
+//                              : length(p-vec2(-d,0.0))-r;
+// }
+
+fn g8(x: f32, y: f32, r: f32, d: f32) -> f32 {
+    let x = x.abs() + 0.5;
+    let y = y.abs();
+    let b = (r * r - d * d).sqrt();
+    if (y - b) * d > x * b {
+        (x.powi(2) + (y - b).powi(2)).sqrt()
+    } else {
+        ((x - d).powi(2) + y).powi(2).sqrt() - r
+    }
+}
 
 fn main() {
     use Style::*;
@@ -91,11 +109,11 @@ fn main() {
     let c4 = rand_okhsl(&mut rng);
     let c5 = rand_okhsl(&mut rng);
 
-    let c4 = *BLACK;
-    let c1 = *RED;
-    let c2 = rgb8(0, 255, 0);
-    let c3 = *BLUE;
-    let c5 = *WHITE;
+    // let c4 = *BLACK;
+    // let c1 = *RED;
+    // let c2 = rgb8(0, 255, 0);
+    // let c3 = *BLUE;
+    // let c5 = *WHITE;
 
     canvas.fill(*WHITE);
 
@@ -106,7 +124,7 @@ fn main() {
             let u = x as f32 / WIDTH as f32 - 0.5;
             let v = y as f32 / HEIGHT as f32 - 0.5;
             // let s = noise2d_01(&nf, &opts, u, v) + normal.sample(&mut rng);
-            let s = g7(u, v) + normal.sample(&mut rng);
+            let s = g8(u, v, 1.0, 0.27) + normal.sample(&mut rng);
             let c = match STYLE {
                 Clipped => cs.get_color_clip(s * FREQ, 0.1),
                 Fractal => cs.get_color_fractal(s * FREQ, PHASE),

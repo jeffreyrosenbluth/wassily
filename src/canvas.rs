@@ -205,7 +205,7 @@ pub fn paint_shader(shader: Shader) -> Paint {
     }
 }
 
-/// Create a linear gradient to draw a line.
+/// Create a linear gradient paint.
 pub fn paint_lg<'a>(x0: f32, y0: f32, x1: f32, y1: f32, stops: Vec<GradientStop>) -> Paint<'a> {
     let lg = LinearGradient::new(
         pt(x0, y0),
@@ -216,6 +216,26 @@ pub fn paint_lg<'a>(x0: f32, y0: f32, x1: f32, y1: f32, stops: Vec<GradientStop>
     )
     .unwrap();
     paint_shader(lg)
+}
+
+pub fn paint_rg<'a>(
+    x0: f32,
+    y0: f32,
+    x1: f32,
+    y1: f32,
+    radius: f32,
+    stops: Vec<GradientStop>,
+) -> Paint<'a> {
+    let rg = RadialGradient::new(
+        pt(x0, y0),
+        pt(x1, y1),
+        radius,
+        stops,
+        SpreadMode::Pad,
+        Transform::identity(),
+    )
+    .unwrap();
+    paint_shader(rg)
 }
 
 fn image_to_canvas(width: u32, height: u32, data: Vec<u8>) -> Canvas {
