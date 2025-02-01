@@ -265,6 +265,7 @@ impl IntoIterator for Palette {
 /// is created by finding the 5 term fourier series that fits the five colors.
 /// The colors are the values of the function at t = 1/6,2/6, 3/6, 4/6, and 5/6.
 /// Where t is in [0,1]. A nice feature of 'ColorScale' is that they are periodic.
+#[derive(Clone, Debug)]
 pub struct ColorScale {
     pub a0: (f32, f32, f32),
     pub a1: (f32, f32, f32),
