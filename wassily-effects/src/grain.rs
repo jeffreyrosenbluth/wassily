@@ -1,9 +1,7 @@
 //! Grain effect
-use crate::core::canvas::{paint_shader, Canvas};
-use crate::color::rgb;
-use crate::noise::{noise2d, NoiseOpts};
-use crate::prelude::pt;
-use crate::core::shape::Shape;
+use wassily_core::{canvas::{paint_shader, Canvas}, shape::Shape, points::pt};
+use wassily_color::rgb;
+use wassily_noise::{noise2d, NoiseOpts};
 use noise::{Fbm, Perlin};
 use tiny_skia::{BlendMode, FilterQuality, Paint, Pattern, SpreadMode, Transform};
 

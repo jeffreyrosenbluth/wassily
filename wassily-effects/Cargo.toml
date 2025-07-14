@@ -1,0 +1,22 @@
+[package]
+name = "wassily-effects"
+version = "0.6.6"
+edition = "2021"
+authors = ["Jeffrey Rosenbluth <jeffrey.rosenbluth@gmail.com>"]
+license = "MIT"
+description = "Visual effects and procedural textures for wassily - a generative art library"
+repository = "https://github.com/jeffreyrosenbluth/wassily"
+readme = "README.md"
+keywords = ["generative", "art", "graphics", "effects", "textures"]
+categories = ["graphics", "multimedia::images"]
+
+[dependencies]
+wassily-core = { path = "../wassily-core" }
+wassily-color = { path = "../wassily-color" }
+wassily-noise = { path = "../wassily-noise" }
+wassily-geometry = { path = "../wassily-geometry" }
+tiny-skia = { workspace = true }
+noise = { workspace = true }
+rand = { workspace = true }
+num-traits = { workspace = true }
+image = { workspace = true }

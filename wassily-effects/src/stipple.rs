@@ -1,6 +1,6 @@
 //! Low discrepancy sampling algorithms.
-use crate::geometry::Matrix;
-use crate::core::points::{center, pt, Algebra};
+use wassily_geometry::Matrix;
+use wassily_core::points::{center, pt, Algebra};
 use num_traits::AsPrimitive;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};

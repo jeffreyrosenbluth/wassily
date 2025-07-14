@@ -22,6 +22,7 @@ wassily-core = { path = "../wassily-core" }
 wassily-color = { path = "../wassily-color" }
 wassily-noise = { path = "../wassily-noise" }
 wassily-geometry = { path = "../wassily-geometry" }
+wassily-effects = { path = "../wassily-effects" }
 tiny-skia = { workspace = true }
 noise = { workspace = true }
 rand = { workspace = true }

@@ -1,8 +1,8 @@
 //! Quadrilateral and Triangle subdivision.
 //! # Example
 //! ```rust
-//! use wassily_geometry::{Quad, quad_divide_vec, Orientation};
-//! use wassily_core::points::pt;
+//! use wassily_geometry::{Quad, quad_divide_vec};
+//! use wassily_core::{points::pt, util::Orientation};
 //!
 //! const WIDTH: f32 = 100.0;
 //! const HEIGHT: f32 = 100.0;

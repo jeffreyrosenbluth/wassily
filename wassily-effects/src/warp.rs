@@ -1,6 +1,6 @@
 //! Tools for domain warping.
-use crate::color::{get_color, get_color_reflect, get_color_tile, get_color_wrap};
-use crate::core::points::pt;
+use wassily_color::{get_color, get_color_reflect, get_color_tile, get_color_wrap};
+use wassily_core::points::pt;
 use image::DynamicImage;
 use std::sync::Arc;
 use tiny_skia::{Color, Point};

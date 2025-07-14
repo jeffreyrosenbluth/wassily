@@ -1,10 +1,8 @@
 //! Tools to make paints from patterns.
 //! See the logo example for an example of how to use these.
-use crate::core::canvas::*;
-use crate::color::*;
-use crate::noise::*;
-use crate::prelude::pt;
-use crate::core::shape::*;
+use wassily_core::{canvas::*, shape::*, points::pt};
+use wassily_color::*;
+use wassily_noise::*;
 use crate::stipple::uniform;
 use noise::core::worley::distance_functions::euclidean_squared;
 use noise::core::worley::ReturnType;
