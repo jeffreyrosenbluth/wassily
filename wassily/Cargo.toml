@@ -1,6 +1,6 @@
 [package]
 name = "wassily"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["jeffreyrosenbluth <jeffrey.rosenbluth@gmail.com>"]
 edition = "2021"
 exclude = [
@@ -18,12 +18,12 @@ categories = ["graphics"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wassily-core = { path = "../wassily-core" }
-wassily-color = { path = "../wassily-color" }
-wassily-noise = { path = "../wassily-noise" }
-wassily-geometry = { path = "../wassily-geometry" }
-wassily-effects = { path = "../wassily-effects" }
-wassily-algorithms = { path = "../wassily-algorithms" }
+wassily-core = { path = "../wassily-core", version = "0.2.0" }
+wassily-color = { path = "../wassily-color", version = "0.2.0" }
+wassily-noise = { path = "../wassily-noise", version = "0.2.0" }
+wassily-geometry = { path = "../wassily-geometry", version = "0.2.0" }
+wassily-effects = { path = "../wassily-effects", version = "0.2.0" }
+wassily-algorithms = { path = "../wassily-algorithms", version = "0.2.0" }
 tiny-skia = { workspace = true }
 noise = { workspace = true }
 rand = { workspace = true }

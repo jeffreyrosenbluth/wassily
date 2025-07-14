@@ -1,6 +1,6 @@
 [package]
 name = "wassily-geometry"
-version = "0.6.6"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jeffrey Rosenbluth <jeffrey.rosenbluth@gmail.com>"]
 license = "MIT"
@@ -11,9 +11,9 @@ keywords = ["generative", "art", "graphics", "geometry", "algorithms"]
 categories = ["graphics", "multimedia::images", "algorithms"]
 
 [dependencies]
-wassily-core = { path = "../wassily-core" }
-wassily-noise = { path = "../wassily-noise" }
-wassily-color = { path = "../wassily-color" }
+wassily-core = { path = "../wassily-core", version = "0.2.0" }
+wassily-noise = { path = "../wassily-noise", version = "0.2.0" }
+wassily-color = { path = "../wassily-color", version = "0.2.0" }
 tiny-skia = { workspace = true }
 rand = { workspace = true }
 rand_distr = { workspace = true }
