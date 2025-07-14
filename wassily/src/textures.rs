@@ -2,7 +2,7 @@
 //! See the logo example for an example of how to use these.
 use crate::core::canvas::*;
 use crate::color::*;
-use crate::noises::*;
+use crate::noise::*;
 use crate::prelude::pt;
 use crate::core::shape::*;
 use crate::stipple::uniform;

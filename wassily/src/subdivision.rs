@@ -20,7 +20,7 @@
 //! }
 //! ```
 
-use crate::noises::*;
+use crate::noise::*;
 use crate::prelude::{pt, Algebra, NoiseOpts, Orientation};
 use noise::{Perlin, Seedable};
 use tiny_skia::Point;

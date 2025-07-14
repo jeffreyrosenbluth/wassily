@@ -9,6 +9,13 @@ pub mod img_noise;
 pub mod sinusoid;
 pub mod white;
 
+// Re-export key types and functions for convenience
+pub use curl::*;
+pub use gabor::*;
+pub use img_noise::*;
+pub use sinusoid::*;
+pub use white::*;
+
 /// The input to noise will be scaled by scale / (width or height).
 /// This will keep noise independent of the canvas size.
 /// If you prefer to scale the input yourself, use `Default::default()`

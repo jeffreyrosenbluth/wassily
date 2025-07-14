@@ -3,7 +3,7 @@ use crate::color::Colorful;
 use crate::prelude::WHITE;
 use crate::{
     curves::ParametricPath,
-    noises::*,
+    noise::*,
     prelude::{paint_solid, pt, Algebra},
     core::shape::Shape,
     stipple::halton,

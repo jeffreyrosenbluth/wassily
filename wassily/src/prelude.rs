@@ -13,12 +13,8 @@ pub use crate::grain::*;
 pub use crate::grid::*;
 pub use crate::lines::*;
 pub use crate::matrix::*;
-pub use crate::noises::curl::*;
-pub use crate::noises::gabor::*;
-pub use crate::noises::img_noise::*;
-pub use crate::noises::sinusoid::*;
-pub use crate::noises::white::*;
-pub use crate::noises::*;
+// Re-export noise functionality from wassily-noise
+pub use crate::noise::*;
 pub use crate::sphere::*;
 pub use crate::stipple::*;
 pub use crate::subdivision::*;
