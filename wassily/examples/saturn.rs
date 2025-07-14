@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-use rand::distr::Standard;
 use rand_distr::{Distribution, Normal};
 use wassily::prelude::*;
 
@@ -19,7 +18,9 @@ enum Style {
     Standard,
 }
 
-impl Distribution<Style> for Standard {
+struct StyleDistribution;
+
+impl Distribution<Style> for StyleDistribution {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Style {
         match rng.random_range(0..3) {
             0 => Style::Fractal,

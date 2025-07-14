@@ -1,5 +1,5 @@
 use crate::core::canvas::Canvas;
-use crate::kolor::Colorful;
+use crate::color::Colorful;
 use crate::prelude::WHITE;
 use crate::{
     curves::ParametricPath,

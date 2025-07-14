@@ -1,5 +1,5 @@
 use crate::core::canvas::Canvas;
-use crate::kolor::rgb8;
+use crate::color::rgb8;
 use crate::core::points::*;
 use crate::prelude::{pt, PI};
 use tiny_skia::Color;

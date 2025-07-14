@@ -1,6 +1,6 @@
 //! Grain effect
 use crate::core::canvas::{paint_shader, Canvas};
-use crate::kolor::rgb;
+use crate::color::rgb;
 use crate::noises::{noise2d, NoiseOpts};
 use crate::prelude::pt;
 use crate::core::shape::Shape;

@@ -19,6 +19,7 @@ categories = ["graphics"]
 
 [dependencies]
 wassily-core = { path = "../wassily-core" }
+wassily-color = { path = "../wassily-color" }
 tiny-skia = { workspace = true }
 noise = { workspace = true }
 rand = { workspace = true }

@@ -3,14 +3,14 @@
 // Re-export core functionality from wassily-core
 pub use crate::core::*;
 
+// Re-export color functionality from wassily-color
+pub use crate::color::*;
+
 // Re-export functionality from this crate
-pub use crate::color_names::*;
-pub use crate::color_palette::*;
 pub use crate::curves::*;
 pub use crate::endo2d::*;
 pub use crate::grain::*;
 pub use crate::grid::*;
-pub use crate::kolor::*;
 pub use crate::lines::*;
 pub use crate::matrix::*;
 pub use crate::noises::curl::*;

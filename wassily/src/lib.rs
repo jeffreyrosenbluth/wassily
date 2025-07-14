@@ -84,16 +84,14 @@ fn main() {
 
  */
 
-// Re-export wassily-core
+// Re-export wassily-core and wassily-color
+pub use wassily_color as color;
 pub use wassily_core as core;
 
-pub mod color_names;
-pub mod color_palette;
 pub mod curves;
 pub mod endo2d;
 pub mod grain;
 pub mod grid;
-pub mod kolor;
 pub mod lines;
 pub mod matrix;
 pub mod noises;

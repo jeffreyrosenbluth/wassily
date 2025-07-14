@@ -1,5 +1,5 @@
 //! Tools for domain warping.
-use crate::kolor::{get_color, get_color_reflect, get_color_tile, get_color_wrap};
+use crate::color::{get_color, get_color_reflect, get_color_tile, get_color_wrap};
 use crate::core::points::pt;
 use image::DynamicImage;
 use std::sync::Arc;

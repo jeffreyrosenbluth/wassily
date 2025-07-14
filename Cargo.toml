@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "wassily",
-    "wassily-core"
+    "wassily-core",
+    "wassily-color"
 ]
 resolver = "2"
 

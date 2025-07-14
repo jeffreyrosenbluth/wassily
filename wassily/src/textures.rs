@@ -1,7 +1,7 @@
 //! Tools to make paints from patterns.
 //! See the logo example for an example of how to use these.
 use crate::core::canvas::*;
-use crate::kolor::*;
+use crate::color::*;
 use crate::noises::*;
 use crate::prelude::pt;
 use crate::core::shape::*;
