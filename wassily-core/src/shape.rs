@@ -4,16 +4,17 @@
 //! Invoke the draw method to finish the build and draw the shape to a  `Canvas`.
 /*!
 
-```rust
-use wassily::prelude::*;
+```no_run
+use wassily_core::*;
+use tiny_skia::Color;
 
     let mut canvas = Canvas::new(500, 500);
-    canvas.fill(*CORNFLOWERBLUE);
+    canvas.fill(Color::from_rgba8(100, 149, 237, 255));
     let pos = center(500, 500);
     Shape::new()
         .star(pos, 100.0, 175.0, 8)
-        .fill_color(*GREENYELLOW)
-        .stroke_color(*MIDNIGHTBLUE)
+        .fill_color(Color::from_rgba8(173, 255, 47, 255))
+        .stroke_color(Color::from_rgba8(25, 25, 112, 255))
         .stroke_weight(3.0)
         .draw(&mut canvas);
     canvas.save_png("./star.png");

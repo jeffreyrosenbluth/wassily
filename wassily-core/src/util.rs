@@ -128,7 +128,7 @@ pub fn chaiken(pts: &[Point], smoothness: u32, trail: Trail) -> Vec<Point> {
 
 mod tests {
     use super::*;
-    use crate::prelude::pt;
+    use crate::points::pt;
 
     #[test]
     fn smooth_step_test() {

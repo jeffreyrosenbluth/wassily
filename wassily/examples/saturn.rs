@@ -1,5 +1,6 @@
 #![allow(dead_code)]
-use rand_distr::{Distribution, Normal, Standard};
+use rand::distr::Standard;
+use rand_distr::{Distribution, Normal};
 use wassily::prelude::*;
 
 const D: u32 = 1;

@@ -11,17 +11,17 @@ use tiny_skia::*;
 /// ## Example
 ///
 /// ```no_run
-/// use wassily::prelude::*;
+/// use wassily_core::*;
+/// use tiny_skia::Color;
 ///
 /// fn draw(canvas: &mut Canvas) {
-///     canvas.fill(*GRAY);
-///     let center = pt(canvas.width / 2, canvas.height / 2);
-///     ShapeBuilder::new()
+///     canvas.fill(Color::from_rgba8(128, 128, 128, 255));
+///     let center = pt(canvas.width() / 2, canvas.height() / 2);
+///     Shape::new()
 ///         .ellipse(center, 300.0, 200.0)
-///         .fill_color(*INDIGO)
-///         .stroke_color(*ORANGE)
+///         .fill_color(Color::from_rgba8(75, 0, 130, 255))
+///         .stroke_color(Color::from_rgba8(255, 165, 0, 255))
 ///         .stroke_weight(10.0)
-///         .build()
 ///         .draw(canvas);
 /// }
 ///
