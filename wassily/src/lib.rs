@@ -78,19 +78,18 @@ fn main() {
             }
         }
     }
-    canvas.save_png("./schotter.png");
+    canvas.save_png("./outputs/schotter.png");
 }
 ```
 
  */
 
 // Re-export all wassily crates
+pub use wassily_algorithms as algorithms;
 pub use wassily_color as color;
 pub use wassily_core as core;
 pub use wassily_effects as effects;
 pub use wassily_geometry as geometry;
 pub use wassily_noise as noise;
 
-pub mod endo2d;
 pub mod prelude;
-pub mod sphere;

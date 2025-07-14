@@ -117,7 +117,7 @@ fn main() {
     //     fl.draw(&mut canvas);
     //     i += spacing;
     // }
-    canvas.save_png("./fade.png");
+    canvas.save_png("./outputs/fade.png");
 }
 
 #[cfg(test)]

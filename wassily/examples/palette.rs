@@ -54,5 +54,5 @@ fn main() {
             .stroke_color(c)
             .draw(&mut canvas);
     }
-    canvas.save_png("palette.png");
+    canvas.save_png("./outputs/palette.png");
 }

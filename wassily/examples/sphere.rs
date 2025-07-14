@@ -17,7 +17,7 @@ fn main() {
     sphere.specular = Some(100.0);
 
     sphere.on_sphere(&mut canvas);
-    canvas.save_png("./sphere.png");
+    canvas.save_png("./outputs/sphere.png");
 }
 
 fn checkered(texture: &mut Canvas) {

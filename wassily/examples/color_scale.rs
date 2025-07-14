@@ -117,5 +117,5 @@ fn main() {
         .draw(&mut canvas);
 
     let file_name = format!("color_scale_{}.png", SEED);
-    canvas.save_png("color_scale.png");
+    canvas.save_png("./outputs/color_scale.png");
 }

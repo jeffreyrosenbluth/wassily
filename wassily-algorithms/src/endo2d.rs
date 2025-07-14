@@ -1,8 +1,9 @@
 //! Endomorphisms of the unit square.
 //! Mappings from the unit square to itself.
 
-use crate::core::points::Algebra;
-use crate::prelude::{pt, Point, PI};
+use wassily_core::points::{pt, Algebra};
+use tiny_skia::Point;
+use std::f32::consts::PI;
 
 pub fn sinusoid(p: Point) -> Point {
     pt(p.x.sin(), p.y.sin())

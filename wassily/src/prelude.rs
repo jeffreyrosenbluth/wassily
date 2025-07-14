@@ -6,6 +6,9 @@ pub use crate::core::*;
 // Re-export color functionality from wassily-color
 pub use crate::color::*;
 
+// Re-export algorithms functionality from wassily-algorithms
+pub use crate::algorithms::*;
+
 // Re-export effects functionality from wassily-effects
 pub use crate::effects::*;
 
@@ -14,10 +17,6 @@ pub use crate::geometry::*;
 
 // Re-export noise functionality from wassily-noise
 pub use crate::noise::*;
-
-// Re-export functionality from this crate
-pub use crate::endo2d::*;
-pub use crate::sphere::*;
 
 #[allow(ambiguous_glob_reexports)]
 pub use image::*;

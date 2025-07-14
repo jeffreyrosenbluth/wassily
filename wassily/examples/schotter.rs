@@ -65,5 +65,5 @@ fn main() {
             }
         }
     }
-    canvas.save_png("./schotter.png");
+    canvas.save_png("./outputs/schotter.png");
 }

@@ -10,5 +10,5 @@ fn main() {
         .stroke_color(*MIDNIGHTBLUE)
         .stroke_weight(3.0);
     star.draw(&mut canvas);
-    canvas.save_png("./star.png");
+    canvas.save_png("./outputs/star.png");
 }

@@ -161,5 +161,5 @@ fn main() {
     //     .fill_color(*WHITE)
     //     .no_stroke()
     //     .draw(&mut canvas);
-    canvas.save_png("default.png");
+    canvas.save_png("./outputs/saturn.png");
 }

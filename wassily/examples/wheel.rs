@@ -57,9 +57,9 @@ fn main() {
                 .stroke_weight(2.0)
                 .draw(&mut canvas);
         }
-        canvas.save_png("scale.png");
+        canvas.save_png("./outputs/wheel.png");
     } else {
-        let file_name = format!("scale_{}.png", SEED);
+        let file_name = format!("./outputs/wheel_{}.png", SEED);
         canvas.save_png(file_name);
     }
 }

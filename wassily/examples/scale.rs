@@ -21,6 +21,6 @@ fn main() {
     // the exact same image as above, but, double the width and height.
     draw(&mut canvas2);
 
-    canvas1.save_png("./scale1.png");
-    canvas2.save_png("./scale2.png");
+    canvas1.save_png("./outputs/scale1.png");
+    canvas2.save_png("./outputs/scale2.png");
 }

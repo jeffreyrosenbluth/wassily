@@ -1,7 +1,6 @@
-use crate::core::canvas::Canvas;
-use crate::color::rgb8;
-use crate::core::points::*;
-use crate::prelude::{pt, PI};
+use wassily_core::{canvas::Canvas, points::*};
+use wassily_color::rgb8;
+use std::f32::consts::PI;
 use tiny_skia::Color;
 
 pub struct SphereScene<'a> {

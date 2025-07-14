@@ -84,7 +84,7 @@ fn main() {
         .no_stroke()
         .draw(&mut canvas);
 
-    canvas.save_png("./logo.png");
+    canvas.save_png("./outputs/logo.png");
 }
 
 fn bbox_circle(center: Point, radius: f32) -> Rect {
