@@ -6,18 +6,17 @@ pub use crate::core::*;
 // Re-export color functionality from wassily-color
 pub use crate::color::*;
 
-// Re-export functionality from this crate
-pub use crate::curves::*;
-pub use crate::endo2d::*;
-pub use crate::grain::*;
-pub use crate::grid::*;
-pub use crate::lines::*;
-pub use crate::matrix::*;
+// Re-export geometry functionality from wassily-geometry
+pub use crate::geometry::*;
+
 // Re-export noise functionality from wassily-noise
 pub use crate::noise::*;
+
+// Re-export functionality from this crate
+pub use crate::endo2d::*;
+pub use crate::grain::*;
 pub use crate::sphere::*;
 pub use crate::stipple::*;
-pub use crate::subdivision::*;
 pub use crate::textures::*;
 pub use crate::warp::*;
 

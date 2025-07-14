@@ -84,21 +84,16 @@ fn main() {
 
  */
 
-// Re-export wassily-core, wassily-color, and wassily-noise
+// Re-export wassily-core, wassily-color, wassily-noise, and wassily-geometry
 pub use wassily_color as color;
 pub use wassily_core as core;
+pub use wassily_geometry as geometry;
 pub use wassily_noise as noise;
 
-pub mod curves;
 pub mod endo2d;
 pub mod grain;
-pub mod grid;
-pub mod lines;
-pub mod matrix;
 pub mod prelude;
-pub mod quadtree;
 pub mod sphere;
 pub mod stipple;
-pub mod subdivision;
 pub mod textures;
 pub mod warp;

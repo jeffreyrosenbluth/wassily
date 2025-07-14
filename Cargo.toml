@@ -3,7 +3,8 @@ members = [
     "wassily",
     "wassily-core",
     "wassily-color",
-    "wassily-noise"
+    "wassily-noise",
+    "wassily-geometry"
 ]
 resolver = "2"
 

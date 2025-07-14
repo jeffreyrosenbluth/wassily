@@ -21,6 +21,7 @@ categories = ["graphics"]
 wassily-core = { path = "../wassily-core" }
 wassily-color = { path = "../wassily-color" }
 wassily-noise = { path = "../wassily-noise" }
+wassily-geometry = { path = "../wassily-geometry" }
 tiny-skia = { workspace = true }
 noise = { workspace = true }
 rand = { workspace = true }

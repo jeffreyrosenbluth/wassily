@@ -1,5 +1,5 @@
 //! Low discrepancy sampling algorithms.
-use crate::matrix::Matrix;
+use crate::geometry::Matrix;
 use crate::core::points::{center, pt, Algebra};
 use num_traits::AsPrimitive;
 use rand::rngs::SmallRng;
