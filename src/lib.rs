@@ -42,15 +42,15 @@ fn main() {
             let factor = y as f32 / ROWS as f32;
 
             // Randomly displace the square.
-            let x_offset = factor * rng.gen_range(-0.5..0.5);
-            let y_offset = factor * rng.gen_range(-0.5..0.5);
+            let x_offset = factor * rng.random_range(-0.5..0.5);
+            let y_offset = factor * rng.random_range(-0.5..0.5);
 
             // Calculate the position of the center of the square.
             let pos_x = (x * SQUARESIZE + MARGIN) as f32 + x_offset + half_size;
             let pos_y = (y * SQUARESIZE + MARGIN) as f32 + y_offset + half_size;
 
             // A random angle to rotate the square.
-            let angle = factor * rng.gen_range(-45.0..45.0);
+            let angle = factor * rng.random_range(-45.0..45.0);
 
             // Create a rotation transform.
             let rotation = Transform::from_rotate_at(angle, pos_x as f32, pos_y as f32);

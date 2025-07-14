@@ -94,7 +94,7 @@ impl FadeLine {
     }
 
     pub fn draw(&mut self, canvas: &mut Canvas) {
-        let k: u32 = self.rng.gen();
+        let k: u32 = self.rng.random();
         let mut ts: Vec<f32> = (0..self.subdivisions).map(|i| halton(i + k, 2)).collect();
         ts.sort_by(|a, b| a.partial_cmp(b).unwrap());
         ts[0] = 0.0;
@@ -104,7 +104,7 @@ impl FadeLine {
             let ps = pp.section(t[0], t[1]);
             let c = self
                 .color
-                .opacity(self.rng.gen_range(self.min_opacity..self.max_opacity));
+                .opacity(self.rng.random_range(self.min_opacity..self.max_opacity));
             Shape::new()
                 .points(&ps)
                 .no_fill()
@@ -128,7 +128,7 @@ pub struct SandLine {
 impl SandLine {
     pub fn new(start: Point, end: Point, seed: u64) -> Self {
         let mut rng = SmallRng::seed_from_u64(seed);
-        let g = rng.gen_range(0.05..0.95);
+        let g = rng.random_range(0.05..0.95);
         Self {
             start,
             end,
@@ -163,7 +163,7 @@ impl SandLine {
             let t = t as f32 / length;
             let x = self.start.x + t * v.x;
             let y = self.start.y + t * v.y;
-            self.g += self.rng.gen_range(-0.05..0.05);
+            self.g += self.rng.random_range(-0.05..0.05);
             // clamp g to 0..1 with a 0.05 in the opposite direction
             if self.g < 0.0 {
                 self.g = 0.05

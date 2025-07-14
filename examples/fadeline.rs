@@ -33,7 +33,7 @@ fn main() {
 
     for x in 0..img.width() {
         for y in 0..img.height() {
-            if noise2d(&nf, &opts, x as f32, y as f32) + CONTAMINATION * (0.5 - rng.gen::<f32>())
+            if noise2d(&nf, &opts, x as f32, y as f32) + CONTAMINATION * (0.5 - rng.random::<f32>())
                 > 0.0
             {
                 img.put_pixel(x, y, *blurred_img_1.get_pixel(x, y));

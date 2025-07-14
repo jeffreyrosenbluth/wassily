@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use rand_distr::{Distribution, Normal};
+use rand_distr::{Distribution, Normal, Standard};
 use wassily::prelude::*;
 
 const D: u32 = 1;
@@ -20,7 +20,7 @@ enum Style {
 
 impl Distribution<Style> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Style {
-        match rng.gen_range(0..3) {
+        match rng.random_range(0..3) {
             0 => Style::Fractal,
             1 => Style::Clipped,
             _ => Style::Standard,

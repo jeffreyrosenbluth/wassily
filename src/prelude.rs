@@ -35,6 +35,6 @@ pub use palette::{
     Hsl, Hsla, Hsluv, Hsluva, Hsv, Hsva, Hwb, Hwba, Lab, Laba, Lch, Lcha, Lighten, Okhsl, Okhsla,
     Okhsv, Okhsva, Okhwb, Okhwba, Oklab, Oklaba, Oklch, Oklcha, ShiftHue, Srgb, Srgba, Xyz, Xyza,
 };
-pub use rand::{rngs::SmallRng, seq::SliceRandom, thread_rng, Rng, SeedableRng};
-pub use rand_distr::{Distribution, Normal, Standard, StandardNormal};
+pub use rand::{rng, rngs::SmallRng, seq::SliceRandom, Rng, SeedableRng};
+pub use rand_distr::{Distribution, Normal, StandardNormal};
 pub use tiny_skia::*;

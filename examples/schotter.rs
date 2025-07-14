@@ -14,7 +14,7 @@ fn main() {
 
     // We will need a random number generator. 'SmallRng' is reexported from
     // the 'rand' crate.
-    let mut rng = SmallRng::from_entropy();
+    let mut rng = SmallRng::from_rng(&mut rng());
 
     // Set the background color.
     canvas.fill(*WHITESMOKE);
@@ -29,15 +29,15 @@ fn main() {
             let factor = y as f32 / ROWS as f32;
 
             // Randomly displace the square.
-            let x_offset = factor * rng.gen_range(-0.5..0.5);
-            let y_offset = factor * rng.gen_range(-0.5..0.5);
+            let x_offset = factor * rng.random_range(-0.5..0.5);
+            let y_offset = factor * rng.random_range(-0.5..0.5);
 
             // Calculate the position of the center of the square.
             let pos_x = (x * SQUARESIZE + MARGIN) as f32 + x_offset + half_size;
             let pos_y = (y * SQUARESIZE + MARGIN) as f32 + y_offset + half_size;
 
             // A random angle to rotate the square.
-            let angle = factor * rng.gen_range(-45.0..45.0);
+            let angle = factor * rng.random_range(-45.0..45.0);
 
             // Create a rotation transform.
             let rotation = Transform::from_rotate_at(angle, pos_x as f32, pos_y as f32);
@@ -55,7 +55,7 @@ fn main() {
                 .draw(&mut canvas);
 
             // Draw a random pearl shape in the middle of the square 25% of the time.
-            if rng.gen_bool(0.25) {
+            if rng.random_bool(0.25) {
                 Shape::new()
                     // pearl(center, width, height, sides, chaiken iterations, rng)
                     .pearl(pt(pos_x, pos_y), size / 5.0, size / 5.0, 8, 4, &mut rng)

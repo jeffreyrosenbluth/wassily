@@ -14,8 +14,8 @@ pub fn uniform<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> V
     let vals: Vec<Point> = (0..n)
         .map(|_| {
             pt(
-                rng.gen_range(0f32..width.as_()),
-                rng.gen_range(0f32..height.as_()),
+                rng.random_range(0f32..width.as_()),
+                rng.random_range(0f32..height.as_()),
             )
         })
         .collect();
@@ -39,7 +39,7 @@ pub fn halton(index: u32, base: u32) -> f32 {
 /// Generate a set of points using the Halton sequence.
 pub fn halton_23<T: AsPrimitive<f32>>(width: T, height: T, n: u32, seed: u64) -> Vec<Point> {
     let mut rng = SmallRng::seed_from_u64(seed);
-    let k: u32 = rng.gen();
+    let k: u32 = rng.random();
     let xs = (k..n + k).map(|i| halton(i, 2));
     let ys = (k..n + k).map(|i| halton(i, 3));
     xs.zip(ys)
@@ -59,7 +59,7 @@ pub fn poisson_disk(width: f32, height: f32, radius: f32, seed: u64) -> Vec<Poin
     let cols = (width / cell_size).ceil() as usize;
     let rows = (height / cell_size).ceil() as usize;
     let mut grid: Matrix<Option<Point>> = Matrix::fill(rows, cols, None);
-    // let p0 = pt(rng.gen_range(0.0..width), rng.gen_range(0.0..height));
+    // let p0 = pt(rng.random_range(0.0..width), rng.random_range(0.0..height));
     let p0 = center(width, height);
     let mut active = vec![p0];
     let mut ps = vec![p0];
@@ -90,12 +90,12 @@ pub fn poisson_disk(width: f32, height: f32, radius: f32, seed: u64) -> Vec<Poin
 
     while !active.is_empty() {
         let mut found = false;
-        let j = rng.gen_range(0..active.len());
+        let j = rng.random_range(0..active.len());
         let p = active[j];
-        let seed: f32 = rng.gen();
+        let seed: f32 = rng.random();
         for i in 0..K {
             let theta = 2.0 * PI * (seed + M * i as f32 / K as f32);
-            let r1: f32 = radius + EPS + radius * 0.5 * rng.gen::<f32>();
+            let r1: f32 = radius + EPS + radius * 0.5 * rng.random::<f32>();
             let p1 = pt(p.x + r1 * theta.cos(), p.y + r1 * theta.sin());
             let xi = (p1.y / cell_size).floor() as usize;
             let yi = (p1.x / cell_size).floor() as usize;

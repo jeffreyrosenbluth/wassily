@@ -206,7 +206,7 @@ impl Palette {
 
     /// Choose a color from the palette at random.
     pub fn rand_color(&mut self) -> Color {
-        self.colors[self.rng.gen_range(0..self.colors.len())]
+        self.colors[self.rng.random_range(0..self.colors.len())]
     }
 
     /// Perturb the colors in the palette using a normal distrtibution with

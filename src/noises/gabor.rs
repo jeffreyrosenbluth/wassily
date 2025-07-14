@@ -125,14 +125,14 @@ impl Gabor {
         let mut rnd = SmallRng::seed_from_u64(morton(i as u32, j as u32) as u64);
         let mut noise = 0.0;
         for _ in 0..self.impulses_per_cell {
-            let xi: f64 = rnd.gen();
-            let yi: f64 = rnd.gen();
-            let wi: f64 = rnd.gen::<f64>() * 2.0 - 1.0;
+            let xi: f64 = rnd.random();
+            let yi: f64 = rnd.random();
+            let wi: f64 = rnd.random::<f64>() * 2.0 - 1.0;
             let omega0i: f64;
             if let Some(o) = self.omega0 {
                 omega0i = o;
             } else {
-                omega0i = rnd.gen_range(0.0..TAU64);
+                omega0i = rnd.random_range(0.0..TAU64);
             }
             let xix = x - xi;
             let yiy = y - yi;

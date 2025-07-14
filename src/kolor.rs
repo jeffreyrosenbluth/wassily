@@ -489,7 +489,7 @@ pub fn jiggle_hue<R: RngCore>(rng: &mut R, std_dev: f32, color: Color) -> Color 
 /// Generate a random opaque color from the Okhsl color space.
 pub fn rand_okhsl<R: RngCore>(rng: &mut R) -> Color {
     let normal = Normal::new(0.0, 0.25).unwrap();
-    let h: f32 = rng.gen_range(0.0..360.0);
+    let h: f32 = rng.random_range(0.0..360.0);
     let s: f32 = 0.65 + normal.sample(rng);
     let l: f32 = 0.5 + normal.sample(rng);
     Okhsl::new(h, s.clamp(0.0, 1.0), l.clamp(0.0, 1.0)).to_color()
@@ -498,10 +498,10 @@ pub fn rand_okhsl<R: RngCore>(rng: &mut R) -> Color {
 /// Generate a random color from the Okhsla color space.
 pub fn rand_okhsla<R: RngCore>(rng: &mut R) -> Color {
     let normal = Normal::new(0.0, 0.25).unwrap();
-    let h: f32 = rng.gen_range(0.0..360.0);
+    let h: f32 = rng.random_range(0.0..360.0);
     let s: f32 = 0.7 + normal.sample(rng);
     let l: f32 = 0.5 + normal.sample(rng);
-    let a: f32 = rng.gen_range(0.0..1.0);
+    let a: f32 = rng.random_range(0.0..1.0);
     Okhsla::new(h, s, l, a).to_color()
 }
 

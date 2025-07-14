@@ -189,7 +189,7 @@ mod tests {
         let mut qt = QNode::Points(pts);
         for _ in 0..1000 {
             qt.insert(
-                pt(rng.gen_range(0.0..3.0), rng.gen_range(0.0..3.0)),
+                pt(rng.random_range(0.0..3.0), rng.random_range(0.0..3.0)),
                 pt(0., 0.),
                 pt(3., 3.),
             );

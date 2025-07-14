@@ -20,8 +20,8 @@ categories = ["graphics"]
 [dependencies]
 tiny-skia = "0.11.4"
 noise = "0.9"
-rand = {version = "0.8.5", features = ["small_rng"]}
-rand_distr = "0.4"
+rand = {version = "0.9.1", features = ["small_rng"]}
+rand_distr = "0.5.1"
 palette = "0.7.6"
 png = "0.17.10"
 image = "0.25.4"
@@ -33,4 +33,4 @@ log = "0.4.22"
 
 [dev-dependencies]
 rayon = "1.10.0"
-itertools = "0.13.0"
+itertools = "0.14.0"
