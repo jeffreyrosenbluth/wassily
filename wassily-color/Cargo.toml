@@ -1,0 +1,22 @@
+[package]
+name = "wassily-color"
+version = "0.1.0"
+authors = ["jeffreyrosenbluth <jeffrey.rosenbluth@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Color utilities and palette management for wassily generative art library"
+readme = "README.md"
+repository = "https://github.com/jeffreyrosenbluth/wassily/"
+homepage = "https://github.com/jeffreyrosenbluth/wassily/"
+keywords = ["art", "color", "palette", "graphics", "generative"]
+categories = ["graphics"]
+
+[dependencies]
+palette = { workspace = true }
+image = { workspace = true }
+color-thief = { workspace = true }
+once_cell = { workspace = true }
+rand = { workspace = true }
+rand_distr = { workspace = true }
+num-traits = { workspace = true }
+tiny-skia = { workspace = true }
