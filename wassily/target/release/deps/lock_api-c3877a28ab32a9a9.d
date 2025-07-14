@@ -1,0 +1,10 @@
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/liblock_api-c3877a28ab32a9a9.rmeta: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/mutex.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/remutex.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/rwlock.rs
+
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/liblock_api-c3877a28ab32a9a9.rlib: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/mutex.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/remutex.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/rwlock.rs
+
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/lock_api-c3877a28ab32a9a9.d: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/mutex.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/remutex.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/rwlock.rs
+
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/lib.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/mutex.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/remutex.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/rwlock.rs:

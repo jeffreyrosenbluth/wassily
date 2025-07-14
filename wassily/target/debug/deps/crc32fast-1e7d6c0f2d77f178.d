@@ -1,0 +1,9 @@
+/Users/jeffreyrosenbluth/Develop/wassily/target/debug/deps/crc32fast-1e7d6c0f2d77f178.d: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/baseline.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/combine.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/specialized/mod.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/table.rs
+
+/Users/jeffreyrosenbluth/Develop/wassily/target/debug/deps/libcrc32fast-1e7d6c0f2d77f178.rmeta: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/baseline.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/combine.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/specialized/mod.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/table.rs
+
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/lib.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/baseline.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/combine.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/specialized/mod.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.4.2/src/table.rs:

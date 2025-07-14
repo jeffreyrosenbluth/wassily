@@ -1,0 +1,10 @@
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/libnum_complex-d9bdf6c02b8356c5.rmeta: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/cast.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/pow.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/complex_float.rs
+
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/libnum_complex-d9bdf6c02b8356c5.rlib: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/cast.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/pow.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/complex_float.rs
+
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/num_complex-d9bdf6c02b8356c5.d: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/cast.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/pow.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/complex_float.rs
+
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/lib.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/cast.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/pow.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-complex-0.4.6/src/complex_float.rs:
