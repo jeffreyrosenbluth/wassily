@@ -1,0 +1,22 @@
+[package]
+name = "wassily-core"
+version = "0.2.0"
+authors = ["jeffreyrosenbluth <jeffrey.rosenbluth@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Core rendering infrastructure for wassily generative art library"
+repository = "https://github.com/jeffreyrosenbluth/wassily/"
+homepage = "https://github.com/jeffreyrosenbluth/wassily/"
+keywords = ["art", "graphics", "2d", "rendering", "canvas"]
+categories = ["graphics"]
+
+[dependencies]
+tiny-skia = { workspace = true }
+image = { workspace = true }
+png = { workspace = true }
+num-traits = { workspace = true }
+num-complex = { workspace = true }
+log = { workspace = true }
+rand = { workspace = true }
+rand_distr = { workspace = true }
+palette = { workspace = true }

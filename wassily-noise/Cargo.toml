@@ -1,0 +1,19 @@
+[package]
+name = "wassily-noise"
+version = "0.2.0"
+edition = "2021"
+authors = ["Jeffrey Rosenbluth <jeffrey.rosenbluth@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "Noise utilities for wassily - a generative art library"
+repository = "https://github.com/jeffreyrosenbluth/wassily/"
+homepage = "https://github.com/jeffreyrosenbluth/wassily/"
+keywords = ["generative", "art", "graphics", "noise", "procedural"]
+categories = ["graphics", "multimedia::images", "science"]
+
+[dependencies]
+noise = { workspace = true }
+rand = { workspace = true }
+rand_distr = { workspace = true }
+num-traits = { workspace = true }
+image = { workspace = true }
+palette = { workspace = true }

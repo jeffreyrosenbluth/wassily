@@ -1,0 +1,21 @@
+[package]
+name = "wassily-geometry"
+version = "0.2.0"
+edition = "2021"
+authors = ["Jeffrey Rosenbluth <jeffrey.rosenbluth@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "Geometric operations and spatial data structures for wassily - a generative art library"
+repository = "https://github.com/jeffreyrosenbluth/wassily/"
+homepage = "https://github.com/jeffreyrosenbluth/wassily/"
+keywords = ["generative", "art", "graphics", "geometry", "algorithms"]
+categories = ["graphics", "multimedia::images", "algorithms"]
+
+[dependencies]
+wassily-core = { path = "../wassily-core", version = "0.2.0" }
+wassily-noise = { path = "../wassily-noise", version = "0.2.0" }
+wassily-color = { path = "../wassily-color", version = "0.2.0" }
+tiny-skia = { workspace = true }
+rand = { workspace = true }
+rand_distr = { workspace = true }
+num-traits = { workspace = true }
+noise = { workspace = true }

@@ -1,0 +1,16 @@
+[package]
+name = "wassily-algorithms"
+version = "0.2.0"
+edition = "2021"
+authors = ["Jeffrey Rosenbluth <jeffrey.rosenbluth@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "Specialized rendering algorithms for wassily - a generative art library"
+repository = "https://github.com/jeffreyrosenbluth/wassily/"
+homepage = "https://github.com/jeffreyrosenbluth/wassily/"
+keywords = ["generative", "art", "graphics", "algorithms", "rendering"]
+categories = ["graphics", "multimedia::images", "algorithms"]
+
+[dependencies]
+wassily-core = { path = "../wassily-core", version = "0.2.0" }
+wassily-color = { path = "../wassily-color", version = "0.2.0" }
+tiny-skia = { workspace = true }

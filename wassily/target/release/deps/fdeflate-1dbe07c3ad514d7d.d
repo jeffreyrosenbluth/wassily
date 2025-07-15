@@ -1,0 +1,10 @@
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/libfdeflate-1dbe07c3ad514d7d.rmeta: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/compress.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/decompress.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/tables.rs
+
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/libfdeflate-1dbe07c3ad514d7d.rlib: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/compress.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/decompress.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/tables.rs
+
+/Users/jeffreyrosenbluth/Develop/wassily/target/release/deps/fdeflate-1dbe07c3ad514d7d.d: /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/lib.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/compress.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/decompress.rs /Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/tables.rs
+
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/lib.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/compress.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/decompress.rs:
+/Users/jeffreyrosenbluth/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fdeflate-0.3.4/src/tables.rs:

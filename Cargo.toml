@@ -1,36 +1,40 @@
-[package]
-name = "wassily"
-version = "0.1.0"
-authors = ["jeffreyrosenbluth <jeffrey.rosenbluth@gmail.com>"]
-edition = "2021"
-exclude = [
-    "src/bin/meta.rs"
+[workspace]
+members = [
+    "wassily",
+    "wassily-core",
+    "wassily-color",
+    "wassily-noise",
+    "wassily-geometry",
+    "wassily-effects",
+    "wassily-algorithms"
 ]
-license = "MIT OR Apache-2.0"
-description = "wassily is both an API and set of tools for creating generative 2D art"
-readme = "README.md"
-repository = "https://github.com/jeffreyrosenbluth/wassily/"
-homepage = "https://github.com/jeffreyrosenbluth/wassily/"
-keywords = ["art", "graphics","2d", "creative", "sketch"]
-categories = ["graphics"]
+resolver = "2"
 
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+[workspace.dependencies]
+# Core rendering
 tiny-skia = "0.11.4"
-noise = "0.9"
-rand = {version = "0.9.1", features = ["small_rng"]}
-rand_distr = "0.5.1"
-palette = "0.7.6"
-png = "0.17.10"
 image = "0.25.4"
-color-thief = "0.2"
+png = "0.17.10"
+
+# Math and numerics
 num-traits = "0.2"
 num-complex = "0.4.6"
+
+# Random number generation
+rand = { version = "0.9.1", features = ["small_rng"] }
+rand_distr = "0.5.1"
+
+# Color handling
+palette = "0.7.6"
+color-thief = "0.2"
 once_cell = "1.19"
+
+# Noise generation
+noise = "0.9"
+
+# Logging
 log = "0.4.22"
 
-[dev-dependencies]
+# Dev dependencies
 rayon = "1.10.0"
 itertools = "0.14.0"
