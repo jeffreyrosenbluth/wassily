@@ -1,25 +1,106 @@
-//! Quadrilateral and Triangle subdivision.
-//! # Example
-//! ```rust
-//! use wassily_geometry::{Quad, quad_divide_vec};
-//! use wassily_core::{points::pt, util::Orientation};
+//! # Recursive Subdivision Algorithms
 //!
-//! const WIDTH: f32 = 100.0;
-//! const HEIGHT: f32 = 100.0;
+//! **Advanced subdivision algorithms for quadrilaterals and triangles with noise-based distortion.**
+//! This module provides powerful tools for creating complex geometric patterns through
+//! recursive subdivision, essential for fractal-like structures, organic tessellations,
+//! and algorithmic mesh generation.
 //!
+//! ## Key Features
+//!
+//! - **[`Quad`]**: Quadrilateral subdivision with customizable split strategies
+//! - **[`Tri`]**: Triangle subdivision for triangular mesh generation
+//! - **Noise-based distortion**: Organic deformation using Perlin noise
+//! - **Perspective projections**: 3D-style quad generation with vanishing points
+//! - **Batch operations**: Efficient subdivision of large shape collections
+//!
+//! ## Core Concepts
+//!
+//! ### Subdivision Strategies
+//!
+//! Shapes can be subdivided using various strategies:
+//! - **Adaptive**: Split along the longest dimension for balanced shapes
+//! - **Fixed ratios**: Consistent split ratios for regular patterns
+//! - **Random**: Probabilistic splitting for organic appearance
+//! - **Function-driven**: Custom logic based on shape properties
+//!
+//! ### Noise-based Distortion
+//!
+//! Points can be perturbed using Perlin noise to create organic variations:
+//! - Maintains overall structure while adding natural irregularity
+//! - Configurable noise scale and intensity
+//! - Useful for simulating natural phenomena and hand-drawn aesthetics
+//!
+//! ## Quick Start
+//!
+//! ```no_run
+//! use wassily_geometry::*;
+//! use wassily_core::points::pt;
+//!
+//! // Create initial quadrilateral
 //! let quad = Quad::new(
-//!     pt(0.0, 0.0),
-//!     pt(0.0, HEIGHT),
-//!     pt(WIDTH, HEIGHT),
-//!     pt(WIDTH, 0.0),
+//!     pt(0.0, 0.0),   // Bottom left
+//!     pt(0.0, 100.0), // Top left  
+//!     pt(100.0, 100.0), // Top right
+//!     pt(100.0, 0.0), // Bottom right
 //! );
-//! let mut qs = vec![quad];
-//! let n = 8;
-//! for _ in 0..n {
-//!     qs = quad_divide_vec(
-//!         &qs,
-//!         |q| q.best_dir(), // Choose the longer orientation to subdivide along.
-//!         |_| (0.25, 0.5),
+//!
+//! // Recursive subdivision
+//! let mut quads = vec![quad];
+//! for _ in 0..5 {
+//!     quads = quad_divide_vec(
+//!         &quads,
+//!         |q| q.best_dir(),    // Split along longest dimension
+//!         |_| (0.3, 0.7),      // Split ratios
+//!     );
+//! }
+//! // Result: 32 subdivided quadrilaterals
+//! ```
+//!
+//! ## Advanced Examples
+//!
+//! ### Organic Subdivision with Noise
+//!
+//! ```no_run
+//! use wassily_geometry::*;
+//! use wassily_core::points::pt;
+//!
+//! // Create base quadrilateral
+//! let quad = Quad::new(pt(0.0, 0.0), pt(0.0, 200.0), pt(200.0, 200.0), pt(200.0, 0.0));
+//! let mut quads = vec![quad];
+//!
+//! // Subdivide with organic distortion
+//! for _ in 0..4 {
+//!     quads = quad_divide_vec(&quads, |q| q.best_dir(), |_| (0.4, 0.6));
+//!     
+//!     // Apply noise-based distortion to all points
+//!     for quad in &mut quads {
+//!         let points = vec![quad.bl, quad.tl, quad.tr, quad.br];
+//!         let warped = warp_points(&points, 0.02, 10.0); // scale=0.02, factor=10.0
+//!         *quad = Quad::new(warped[0], warped[1], warped[2], warped[3]);
+//!     }
+//! }
+//! ```
+//!
+//! ### Triangle Mesh Generation
+//!
+//! ```no_run
+//! use wassily_geometry::*;
+//! use wassily_core::points::pt;
+//!
+//! // Create initial triangle
+//! let triangle = Tri::new(
+//!     pt(0.0, 0.0),   // Bottom left
+//!     pt(50.0, 100.0), // Top
+//!     pt(100.0, 0.0), // Bottom right
+//! );
+//!
+//! // Recursive triangle subdivision
+//! let mut triangles = vec![triangle];
+//! for _ in 0..6 {
+//!     triangles = tri_divide_vec(
+//!         &triangles,
+//!         |t| t.best_dir(),    // Split from vertex opposite longest side
+//!         || 0.5,              // Split at midpoint
 //!     );
 //! }
 //! ```

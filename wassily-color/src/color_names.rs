@@ -54,7 +54,7 @@
 //! - **DEEPPINK**, **LIME**, **GOLD**, **ORANGE**
 //! - **VIOLET**, **TURQUOISE**, **HOTPINK**
 //!
-use crate::kolor::rgb8;
+use crate::color::rgb8;
 use once_cell::sync::Lazy;
 use tiny_skia::Color;
 

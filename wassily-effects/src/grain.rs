@@ -1,9 +1,54 @@
-//! Grain effect
-use wassily_core::{canvas::{paint_shader, Canvas}, shape::Shape, points::pt};
-use wassily_color::rgb;
-use wassily_noise::{noise2d, NoiseOpts};
+//! # Grain Effects
+//!
+//! Film grain and noise overlay effects for adding texture and visual interest
+//! to digital artwork. This module provides tools for creating realistic grain
+//! effects that simulate film photography or add organic texture to clean digital art.
+//!
+//! ## Key Features
+//!
+//! - **Film Grain**: Simulates the texture of film photography
+//! - **Configurable Parameters**: Control grain size, intensity, and distribution
+//! - **Blend Modes**: Uses overlay blending for natural grain appearance
+//! - **Performance Optimized**: Efficient noise-based grain generation
+//!
+//! ## Basic Usage
+//!
+//! ```no_run
+//! use wassily_effects::*;
+//! use wassily_core::*;
+//!
+//! // Create grain effect
+//! let grain = Grain::new(800, 600, 0.01, 0.5);
+//! let grain_paint = grain.paint();
+//!
+//! // Apply to existing artwork
+//! let mut canvas = Canvas::new(800, 600);
+//! canvas.fill(*BLUE);  // Base color
+//! canvas.fill_paint(&grain_paint);  // Add grain overlay
+//! ```
+//!
+//! ## Parameters
+//!
+//! - **Scale**: Controls the grain size (smaller = finer grain)
+//! - **Factor**: Controls the grain intensity (higher = more visible)
+//! - **Blend Mode**: Uses overlay mode for natural grain appearance
+//! - **Opacity**: Semi-transparent grain for subtle effect
+//!
+//! ## Applications
+//!
+//! - **Film Photography Simulation**: Add authentic film grain
+//! - **Texture Enhancement**: Add organic texture to flat colors
+//! - **Artistic Effects**: Create vintage or aged appearance
+//! - **Visual Interest**: Break up large areas of flat color
 use noise::{Fbm, Perlin};
 use tiny_skia::{BlendMode, FilterQuality, Paint, Pattern, SpreadMode, Transform};
+use wassily_color::rgb;
+use wassily_core::{
+    canvas::{paint_shader, Canvas},
+    points::pt,
+    shape::Shape,
+};
+use wassily_noise::{noise2d, NoiseOpts};
 
 pub struct Grain(Canvas);
 

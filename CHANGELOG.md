@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `itertools` upgraded to 0.14.0
 - **API Improvements**: Fixed deprecated `gen_range` calls throughout codebase
 - **File Organization**: Cleaned up project structure, removed duplicate files
+- **Module Rename**: `kolor.rs` renamed to `color.rs` in `wassily-color` crate for better naming consistency
 
 ### Fixed
 - **Saturn Example**: Resolved Standard distribution import conflict

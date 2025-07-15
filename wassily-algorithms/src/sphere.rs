@@ -1,8 +1,88 @@
+//! # 3D Sphere Rendering
+//!
+//! Advanced 3D sphere rendering with realistic lighting, texture mapping, and
+//! perspective projection. This module provides a complete 3D rendering pipeline
+//! optimized for generative art applications.
+//!
+//! ## Key Features
+//!
+//! - **Realistic Lighting**: Multiple light sources with diffuse and specular reflection
+//! - **Texture Mapping**: Apply 2D canvases as textures on 3D spheres
+//! - **3D Rotation**: Rotate spheres around X, Y, and Z axes
+//! - **Perspective Projection**: Realistic perspective with configurable focal length
+//! - **Multiple Lights**: Support for multiple light sources
+//!
+//! ## Basic Usage
+//!
+//! ```no_run
+//! use wassily_algorithms::*;
+//! use wassily_core::*;
+//!
+//! // Create a texture
+//! let mut texture = Canvas::new(256, 256);
+//! texture.fill(*BLUE);
+//!
+//! // Set up a basic scene
+//! let scene = SphereScene::basic(pt3(0.0, 0.0, 100.0), &texture);
+//!
+//! // Render to output
+//! let mut output = Canvas::new(800, 600);
+//! render_sphere(&scene, &mut output);
+//! ```
+//!
+//! ## Advanced Lighting
+//!
+//! ```no_run
+//! use wassily_algorithms::*;
+//! use wassily_core::*;
+//!
+//! let texture = Canvas::new(256, 256);
+//! 
+//! // Create lights
+//! let lights = vec![
+//!     Light::new(pt3(-10.0, 10.0, 5.0), *WHITE, 0.8),
+//!     Light::new(pt3(10.0, -5.0, 10.0), *BLUE, 0.3),
+//! ];
+//!
+//! // Set up scene with custom lighting
+//! let scene = SphereScene::new(
+//!     pt3(0.0, 0.0, 0.0),    // camera position
+//!     400.0,                  // focal length
+//!     pt3(0.0, 0.0, 100.0),  // sphere center
+//!     50.0,                   // sphere radius
+//!     &texture,
+//!     0.1, 0.2, 0.0,         // rotation angles
+//!     lights,
+//!     Some(32.0),            // specular exponent
+//! );
+//! ```
+//!
+//! ## Components
+//!
+//! - [`SphereScene`]: Complete scene configuration
+//! - [`Light`]: Light source definition
+//! - Main rendering function for sphere scenes
+
 use wassily_core::{canvas::Canvas, points::*};
 use wassily_color::rgb8;
 use std::f32::consts::PI;
 use tiny_skia::Color;
 
+/// Configuration for a 3D sphere rendering scene.
+/// 
+/// This struct contains all the parameters needed to render a textured sphere
+/// with realistic lighting and perspective projection.
+/// 
+/// # Fields
+/// 
+/// - `camera`: Position of the camera in 3D space
+/// - `focal_len`: Focal length for perspective projection (higher = more telephoto)
+/// - `center`: Position of the sphere center in 3D space
+/// - `radius`: Radius of the sphere
+/// - `texture`: 2D canvas to use as texture on the sphere surface
+/// - `rotation_x`, `rotation_y`, `rotation_z`: Rotation angles in radians
+/// - `lights`: Vector of light sources
+/// - `specular`: Optional specular reflection exponent (higher = shinier)
 pub struct SphereScene<'a> {
     pub camera: Point3,
     pub focal_len: f32,

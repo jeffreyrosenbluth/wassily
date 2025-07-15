@@ -18,7 +18,7 @@
 //!
 //! - **[`color_names`]**: Pre-defined HTML/CSS color constants
 //! - **[`color_palette`]**: Palette management and color scaling functions
-//! - **[`kolor`]**: Core color utilities, conversions, and generation functions
+//! - **[`color`]**: Core color utilities, conversions, and generation functions
 //!
 //! ## Quick Start
 //!
@@ -59,12 +59,12 @@
 
 pub mod color_names;
 pub mod color_palette;
-pub mod kolor;
+pub mod color;
 
 // Re-export key types and functions for convenience
 pub use color_names::*;
 pub use color_palette::*;
-pub use kolor::*;
+pub use color::*;
 
 // Re-export commonly used external types
 pub use palette::{

@@ -1,5 +1,49 @@
-//! Tools to make paints from patterns.
-//! See the logo example for an example of how to use these.
+//! # Procedural Textures
+//!
+//! Tools for creating procedural textures and pattern-based paints.
+//! This module provides utilities for generating complex textures algorithmically
+//! and converting them into paint objects for use with shapes and fills.
+//!
+//! ## Key Components
+//!
+//! - **[`PatternPaint`]**: Convert textures into reusable paint patterns
+//! - **Texture Generators**: Functions to create various procedural textures
+//! - **Pattern Integration**: Seamless integration with wassily's paint system
+//!
+//! ## Basic Usage
+//!
+//! ```no_run
+//! use wassily_effects::*;
+//! use wassily_core::*;
+//!
+//! // Create a texture
+//! let texture = stipple_texture(256, 256, *BLACK, 8.0);
+//!
+//! // Convert to pattern paint
+//! let bbox = Rect::from_xywh(0.0, 0.0, 256.0, 256.0).unwrap();
+//! let mut pattern_paint = PatternPaint::new(&texture, bbox, 256, 256);
+//! let paint = pattern_paint.paint();
+//!
+//! // Use with shapes
+//! Shape::new()
+//!     .rect_xywh(pt(100, 100), pt(200, 200))
+//!     .fill_paint(&paint)
+//!     .draw(&mut canvas);
+//! ```
+//!
+//! ## Texture Types
+//!
+//! - **Stipple Textures**: Dot patterns with various distributions
+//! - **Noise Textures**: Procedural noise-based surface patterns
+//! - **Geometric Textures**: Mathematical patterns and shapes
+//! - **Custom Textures**: Build your own texture generators
+//!
+//! ## Applications
+//!
+//! - **Surface Treatments**: Add texture to filled shapes
+//! - **Pattern Fills**: Repeating patterns across large areas
+//! - **Artistic Effects**: Stippling, hatching, cross-hatching
+//! - **Material Simulation**: Wood grain, fabric, stone textures
 use wassily_core::{canvas::*, shape::*, points::pt};
 use wassily_color::*;
 use wassily_noise::*;

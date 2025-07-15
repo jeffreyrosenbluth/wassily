@@ -1,4 +1,61 @@
-//! Tools for domain warping.
+//! # Domain Warping
+//!
+//! Advanced coordinate transformation and domain warping effects.
+//! This module provides tools for transforming coordinate spaces to create
+//! distortion effects, non-linear transformations, and complex visual warping
+//! of images and procedural content.
+//!
+//! ## Key Concepts
+//!
+//! Domain warping transforms the coordinate space before sampling colors or textures,
+//! creating powerful distortion effects:
+//!
+//! - **Coordinate Transformation**: Map input coordinates to new positions
+//! - **Chain Composition**: Combine multiple warping operations
+//! - **Multi-Source Support**: Warp images, functions, or other warp nodes
+//! - **Flexible Coordinate Systems**: Polar, Cartesian, or absolute coordinates
+//!
+//! ## Components
+//!
+//! - **[`Warp`]**: Main warping transformation container
+//! - **[`WarpNode`]**: Source content (image, function, or nested warp)
+//! - **[`Coord`]**: Coordinate system specification
+//! - **Domain Functions**: Functions that transform coordinate spaces
+//!
+//! ## Basic Usage
+//!
+//! ```no_run
+//! use wassily_effects::*;
+//! use wassily_core::*;
+//! use std::sync::Arc;
+//!
+//! // Create a simple warping function
+//! let warp_func = Arc::new(|p: Point| {
+//!     // Simple swirl transformation
+//!     let r = (p.x * p.x + p.y * p.y).sqrt();
+//!     let angle = r * 0.1;
+//!     pt(
+//!         p.x * angle.cos() - p.y * angle.sin(),
+//!         p.x * angle.sin() + p.y * angle.cos()
+//!     )
+//! });
+//!
+//! // Create color function
+//! let color_func = Arc::new(|x: f32, y: f32| {
+//!     rgb8((x * 255.0) as u8, (y * 255.0) as u8, 128)
+//! });
+//!
+//! // Combine into warp
+//! let warp_node = WarpNode::Func(color_func);
+//! let warp = Warp::new(warp_func, warp_node, Coord::Cartesian);
+//! ```
+//!
+//! ## Applications
+//!
+//! - **Image Distortion**: Non-linear image transformations
+//! - **Procedural Effects**: Warped noise and pattern generation
+//! - **Artistic Distortion**: Creative coordinate space manipulation
+//! - **Animation**: Time-varying coordinate transformations
 use wassily_color::{get_color, get_color_reflect, get_color_tile, get_color_wrap};
 use wassily_core::points::pt;
 use image::DynamicImage;

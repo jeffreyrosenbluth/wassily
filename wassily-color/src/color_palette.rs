@@ -55,7 +55,7 @@
 //! let palette = Palette::from_image("artwork.jpg", 5);
 //! ```
 
-use crate::kolor::*;
+use crate::color::*;
 
 /// Map a value from one range to another.
 fn map_range(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {

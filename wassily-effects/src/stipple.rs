@@ -1,4 +1,54 @@
-//! Low discrepancy sampling algorithms.
+//! # Low-Discrepancy Sampling
+//!
+//! Advanced sampling algorithms for generating superior point distributions.
+//! This module provides low-discrepancy sequences that create more uniform
+//! point distributions than pseudo-random sampling, essential for high-quality
+//! stippling, sampling, and procedural generation.
+//!
+//! ## Key Algorithms
+//!
+//! - **Halton Sequence**: Classic low-discrepancy sequence for 2D sampling
+//! - **Uniform Distribution**: Traditional pseudo-random sampling for comparison
+//! - **Specialized Samplers**: Optimized for specific generative art applications
+//!
+//! ## Low-Discrepancy vs Random
+//!
+//! Low-discrepancy sequences provide better space-filling properties than
+//! pseudo-random sampling:
+//!
+//! - **More Uniform**: Better distribution across the sampling space
+//! - **Less Clumping**: Avoids the clustering typical of random sampling
+//! - **Deterministic**: Reproducible results with same parameters
+//! - **Scalable**: Quality improves with more sample points
+//!
+//! ## Basic Usage
+//!
+//! ```no_run
+//! use wassily_effects::*;
+//! use wassily_core::*;
+//!
+//! // Generate low-discrepancy points
+//! let points = halton_2d(1000, 800.0, 600.0);
+//!
+//! // Create stipple pattern
+//! let mut canvas = Canvas::new(800, 600);
+//! canvas.fill(*WHITE);
+//!
+//! for point in points {
+//!     Shape::new()
+//!         .circle(point, 2.0)
+//!         .fill_color(*BLACK)
+//!         .draw(&mut canvas);
+//! }
+//! ```
+//!
+//! ## Applications
+//!
+//! - **Stippling**: High-quality dot patterns and pointillism
+//! - **Sampling**: Monte Carlo integration and statistical sampling
+//! - **Texture Generation**: Even distribution of texture elements
+//! - **Particle Systems**: Better initial particle placement
+//! - **Procedural Generation**: More natural-looking random placement
 use wassily_geometry::Matrix;
 use wassily_core::points::{center, pt, Algebra};
 use num_traits::AsPrimitive;
