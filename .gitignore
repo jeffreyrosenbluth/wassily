@@ -1,3 +1,7 @@
 /target
 Cargo.lock
 *.png
+
+# Generated documentation files
+README.html
+README_files/
