@@ -1,4 +1,59 @@
-//! A Palette of colors and functions to manage them.
+//! # Color Palettes and Scaling
+//!
+//! Tools for managing color palettes and creating smooth color transitions.
+//! This module provides the `Palette` struct for basic color management and
+//! the `ColorScale` struct for mathematically smooth color interpolation using
+//! Fourier series.
+//!
+//! ## Key Components
+//!
+//! - **[`Palette`]**: Basic color palette management with random access
+//! - **[`ColorScale`]**: Fourier-based smooth color transitions
+//! - **Image Extraction**: Extract dominant colors from images
+//! - **Utility Functions**: Color manipulation and helper functions
+//!
+//! ## Palette Management
+//!
+//! ```no_run
+//! use wassily_color::*;
+//!
+//! // Create a palette from colors
+//! let mut palette = Palette::new(vec![
+//!     *CRIMSON,
+//!     *GOLD,
+//!     *FORESTGREEN,
+//!     *STEELBLUE,
+//! ]);
+//!
+//! // Access colors
+//! let first_color = palette.get_color(0);
+//! let random_color = palette.get_random_color();
+//! palette.shuffle(); // Randomize order
+//! ```
+//!
+//! ## Color Scaling
+//!
+//! ```no_run
+//! use wassily_color::*;
+//!
+//! // Create a smooth color scale
+//! let scale = ColorScale::new(
+//!     *RED, *ORANGE, *YELLOW, *GREEN, *BLUE
+//! );
+//!
+//! // Get interpolated colors
+//! let color_at_25_percent = scale.get_color(0.25);
+//! let fractal_color = scale.get_color_fractal(0.5, 10.0);
+//! ```
+//!
+//! ## Image Color Extraction
+//!
+//! ```no_run
+//! use wassily_color::*;
+//!
+//! // Extract dominant colors from an image
+//! let palette = Palette::from_image("artwork.jpg", 5);
+//! ```
 
 use crate::kolor::*;
 
@@ -269,7 +324,7 @@ impl IntoIterator for Palette {
 /// A color scale is a gradient made from five colors. The gradient is
 /// is created by finding the 5 term fourier series that fits the five colors.
 /// The colors are the values of the function at t = 1/6,2/6, 3/6, 4/6, and 5/6.
-/// Where t is in [0,1]. A nice feature of 'ColorScale' is that they are periodic.
+/// Where t is in \[0,1\]. A nice feature of 'ColorScale' is that they are periodic.
 #[derive(Clone, Debug)]
 pub struct ColorScale {
     pub a0: (f32, f32, f32),
@@ -359,7 +414,7 @@ impl ColorScale {
         Self::new(color0, color1, color2, color3, color4)
     }
 
-    /// Get a color from the color scale at t in [0,1].
+    /// Get a color from the color scale at t in \[0,1\].
     pub fn get_color(&self, t: f32) -> Color {
         let red = 0.5
             + 0.5
@@ -392,7 +447,7 @@ impl ColorScale {
         .unwrap()
     }
 
-    /// Get a color from the fractal version of the color scale at t in [0,1].
+    /// Get a color from the fractal version of the color scale at t in \[0,1\].
     pub fn get_color_fractal(&self, t: f32, phase: f32) -> Color {
         let a = self.get_color(t);
         let b = self.get_color(2.0 * t).rotate_hue(phase);

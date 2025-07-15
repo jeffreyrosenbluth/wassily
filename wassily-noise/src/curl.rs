@@ -1,4 +1,37 @@
-//! A Curl noise struct that holds a source noise function and an epsilon value.
+//! # Curl Noise
+//!
+//! Curl noise generates vector fields with fluid-like, swirling patterns by computing
+//! the curl of a scalar noise field. This creates divergence-free vector fields that
+//! are particularly useful for simulating fluid flow, particle systems, and organic
+//! movement patterns in generative art.
+//!
+//! ## Key Features
+//!
+//! - **Fluid-like Motion**: Creates natural, swirling vector fields
+//! - **Divergence-free**: Mathematically guarantees no sources or sinks
+//! - **Configurable**: Adjustable epsilon value for different curl characteristics
+//! - **Composable**: Works with any underlying noise function
+//!
+//! ## Usage
+//!
+//! ```no_run
+//! use wassily_noise::*;
+//! use noise::{Perlin, NoiseFn};
+//!
+//! // Create curl noise from Perlin noise
+//! let perlin = Perlin::new(42);
+//! let curl_noise = Curl::new(perlin).eps(0.001);
+//!
+//! // Use in particle systems or flow fields
+//! let flow_vector = curl_noise.get([x, y]);
+//! ```
+//!
+//! ## Applications
+//!
+//! - **Particle Systems**: Natural, flowing particle movement
+//! - **Flow Fields**: Organic line and curve generation
+//! - **Fluid Simulation**: Realistic fluid-like patterns
+//! - **Organic Textures**: Natural, non-repetitive surface patterns
 use noise::{NoiseFn, Seedable};
 use std::f64::consts::PI;
 

@@ -1,4 +1,45 @@
-//! Gabor Noise - 2d only.
+//! # Gabor Noise
+//!
+//! Gabor noise generates procedural textures with controllable frequency and orientation
+//! characteristics. Based on Gabor kernels (windowed sinusoids), this noise is particularly
+//! useful for creating textures that resemble natural materials like wood, fabric, or
+//! organic surfaces.
+//!
+//! ## Key Features
+//!
+//! - **Frequency Control**: Adjustable frequency characteristics
+//! - **Anisotropic**: Can create directional patterns and textures
+//! - **Natural Textures**: Excellent for organic and material-like surfaces
+//! - **2D Optimized**: Specialized for 2D texture generation
+//!
+//! ## Implementation
+//!
+//! This implementation is based on the research papers:
+//! - Lagae et al. (2009): "Procedural Noise using Sparse Gabor Convolution"
+//! - Lagae et al. (2011): "Improving Gabor Noise"
+//! - Tavernier et al. (2019): "Making Gabor Noise Fast and Normalized"
+//!
+//! ## Usage
+//!
+//! ```no_run
+//! use wassily_noise::*;
+//! use noise::NoiseFn;
+//!
+//! // Create Gabor noise with specific parameters
+//! let gabor_noise = Gabor::new()
+//!     .freq(0.1)
+//!     .impulse_density(64.0);
+//!
+//! // Generate texture values
+//! let texture_value = gabor_noise.get([x, y]);
+//! ```
+//!
+//! ## Applications
+//!
+//! - **Material Textures**: Wood grain, fabric patterns, rock surfaces
+//! - **Organic Patterns**: Natural, non-repetitive surface details
+//! - **Procedural Textures**: Tileable texture generation
+//! - **Artistic Effects**: Stylized surface treatments
 use noise::NoiseFn;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};

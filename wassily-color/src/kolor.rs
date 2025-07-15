@@ -1,4 +1,61 @@
-//! Utilities to manage colors.
+//! # Color Utilities
+//!
+//! Core color utilities, conversions, and generation functions for generative art.
+//! This module provides the fundamental color operations, random color generation,
+//! and conversion utilities that form the foundation of the wassily color system.
+//!
+//! ## Key Functions
+//!
+//! ### Color Creation
+//! - [`rgb8()`]: Create colors from 8-bit RGB values
+//! - RGBA color creation from 8-bit values
+//! - HSL/HSV color creation functions
+//! - Perceptually uniform color space functions
+//!
+//! ### Random Color Generation
+//! - [`rand_okhsl()`]: Generate random colors in perceptually uniform space
+//! - Random color generation in various color spaces
+//! - Random RGB color generation
+//!
+//! ### Color Conversion
+//! - [`ConvertColor`]: Trait for converting between color types
+//! - Wide support for palette crate color types
+//! - Automatic conversion to/from TinySkia Color
+//!
+//! ## Usage Examples
+//!
+//! ```no_run
+//! use wassily_color::*;
+//! use rand::thread_rng;
+//!
+//! // Create colors from RGB values
+//! let red = rgb8(255, 0, 0);
+//! let blue = rgba8(0, 0, 255, 128); // Semi-transparent blue
+//!
+//! // Create colors from HSL (more intuitive)
+//! let bright_green = hsl(120.0, 1.0, 0.5); // Hue, Saturation, Lightness
+//! let pastel_pink = okhsl(330.0, 0.7, 0.8); // Perceptually uniform
+//!
+//! // Generate random colors
+//! let mut rng = thread_rng();
+//! let random_color = rand_okhsl(&mut rng);
+//! let random_pastel = rand_okhsl_lightness(&mut rng, 0.8);
+//! ```
+//!
+//! ## Color Spaces
+//!
+//! This module emphasizes perceptually uniform color spaces:
+//!
+//! - **Okhsl/Okhsv**: Recommended for most generative art applications
+//! - **Lab/Lch**: Perceptually uniform lightness and chroma
+//! - **Traditional RGB/HSL**: For compatibility and specific use cases
+//!
+//! ## Advanced Features
+//!
+//! - **Noise-based Colors**: Generate colors using noise functions
+//! - **Image Sampling**: Extract colors from images at specific coordinates
+//! - **Gradient Generation**: Create smooth color transitions
+//! - **Color Harmony**: Tools for creating pleasing color relationships
 
 // Simple noise replacement - for now using basic pseudo-random
 fn normal_xy(x: f64, y: f64) -> f64 {

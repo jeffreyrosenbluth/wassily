@@ -1,7 +1,25 @@
+//! # Shape Builder
+//!
 //! A builder for creating shapes. `Shape` is the main way in which paths are built
-//! and drawn to the `Canvas`. The basid idea is to provide a list of points that
+//! and drawn to the `Canvas`. The basic idea is to provide a list of points that
 //! are connected by lines or bezier curves. The shape can then be filled and/or stroked.
-//! Invoke the draw method to finish the build and draw the shape to a  `Canvas`.
+//! Invoke the draw method to finish the build and draw the shape to a `Canvas`.
+//!
+//! ## Basic Usage
+//!
+//! The Shape builder follows a fluent API pattern:
+//! 1. Create a new shape with `Shape::new()`
+//! 2. Add geometry (circle, rectangle, polygon, etc.)
+//! 3. Set styling (fill color, stroke color, stroke weight)
+//! 4. Apply transformations (rotate, scale, translate)
+//! 5. Draw to canvas with `.draw(canvas)`
+//!
+//! ## Available Shapes
+//!
+//! - **Basic Shapes**: `circle()`, `ellipse()`, `rect()`, `line()`
+//! - **Polygons**: `polygon()`, `star()`, `regular_polygon()`
+//! - **Paths**: `polyline()`, `bezier_curve()`, `quad_curve()`
+//! - **Procedural**: `pearl()` (randomized polygon)
 /*!
 
 ```no_run

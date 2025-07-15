@@ -1,5 +1,54 @@
-//! Make noise easier to use in generative art and use f32 instead of f64.
-//! And add some noise functions not present in the noise crate.
+//! # Wassily Noise
+//!
+//! Noise generation utilities optimized for generative art applications.
+//! This crate provides ergonomic wrappers around the Rust noise library with
+//! f32 support, additional noise functions, and utilities specifically designed
+//! for creative coding and generative art.
+//!
+//! ## Key Features
+//!
+//! - **f32 Support**: All noise functions work with f32 instead of f64 for better performance
+//! - **Scale-Independent**: Noise scaling that adapts to canvas size automatically
+//! - **Generative Art Focus**: Additional noise types specifically useful for creative coding
+//! - **Easy Integration**: Seamless integration with wassily's canvas and shape systems
+//!
+//! ## Available Noise Types
+//!
+//! - **Core Functions**: [`noise2d()`], [`noise3d()`] with normalized variants
+//! - **[`curl`]**: Curl noise for fluid-like effects and vector fields
+//! - **[`gabor`]**: Gabor noise for procedural textures and patterns
+//! - **[`white`]**: White noise and pseudo-random number generation
+//! - **[`sinusoid`]**: Sinusoidal noise patterns
+//! - **[`img_noise`]**: Image-based noise generation
+//!
+//! ## Quick Start
+//!
+//! ```no_run
+//! use wassily_noise::*;
+//! use noise::{NoiseFn, Perlin};
+//!
+//! // Create a noise function
+//! let perlin = Perlin::new(42);
+//! let opts = NoiseOpts::default().scales(0.01);
+//!
+//! // Generate noise values
+//! let value = noise2d(perlin, &opts, 100.0, 150.0);      // Range: [-1, 1]
+//! let normalized = noise2d_01(perlin, &opts, 100.0, 150.0); // Range: [0, 1]
+//! ```
+//!
+//! ## Noise Options
+//!
+//! The [`NoiseOpts`] struct provides fine-grained control over noise generation:
+//!
+//! ```no_run
+//! use wassily_noise::*;
+//!
+//! let opts = NoiseOpts::default()
+//!     .width(800.0)
+//!     .height(600.0)
+//!     .scales(0.005)        // Uniform scaling
+//!     .factor(2.0);         // Amplitude multiplier
+//! ```
 use noise::NoiseFn;
 use num_traits::{AsPrimitive, ToPrimitive};
 
@@ -16,11 +65,37 @@ pub use img_noise::*;
 pub use sinusoid::*;
 pub use white::*;
 
-/// The input to noise will be scaled by scale / (width or height).
-/// This will keep noise independent of the canvas size.
-/// If you prefer to scale the input yourself, use `Default::default()`
-/// or set width and height to be 1.0.
-/// The output will be scaled by factor.
+/// Configuration options for noise generation.
+///
+/// `NoiseOpts` provides fine-grained control over how noise coordinates are scaled
+/// and how the output is modified. This allows for canvas-size-independent noise
+/// generation and consistent results across different output resolutions.
+///
+/// ## Scaling Behavior
+///
+/// - **Input Scaling**: Coordinates are scaled by `scale / (width or height)`
+/// - **Output Scaling**: Results are multiplied by `factor`
+/// - **Canvas Independence**: Noise patterns remain consistent regardless of canvas size
+///
+/// ## Example
+///
+/// ```no_run
+/// use wassily_noise::*;
+///
+/// // Create noise options for a 800x600 canvas
+/// let opts = NoiseOpts::default()
+///     .width(800.0)
+///     .height(600.0)
+///     .scales(0.01)     // Fine detail
+///     .factor(2.0);     // Amplify output
+///
+/// // Same pattern will look identical on any canvas size
+/// let opts_large = NoiseOpts::default()
+///     .width(1600.0)
+///     .height(1200.0)
+///     .scales(0.01)
+///     .factor(2.0);
+/// ```
 #[derive(Debug, Clone, Copy)]
 pub struct NoiseOpts {
     pub width: f32,
@@ -76,12 +151,12 @@ impl NoiseOpts {
         Self { x_scale, ..self }
     }
 
-    /// Used to  the y-coordinate: `y = y_scale * y / height`.
+    /// Used to scale the y-coordinate: `y = y_scale * y / height`.
     pub fn y_scale(self, y_scale: f32) -> Self {
         Self { y_scale, ..self }
     }
 
-    /// Used ot scale the z-coordingate: z = z_scale * z.
+    /// Used to scale the z-coordinate: `z = z_scale * z`.
     pub fn z_scale(self, z_scale: f32) -> Self {
         Self { z_scale, ..self }
     }

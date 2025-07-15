@@ -1,4 +1,42 @@
-//! # Prelude - use this to import everthing you need to use the library.
+//! # Prelude
+//!
+//! The prelude provides a convenient way to import all the essential functionality
+//! from the wassily ecosystem. This is the recommended approach for most users.
+//!
+//! ## Usage
+//!
+//! ```rust
+//! use wassily::prelude::*;
+//!
+//! fn main() {
+//!     let mut canvas = Canvas::new(400, 400);
+//!     canvas.fill(*WHITE);
+//!     
+//!     Shape::new()
+//!         .circle(center(400, 400), 100.0)
+//!         .fill_color(*BLUE)
+//!         .draw(&mut canvas);
+//!         
+//!     canvas.save_png("circle.png");
+//! }
+//! ```
+//!
+//! ## What's Included
+//!
+//! The prelude re-exports all public items from:
+//! - **wassily-core**: Canvas, Shape, drawing primitives, and utilities
+//! - **wassily-color**: Color types, palettes, and color manipulation functions
+//! - **wassily-noise**: Noise generation functions and utilities
+//! - **wassily-geometry**: Geometric operations, curves, and spatial data structures
+//! - **wassily-effects**: Visual effects and procedural textures
+//! - **wassily-algorithms**: Specialized rendering algorithms
+//!
+//! Plus essential external dependencies:
+//! - **tiny-skia**: Low-level graphics primitives
+//! - **palette**: Advanced color types and color spaces
+//! - **rand**: Random number generation
+//! - **image**: Image loading and processing
+//! - **noise**: Core noise functions
 
 // Re-export core functionality from wassily-core
 pub use crate::core::*;

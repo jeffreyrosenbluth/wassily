@@ -1,5 +1,35 @@
 //! # Canvas
-//! A context for drawing.
+//!
+//! The Canvas is the primary drawing surface for wassily. It provides a high-level
+//! abstraction over tiny-skia's Pixmap with additional features for scalable rendering.
+//!
+//! ## Key Features
+//!
+//! - **Scalable Rendering**: Create images at different sizes using scale factors
+//! - **Multiple Output Formats**: Save as PNG, JPEG, and other image formats
+//! - **Direct Pixel Access**: Paint individual pixels or work with image data
+//! - **Image Integration**: Load from and convert to standard image formats
+//!
+//! ## Usage Patterns
+//!
+//! ### Basic Drawing
+//! ```no_run
+//! use wassily_core::*;
+//! use tiny_skia::Color;
+//!
+//! let mut canvas = Canvas::new(400, 300);
+//! canvas.fill(Color::WHITE);
+//! canvas.save_png("output.png");
+//! ```
+//!
+//! ### Scalable Output
+//! ```no_run
+//! use wassily_core::*;
+//! 
+//! // Same drawing code works at different scales
+//! let mut small = Canvas::new(400, 300);
+//! let mut large = Canvas::with_scale(400, 300, 2.0); // 800x600 output
+//! ```
 
 use crate::points::pt;
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};

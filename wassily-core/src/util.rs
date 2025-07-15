@@ -1,3 +1,40 @@
+//! # Utility Functions
+//!
+//! Mathematical utilities and helper functions for generative art and graphics programming.
+//! This module provides commonly used functions for mapping values, trigonometric operations,
+//! geometric calculations, and algorithmic utilities.
+//!
+//! ## Key Functions
+//!
+//! ### Mathematical Operations
+//! - [`map_range()`]: Map values between different ranges
+//! - [`sin01()`], [`cos01()`]: Trigonometric functions mapped to \\[0,1\\]
+//! - [`curl()`]: Calculate the curl of a 2D scalar field
+//!
+//! ### Geometric Utilities
+//! - [`chaiken()`]: Chaiken's corner cutting algorithm for curve smoothing
+//! - Adaptive curve refinement based on curvature
+//! - Generate points along parametric curves
+//!
+//! ### Algorithmic Helpers
+//! - [`calculate_hash()`]: Generate hash values for any hashable type
+//! - [`Trail`]: Track sequences of points for path-based effects
+//!
+//! ## Example
+//!
+//! ```no_run
+//! use wassily_core::*;
+//! 
+//! // Map a value from one range to another
+//! let normalized = map_range(150.0, 0.0, 300.0, 0.0, 1.0);
+//! 
+//! // Use trigonometric functions mapped to [0,1]
+//! let wave = sin01(x * 0.1);
+//! 
+//! // Smooth a polygon using Chaiken's algorithm
+//! let smooth_points = chaiken(&rough_points, 3);
+//! ```
+
 use crate::points::Algebra;
 use std::{
     collections::hash_map::DefaultHasher,
@@ -11,7 +48,7 @@ pub fn calculate_hash<T: Hash>(t: T) -> u64 {
     s.finish()
 }
 
-/// Map a value from one range to anothe.
+/// Map a value from one range to another.
 pub fn map_range(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
     (x - in_min) / (in_max - in_min) * (out_max - out_min) + out_min
 }

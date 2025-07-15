@@ -1,4 +1,38 @@
-//! Functions for dealing with 2D and 3D points.
+//! # Point Utilities
+//!
+//! Functions and types for dealing with 2D and 3D points, including mathematical
+//! operations, transformations, and utility functions for generative art.
+//!
+//! ## Key Functions
+//!
+//! - [`pt()`]: Create 2D points from any numeric type
+//! - [`pt3()`]: Create 3D points from any numeric type
+//! - [`center()`]: Find the center point of a rectangle
+//! - Linear interpolation between points
+//! - Distance calculations between points
+//!
+//! ## Mathematical Constants
+//!
+//! Common mathematical constants are re-exported for convenience:
+//! - [`PI`]: π (3.14159...)
+//! - [`TAU`]: 2π (6.28318...)
+//! - [`HALF_PI`]: π/2 (1.57079...)
+//!
+//! ## Example
+//!
+//! ```no_run
+//! use wassily_core::*;
+//! 
+//! // Create points from different numeric types
+//! let p1 = pt(100, 200);      // From integers
+//! let p2 = pt(150.5, 250.5);  // From floats
+//! 
+//! // Calculate center of a canvas
+//! let center_point = center(400, 300);
+//! 
+//! // Linear interpolation
+//! let midpoint = lerp(p1, p2, 0.5);
+//! ```
 use num_complex::Complex32;
 use num_traits::AsPrimitive;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};

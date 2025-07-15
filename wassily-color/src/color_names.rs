@@ -1,10 +1,58 @@
-//! HTML Color Names
-//! ## Example
+//! # HTML Color Names
+//!
+//! Pre-defined color constants for all standard HTML/CSS color names.
+//! These colors are provided as lazy-evaluated static constants, making them
+//! efficient to use throughout your generative art applications.
+//!
+//! ## Key Features
+//!
+//! - **Complete Coverage**: All 140+ HTML/CSS color names
+//! - **Lazy Evaluation**: Colors are computed only when first accessed
+//! - **Consistent Names**: Use standard HTML color names (e.g., `CORNFLOWERBLUE`)
+//! - **Direct Usage**: Dereference with `*` to get the Color value
+//!
+//! ## Usage
+//!
 //! ```rust
 //! use wassily_color::*;
 //! use tiny_skia::Color;
 //!
-//! let color: Color = *CORNFLOWERBLUE;
+//! // Use named colors directly
+//! let blue = *CORNFLOWERBLUE;
+//! let red = *CRIMSON;
+//! let green = *FORESTGREEN;
+//!
+//! // Common color combinations
+//! let background = *WHITESMOKE;
+//! let foreground = *DARKSLATEGRAY;
+//!
+//! // Vibrant colors for art
+//! let vibrant_colors = vec![
+//!     *DEEPPINK,
+//!     *LIME,
+//!     *GOLD,
+//!     *MEDIUMORCHID,
+//!     *TURQUOISE,
+//! ];
+//! ```
+//!
+//! ## Color Categories
+//!
+//! ### Basic Colors
+//! - **BLACK**, **WHITE**, **RED**, **GREEN**, **BLUE**
+//! - **YELLOW**, **CYAN**, **MAGENTA**
+//!
+//! ### Grays
+//! - **LIGHTGRAY**, **GRAY**, **DARKGRAY**
+//! - **SILVER**, **DIMGRAY**, **LIGHTSLATEGRAY**
+//!
+//! ### Nature Colors
+//! - **FORESTGREEN**, **SEAGREEN**, **OLIVEDRAB**
+//! - **SKYBLUE**, **STEELBLUE**, **SANDYBROWN**
+//!
+//! ### Vibrant Colors
+//! - **DEEPPINK**, **LIME**, **GOLD**, **ORANGE**
+//! - **VIOLET**, **TURQUOISE**, **HOTPINK**
 //!
 use crate::kolor::rgb8;
 use once_cell::sync::Lazy;

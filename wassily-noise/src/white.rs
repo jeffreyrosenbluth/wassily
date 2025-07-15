@@ -1,5 +1,38 @@
-//! Stateless pseudrandom number generators. These are often usefull when
-//! parallelizing an algorithm where you want to avoid mutable state.
+//! # White Noise
+//!
+//! Stateless pseudo-random number generators optimized for generative art applications.
+//! These functions are particularly useful when parallelizing algorithms where you want
+//! to avoid mutable state, or when you need deterministic randomness based on coordinates.
+//!
+//! ## Key Features
+//!
+//! - **Stateless**: No mutable state, perfect for parallel processing
+//! - **Deterministic**: Same input always produces same output
+//! - **Fast**: Optimized for real-time generative art applications
+//! - **Coordinate-based**: Generate randomness directly from spatial coordinates
+//!
+//! ## Usage Patterns
+//!
+//! ### Spatial Randomness
+//! ```no_run
+//! use wassily_noise::*;
+//!
+//! // Generate consistent randomness for each pixel
+//! for y in 0..height {
+//!     for x in 0..width {
+//!         let random_value = white2d(x as f32, y as f32);
+//!         // Use random_value for pixel effects
+//!     }
+//! }
+//! ```
+//!
+//! ### Parallel Processing
+//! ```no_run
+//! use wassily_noise::*;
+//!
+//! // Each thread can generate randomness independently
+//! let random_at_point = white2d(100.0, 200.0);
+//! ```
 use noise::NoiseFn;
 
 // See https://github.com/Lokathor/randomize and
