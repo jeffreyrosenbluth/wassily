@@ -4,7 +4,15 @@ version = "0.2.0"
 authors = ["jeffreyrosenbluth <jeffrey.rosenbluth@gmail.com>"]
 edition = "2021"
 exclude = [
-    "src/bin/meta.rs"
+    "src/bin/meta.rs",
+    "target/",
+    "Cargo.lock",
+    "../assets/",
+    "../outputs/",
+    "../target/",
+    "../*.png",
+    "../*.html",
+    "../*_files/"
 ]
 license = "MIT OR Apache-2.0"
 description = "wassily is both an API and set of tools for creating generative 2D art"
