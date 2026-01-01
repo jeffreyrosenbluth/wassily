@@ -100,18 +100,16 @@ fn to_okhls(c: Rgba<u8>) -> Okhsl {
 }
 
 pub(crate) fn luma(c: Rgba<u8>) -> f64 {
-    let okhsl = to_okhls(c);
-    ((okhsl.lightness * 255.0) * 128.5) as f64
+    2.0 * (to_okhls(c).lightness as f64 - 0.5)
 }
 
 pub(crate) fn hue(c: Rgba<u8>) -> f64 {
-    let hsl = to_okhls(c);
-    ((hsl.get_hue().into_positive_degrees() * 255.0 / 360.0) * 129.0) as f64
+    let degrees = to_okhls(c).get_hue().into_positive_degrees();
+    2.0 * (degrees as f64 / 360.0 - 0.5)
 }
 
 pub(crate) fn saturation(c: Rgba<u8>) -> f64 {
-    let okhsl = to_okhls(c);
-    ((okhsl.saturation * 255.0) * 128.5) as f64
+    2.0 * (to_okhls(c).saturation as f64 - 0.5)
 }
 
 pub(crate) fn max_rgb(c: Rgba<u8>) -> f64 {
