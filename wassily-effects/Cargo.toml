@@ -14,7 +14,7 @@ categories = ["graphics", "multimedia::images"]
 [dependencies]
 wassily-core = { path = "../wassily-core", version = "0.2.0" }
 wassily-color = { path = "../wassily-color", version = "0.2.0" }
-wassily-noise = { path = "../wassily-noise", version = "0.2.0" }
+wassily-noise = { path = "../wassily-noise", version = "0.3.0" }
 wassily-geometry = { path = "../wassily-geometry", version = "0.2.0" }
 tiny-skia = { workspace = true }
 noise = { workspace = true }
