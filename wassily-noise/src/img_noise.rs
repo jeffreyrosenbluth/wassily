@@ -1,21 +1,17 @@
 use image::{GenericImageView, Rgba};
 use noise::NoiseFn;
-use palette::{GetHue, IntoColor, Okhsl, Srgb};
+use palette::{GetHue, IntoColor, Okhsl, Okhsv, Srgb};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum ColorMap {
     Luma,
     Hue,
     Saturation,
-    MaxRGB,
-    MinRGB,
-    RgDifference,
-    GbDifference,
-    BrDifference,
     WrappedHue,
     HueSat,
     LumaSat,
     Chroma,
+    Value,
 }
 
 impl std::fmt::Display for ColorMap {
@@ -24,15 +20,11 @@ impl std::fmt::Display for ColorMap {
             ColorMap::Luma => write!(f, "Luma"),
             ColorMap::Hue => write!(f, "Hue"),
             ColorMap::Saturation => write!(f, "Saturation"),
-            ColorMap::MaxRGB => write!(f, "Max RGB"),
-            ColorMap::MinRGB => write!(f, "Min RGB"),
-            ColorMap::RgDifference => write!(f, "Rg Difference"),
-            ColorMap::GbDifference => write!(f, "Gb Difference"),
-            ColorMap::BrDifference => write!(f, "Br Difference"),
             ColorMap::WrappedHue => write!(f, "Wrapped Hue"),
             ColorMap::HueSat => write!(f, "Hue Sat"),
             ColorMap::LumaSat => write!(f, "Luma Sat"),
             ColorMap::Chroma => write!(f, "Chroma"),
+            ColorMap::Value => write!(f, "Value"),
         }
     }
 }
@@ -68,11 +60,7 @@ impl NoiseFn<f64, 2> for ImgNoise {
             ColorMap::Luma => luma(pixel) as f64,
             ColorMap::Hue => hue(pixel) as f64,
             ColorMap::Saturation => saturation(pixel) as f64,
-            ColorMap::MaxRGB => max_rgb(pixel) as f64,
-            ColorMap::MinRGB => min_rgb(pixel) as f64,
-            ColorMap::RgDifference => rg_difference(pixel) as f64,
-            ColorMap::GbDifference => gb_difference(pixel) as f64,
-            ColorMap::BrDifference => br_difference(pixel) as f64,
+            ColorMap::Value => value(pixel) as f64,
             ColorMap::WrappedHue => wrapped_hue(pixel) as f64,
             ColorMap::HueSat => hue_sat(pixel) as f64,
             ColorMap::LumaSat => luma_sat(pixel) as f64,
@@ -91,7 +79,15 @@ pub fn reflect(p: f64, period: f64) -> f64 {
     r.clamp(0.0, period - 1.0)
 }
 
-fn to_okhls(c: Rgba<u8>) -> Okhsl {
+fn to_okhsl(c: Rgba<u8>) -> Okhsl {
+    let r = c.0[0] as f32 / 255.0;
+    let g = c.0[1] as f32 / 255.0;
+    let b = c.0[2] as f32 / 255.0;
+    let srgb = Srgb::new(r, g, b);
+    srgb.into_color()
+}
+
+fn to_okhsv(c: Rgba<u8>) -> Okhsv {
     let r = c.0[0] as f32 / 255.0;
     let g = c.0[1] as f32 / 255.0;
     let b = c.0[2] as f32 / 255.0;
@@ -100,74 +96,55 @@ fn to_okhls(c: Rgba<u8>) -> Okhsl {
 }
 
 pub(crate) fn luma(c: Rgba<u8>) -> f64 {
-    2.0 * (to_okhls(c).lightness as f64 - 0.5)
+    2.0 * (to_okhsl(c).lightness as f64 - 0.5)
 }
 
 pub(crate) fn hue(c: Rgba<u8>) -> f64 {
-    let degrees = to_okhls(c).get_hue().into_positive_degrees();
+    let degrees = to_okhsl(c).get_hue().into_positive_degrees();
     2.0 * (degrees as f64 / 360.0 - 0.5)
 }
 
 pub(crate) fn saturation(c: Rgba<u8>) -> f64 {
-    2.0 * (to_okhls(c).saturation as f64 - 0.5)
-}
-
-pub(crate) fn max_rgb(c: Rgba<u8>) -> f64 {
-    let max = c.0.iter().max().unwrap();
-    2.0 * (*max as f64 / 255.0 - 0.5)
-}
-
-pub(crate) fn min_rgb(c: Rgba<u8>) -> f64 {
-    let min = c.0.iter().min().unwrap();
-    2.0 * (*min as f64 / 255.0 - 0.5)
-}
-
-pub(crate) fn rg_difference(c: Rgba<u8>) -> f64 {
-    (c.0[0] - c.0[1]) as f64 / 255.0
-}
-
-pub(crate) fn gb_difference(c: Rgba<u8>) -> f64 {
-    (c.0[1] - c.0[2]) as f64 / 255.0
-}
-
-pub(crate) fn br_difference(c: Rgba<u8>) -> f64 {
-    (c.0[2] - c.0[0]) as f64 / 255.0
+    2.0 * (to_okhsl(c).saturation as f64 - 0.5)
 }
 
 pub(crate) fn wrapped_hue(c: Rgba<u8>) -> f64 {
-    let okhsl = to_okhls(c);
+    let okhsl = to_okhsl(c);
     let h_degrees = okhsl.get_hue().into_positive_degrees();
     let h = f64::min(h_degrees as f64, 360.0 - h_degrees as f64);
     2.0 * (h / 360.0 - 0.5)
 }
 
 pub(crate) fn hue_sat(c: Rgba<u8>) -> f64 {
-    // Get the raw hue and saturation values (0-255 range)
     let raw_hue = {
-        let hsl = to_okhls(c);
+        let hsl = to_okhsl(c);
         hsl.get_hue().into_positive_degrees() as f64 / 360.0
     };
     let raw_sat = {
-        let okhsl = to_okhls(c);
+        let okhsl = to_okhsl(c);
         okhsl.saturation as f64
     };
-    raw_hue * raw_sat
+    2.0 * (raw_hue * raw_sat - 0.5)
 }
+
 pub(crate) fn luma_sat(c: Rgba<u8>) -> f64 {
-    // Get the raw luma and saturation values (0-255 range)
     let raw_luma = {
-        let okhsl = to_okhls(c);
+        let okhsl = to_okhsl(c);
         okhsl.lightness as f64
     };
     let raw_sat = {
-        let okhsl = to_okhls(c);
+        let okhsl = to_okhsl(c);
         okhsl.saturation as f64
     };
-    raw_luma * raw_sat
+    2.0 * (raw_luma * raw_sat - 0.5)
 }
 
 pub(crate) fn chroma(c: Rgba<u8>) -> f64 {
     let mx = c.0[0].max(c.0[1]).max(c.0[2]);
     let mn = c.0[0].min(c.0[1]).min(c.0[2]);
-    (mx - mn) as f64 / 255.0
+    2.0 * ((mx - mn) as f64 / 255.0 - 0.5)
+}
+
+pub(crate) fn value(c: Rgba<u8>) -> f64 {
+    2.0 * (to_okhsv(c).value as f64 - 0.5)
 }
